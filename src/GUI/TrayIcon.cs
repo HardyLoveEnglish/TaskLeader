@@ -7,11 +7,14 @@ using System.Windows.Forms;
 using TaskLeader.BLL;
 using TaskLeader.BO;
 using TaskLeader.DAL;
+using TaskLeader.Server;
 
 namespace TaskLeader.GUI
 {
     public class TrayIcon : ApplicationContext
     {
+        private GUIServer server;
+
         // Déclaration des composants IHM
         private static NotifyIcon trayIcon = new NotifyIcon();
         private ContextMenuStrip trayContext = new ContextMenuStrip();
@@ -147,6 +150,9 @@ namespace TaskLeader.GUI
             NameValueCollection section = (NameValueCollection)ConfigurationManager.GetSection("Hotkey");
             registerHotkey(section["NewAction"], ref hkNewAction, new HotkeyMethodDelegate(ajoutAction));
             registerHotkey(section["ListeActions"], ref hkListe, new HotkeyMethodDelegate(displayToolbox));
+
+            server = new GUIServer();
+            server.Start();
         }
 
         private static Toolbox v_toolbox = null;
@@ -207,6 +213,8 @@ namespace TaskLeader.GUI
                 hkListe.Unregister();
 
             trayIcon.Visible = false;
+            server.Stop();
+
             Application.Exit();
         }
 
