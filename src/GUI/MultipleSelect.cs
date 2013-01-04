@@ -185,7 +185,7 @@ namespace TaskLeader.GUI
 
         #region Membres 'enfant'
 
-        private bool hasParent { get { return (this.type.parent != null); } }
+        private bool hasParent { get { return (this.type.parent != -1); } }
 
         /// <summary>
         /// Rend dépendant ce widget d'un autre

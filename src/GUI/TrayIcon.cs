@@ -134,7 +134,7 @@ namespace TaskLeader.GUI
             {
                 foreach (String dbName in dbs.Keys)
                     activeDBs.Add(dbName); // Au lancement toutes les DBs sont actives
-                this.displayToolbox(new Object(), new EventArgs()); // Affichage de la Toolbox
+                //this.displayToolbox(new Object(), new EventArgs()); // Affichage de la Toolbox
                 invokeControl.CreateControl();
             }
             else

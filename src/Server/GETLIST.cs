@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using SuperWebSocket;
 using SuperWebSocket.SubProtocol;
+using TaskLeader.DAL;
+using TaskLeader.GUI;
 
 namespace TaskLeader.Server
 {
     public enum ListTypes
     {
-        dbEntities = 0,
-        dbs = 1,
+        dbs = 0,
+        dbEntities = 1,
         filters = 2,
         criterias = 3
     }
@@ -19,12 +21,13 @@ namespace TaskLeader.Server
         public object args { get; set; }
     }
 
-    public class ListAnswerData
+    public class ListAnswerData { public string label { get; set; } }
+    public class EntitiesListAnswerData : ListAnswerData
     {
         public int id { get; set; }
-        public string label { get; set; }
+        public int parent = -1;
+        public object[] values { get; set; }
     }
-    public class EntitiesListAnswerData : ListAnswerData { public int parent = -1; }
     public class DbsListAnswerData : ListAnswerData { public bool defaut { get; set; } }
 
     public class GETLIST : JsonSubCommand<GetListRequest>
@@ -32,7 +35,7 @@ namespace TaskLeader.Server
         protected override void ExecuteJsonCommand(WebSocketSession session, GetListRequest commandInfo)
         {
             if (session.Logger.IsDebugEnabled)
-                session.Logger.Debug("GETLIST request received from " + session.RemoteEndPoint);
+                session.Logger.Debug("GETLIST[" + Enum.GetName(typeof(ListTypes), commandInfo.type) + "] request received from " + session.RemoteEndPoint);
 
             SendJsonMessage(session,
                 String.Empty,
@@ -49,14 +52,18 @@ namespace TaskLeader.Server
             {
                 case ListTypes.dbEntities:
                     answer.answerType = AnswerTypes.entities_list;
-                    values.Add(new EntitiesListAnswerData() { id = 0, label = "Contextes" });
-                    values.Add(new EntitiesListAnswerData() { id = 1, label = "Sujets", parent = 0 });
-                    values.Add(new EntitiesListAnswerData() { id = 2, label = "Destinataires" });
+                    for (int i = 0; i < DB.entities.Length; i++)
+                        values.Add(new EntitiesListAnswerData() {
+                            id = i,
+                            label = DB.entities[i].nom,
+                            parent = DB.entities[i].parent,
+                            values = TrayIcon.dbs["Perso"].getTitres(DB.entities[i])
+                        });
                     break;
                 case ListTypes.dbs:
                     answer.answerType = AnswerTypes.dbs_list;
-                    values.Add(new DbsListAnswerData() { id = 0, label = "Perso", defaut = true });
-                    values.Add(new DbsListAnswerData() { id = 0, label = "Déploiement"});
+                    foreach (String dbName in TrayIcon.dbs.Keys)
+                        values.Add(new DbsListAnswerData() { label = dbName });
                     break;
             }
 

@@ -7,8 +7,8 @@ namespace TaskLeader.Server
 {
     public enum AnswerTypes
     {
-        entities_list = 0,
-        dbs_list =1,
+        dbs_list = 0,
+        entities_list = 1,        
         filters_list =2,
         criterias_list =3
     }

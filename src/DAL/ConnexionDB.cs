@@ -25,7 +25,7 @@ namespace TaskLeader.DAL
             this.allColName = all;
         }
 
-        public DBentity parent;
+        public int parent = -1;
     }
 
     public delegate void ParentValueEventHandler(String parentValue);
@@ -53,7 +53,7 @@ namespace TaskLeader.DAL
             _builder.Pooling = true;
 
             //TODO: ne pas harcoder les différents types
-            sujet.parent = contexte;
+            sujet.parent = 0;
             this.NewValue.Add(contexte.nom, null);
             this.NewValue.Add(sujet.nom, null);
             this.NewValue.Add(destinataire.nom, null);

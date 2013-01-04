@@ -26,8 +26,8 @@ namespace TaskLeader.GUI
             foreach (DBentity entity in DB.entities)
             {
                 widget = new CritereSelect(entity);
-                if (entity.parent != null)
-                    widget.addParent(this.selectPanel.Controls[entity.parent.nom] as CritereSelect);
+                if (entity.parent != -1)
+                    widget.addParent(this.selectPanel.Controls[DB.entities[entity.parent].nom] as CritereSelect);
                 this.selectPanel.Controls.Add(widget);
             }
             this.selectPanel.ResumeLayout();

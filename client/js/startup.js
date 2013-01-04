@@ -53,6 +53,7 @@
  
   function init() {
     WSclient.Send('GETLIST',{ type: 0});
+    WSclient.Send('GETLIST',{ type: 1});
   }
  
   function LogMessage(message) {
@@ -63,11 +64,18 @@
   function ParseResponse(response) {  
     var message = $.parseJSON(response);//TODO: il faut un try catch
 
-    if (message.answerType == 0) { //entities_list
+    if (message.answerType == 0) { //dbs_list
       $.each(message.data,function(index,value) {
-        $("div#manualFilterTab").append('<div id="'+value.label+'">'+value.label+':</div>');
+        $("#manuelDBcombo").append('<option>'+value.label+'</option>');
       });
-    }else if (message.type == 1) {
+    }else if (message.answerType == 1) { //entities_list
+      $.each(message.data,function(index,value) {
+        $("#manuelSelects").addMultipleSelect({
+          label: value.label,
+          displayAll: true,
+          values: value.values
+        });
+      });
     }
   }
   
