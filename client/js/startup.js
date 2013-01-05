@@ -1,8 +1,7 @@
 (function(window, $) {
-
-	$( "#contextes" ).buttonset();
-	$( "#filtres" ).buttonset();
+  
 	$( "#tabs" ).tabs();
+  $("#actions").Grille();
 				
   Modernizr.load({
     test: Modernizr.websockets,
@@ -67,6 +66,7 @@
     if (message.answerType == 0) { //dbs_list
       $.each(message.data,function(index,value) {
         $("#manuelDBcombo").append('<option>'+value.label+'</option>');
+        $("#manuelDBcombo").show();
       });
     }else if (message.answerType == 1) { //entities_list
       $.each(message.data,function(index,value) {

@@ -3,6 +3,8 @@ body {
 	font-size: 62.5%;
 }
 
+#data { margin-top: 10px; }
+
 #status { color: #fff; padding: 3px; }
 .offline { background-color: #900; }
 .pending { background-color: #666; }
