@@ -51,8 +51,8 @@
   };
  
   function init() {
-    WSclient.Send('GETLIST',{ type: 0});
-    WSclient.Send('GETLIST',{ type: 1});
+    WSclient.Send('GETLIST',{ type:0});
+    WSclient.Send('GETLIST',{ type:1, db:"Perso"});
   }
  
   function LogMessage(message) {
