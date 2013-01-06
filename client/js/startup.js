@@ -2,18 +2,8 @@
   
 	$( "#tabs" ).tabs();
   $("#actions").Grille();
-				
-  Modernizr.load({
-    test: Modernizr.websockets,
-    nope: 'js/lib/web-socket-js/web_socket.js'
-  });
-
-  // Set URL of your WebSocketMain.swf here, for web-socket-js
-  WEB_SOCKET_SWF_LOCATION = 'js/lib/web-socket-js/WebSocketMain.swf';
-  WEB_SOCKET_DEBUG = true;
 
   var WSclient = {};
-  var me = {};
   
   Connect();
   

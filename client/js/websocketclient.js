@@ -15,20 +15,6 @@ https://github.com/Olivine-Labs/Alchemy-Websockets-Client-Library
 
       this._options = MergeDefaults(this._defaultOptions, options);
 
-      if (!options.SocketType) {
-        /* Try to autodetect websocket support if we have Modernizr
-        loaded. If another lib (like web-sockets-js) is loaded that
-        creates a websocket obj where we wouldn't normally have one,
-        we'll assume that it's flash.*/
-        if (!!Modernizr) {
-          if (Modernizr.websockets) {
-            this.SocketType = WebSocketClient.prototype.SocketTypes.WebSocket;
-          } else if (!Modernizr.websockets) {
-            this.SocketType = WebSocketClient.prototype.SocketTypes.FlashSocket;
-          }
-        }
-      }
-
       if (!window.WebSocket) {
         throw 'UNSUPPORTED: Websockets are not supported in this browser!';
       }
@@ -55,13 +41,8 @@ https://github.com/Olivine-Labs/Alchemy-Websockets-Client-Library
 
     SocketState: 3,
 
-    SocketTypes: {
-      WebSocket: 'websocket',
-      FlashSocket: 'flashsocket'
-    },
-
     Start: function() {
-      var server = 'ws://' + this._options.Server + ':' + this._options.Port + '/' + this._options.Action + '?socketType=' + this._options.SocketType;
+      var server = 'ws://' + this._options.Server + ':' + this._options.Port + '/' + this._options.Action;
       var ACInstance = this;
       this._socket = new WebSocket(server);
       this._socket.onopen = function() { ACInstance._OnOpen(); };
@@ -137,7 +118,6 @@ https://github.com/Olivine-Labs/Alchemy-Websockets-Client-Library
     Port: 81,
     Server: '',
     Action: '',
-    SocketType: WebSocketClient.prototype.SocketTypes.WebSocket,
 
     Connected: function() { },
     Disconnected: function() { },
