@@ -70,7 +70,7 @@ namespace TaskLeader.DAL
                 using (SQLiteConnection SQLC = new SQLiteConnection(this._connectionString))
                 {
 
-                        SQLC.Open();
+                    SQLC.Open();
 
                     using (SQLiteDataAdapter SQLAdap = new SQLiteDataAdapter(requete, SQLC))
                         SQLAdap.Fill(data);// Remplissage avec les données de l'adaptateur
@@ -205,37 +205,35 @@ namespace TaskLeader.DAL
         // =====================================================================================
 
         // Vérification de la présence d'une nouvelle valeur d'une entité
-        public bool isNvo(DBentity entity, String title)
+        public bool isNvo(DBentity entity, String title, String parentValue = "")
         {
             String titre = "'" + title.Replace("'", "''") + "'";
-            String requete = "SELECT count(id) FROM " + entity.mainTable + " WHERE Titre=" + titre;
+            String parent = "'" + parentValue.Replace("'", "''") + "'";
+            String requete;
+
+            if (entity.parent == -1) // No parent entity
+                requete = "SELECT count(id) FROM " + entity.mainTable + " WHERE Titre=" + titre;
+            else
+                requete = "SELECT count(M.id) FROM " + entity.mainTable + " M, " + DB.entities[entity.parent].mainTable + " P " +
+                "WHERE M." + entity.foreignID + " = P.id AND P.Titre =" + parent + " AND M.Titre=" + titre;
 
             return (getInteger(requete) == 0);
         }
 
-        // Vérification de la présence d'un nouveau sujet
-        public bool isNvoSujet(String contexte, String subject)
-        {
-            String ctxt = "'" + contexte.Replace("'", "''") + "'";
-            String sujet = "'" + subject.Replace("'", "''") + "'";
-
-            String requete = "SELECT count(Titre) FROM VueSujets WHERE Contexte = " + ctxt + " AND Titre = " + sujet;
-
-            if (this.getInteger(requete) == 0)
-                return true;
-            else
-                return false;
-        }
-
         // =====================================================================================
 
-        // Récupération de la liste des valeurs d'une entité. Obsolète: getCtxt, getDest, getStatut, getFilters(
-        public object[] getTitres(DBentity entity, String key = null)
+        // Récupération de la liste des valeurs d'une entité. Obsolète: getCtxt, getDest, getStatut, getFilters
+        public object[] getTitres(DBentity entity, string parentValue = "")
         {
-            if (entity.mainTable != "Sujets")
-                return getList("SELECT Titre FROM " + entity.mainTable + " ORDER BY Titre ASC");
+            string request;
+
+            if (entity.parent == -1) // No parent entity
+                request = "SELECT Titre FROM " + entity.mainTable + " ORDER BY Titre ASC";
             else
-                return getList("SELECT Titre FROM VueSujets WHERE Contexte ='" + key + "' ORDER BY Titre ASC");
+                request = "SELECT M.Titre FROM " + entity.mainTable + " M, " + DB.entities[entity.parent].mainTable + " P " +
+                    "WHERE M." + entity.foreignID + " = P.id AND P.Titre ='" + parentValue + "' ORDER BY M.Titre ASC";
+
+            return getList(request);
         }
 
         /// <summary>

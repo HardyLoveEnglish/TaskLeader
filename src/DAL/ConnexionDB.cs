@@ -13,22 +13,28 @@ namespace TaskLeader.DAL
         /// Nom de l'entité pour IHM, !!doit être unique !!
         /// </summary>
         public String nom;
-        public String mainTable; // Nom de la table principale
-        public String viewColName; // Nom de la colonne dans vueActions
-        public String allColName; // Nom de la colonne "All" dans la table Filtre
+        /// <summary>
+        /// Nom de la table principale
+        /// </summary>
+        public String mainTable;
+        /// <summary>
+        /// Nom de la colonne dans vueActions
+        /// </summary>
+        public String viewColName;
+        /// <summary>
+        /// Nom de la colonne "All" dans la table Filtre
+        /// </summary>
+        public String allColName;
 
-        public DBentity(String name, String view, String table, String all)
-        {
-            this.nom = name;
-            this.mainTable = table;
-            this.viewColName = view;
-            this.allColName = all;
-        }
-
-        public DBentity parent;
+        public int parent = -1;
+        /// <summary>
+        /// Nom de la colonne foreign key si entity parente
+        /// TODO: sera normalisé dans la base 0.8
+        /// </summary>
+        public String foreignID;
     }
 
-    public delegate void ParentValueEventHandler(String parentValue);
+    public delegate void NewValueEventHandler(String parentValue);
     public delegate void ActionEditedEventHandler(String dbName, String actionID);
 
     public partial class DB //TODO: détecter les ouvertures de fichier pour les limiter
@@ -53,7 +59,6 @@ namespace TaskLeader.DAL
             _builder.Pooling = true;
 
             //TODO: ne pas harcoder les différents types
-            sujet.parent = contexte;
             this.NewValue.Add(contexte.nom, null);
             this.NewValue.Add(sujet.nom, null);
             this.NewValue.Add(destinataire.nom, null);
@@ -65,19 +70,19 @@ namespace TaskLeader.DAL
         private String _connectionString { get { return _builder.ConnectionString; } }
 
         // "Schéma de base" = Nom de l'entité pour IHM, Nom de la colonne dans vueActions, Nom de la table principale, Nom de la colonne "All" dans la table Filtre
-        public static DBentity contexte = new DBentity("Contextes", "Contexte", "Contextes", "AllCtxt");
-        public static DBentity sujet = new DBentity("Sujets", "Sujet", "Sujets", "AllSuj");
-        public static DBentity destinataire = new DBentity("Destinataires", "Destinataire", "Destinataires", "AllDest");
-        public static DBentity statut = new DBentity("Statuts", "Statut", "Statuts", "AllStat");
-        public static DBentity filtre = new DBentity("Filtres", "", "Filtres", "");
+        public static DBentity contexte = new DBentity() { nom = "Contextes", viewColName = "Contexte", mainTable = "Contextes", allColName = "AllCtxt" };
+        public static DBentity sujet = new DBentity() { nom = "Sujets", viewColName = "Sujet", mainTable = "Sujets", allColName = "AllSuj", parent = 0, foreignID = "CtxtID" };
+        public static DBentity destinataire = new DBentity() { nom = "Destinataires", viewColName = "Destinataire", mainTable = "Destinataires", allColName = "AllDest" };
+        public static DBentity statut = new DBentity() { nom = "Statuts", viewColName = "Statut", mainTable = "Statuts", allColName = "AllStat" };
+        public static DBentity filtre = new DBentity() { nom = "Filtres", viewColName = "", mainTable = "Filtres", allColName = "" };
         public static DBentity[] entities = { contexte, sujet, destinataire, statut };
 
         #region Events
 
         // Gestion des évènements NewValue - http://msdn.microsoft.com/en-us/library/z4ka55h8(v=vs.80).aspx
         private Dictionary<String, Delegate> NewValue = new Dictionary<String, Delegate>();
-        public void subscribe_NewValue(DBentity entity, ParentValueEventHandler value) { this.NewValue[entity.nom] = (ParentValueEventHandler)this.NewValue[entity.nom] + value; }
-        public void unsubscribe_NewValue(DBentity entity, ParentValueEventHandler value) { this.NewValue[entity.nom] = (ParentValueEventHandler)this.NewValue[entity.nom] - value; }
+        public void subscribe_NewValue(DBentity entity, NewValueEventHandler value) { this.NewValue[entity.nom] = (NewValueEventHandler)this.NewValue[entity.nom] + value; }
+        public void unsubscribe_NewValue(DBentity entity, NewValueEventHandler value) { this.NewValue[entity.nom] = (NewValueEventHandler)this.NewValue[entity.nom] - value; }
         /// <summary>
         /// Génération de l'évènement NewValue
         /// </summary>
@@ -85,8 +90,8 @@ namespace TaskLeader.DAL
         /// <param name="parentValue">La valeur courante de la DBentity parente</param>
         private void OnNewValue(DBentity entity, String parentValue = null)
         {
-            ParentValueEventHandler handler;
-            if (null != (handler = (ParentValueEventHandler)this.NewValue[entity.nom]))
+            NewValueEventHandler handler;
+            if (null != (handler = (NewValueEventHandler)this.NewValue[entity.nom]))
                 handler(parentValue);
         }
 

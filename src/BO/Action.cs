@@ -313,9 +313,9 @@ namespace TaskLeader.BO
                 }
 
             if (this.sujetHasChanged)
-                if (db.isNvoSujet(this.Contexte, this.Sujet)) //TODO: il y a un cas foireux si le contexte est vide
+                if (db.isNvo(DB.sujet, this.Sujet, this.Contexte)) //TODO: il y a un cas foireux si le contexte est vide
                 {
-                    resultat = db.insertSujet(this.Contexte, this.Sujet);
+                    resultat = db.insert(DB.sujet, this.Sujet, this.Contexte);
                     if (resultat == 1)
                         bilan += "Nouveau sujet enregistré\n";
                 }

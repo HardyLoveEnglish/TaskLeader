@@ -114,8 +114,8 @@ namespace TaskLeader.GUI
         /// <summary>
         /// Evènement déclenché quand une seule valeur de la grille est sélectionnée
         /// </summary>
-        private ParentValueEventHandler v_NewParentValue;
-        public event ParentValueEventHandler NewParentValue
+        private NewValueEventHandler v_NewParentValue;
+        public event NewValueEventHandler NewParentValue
         {
             add
             {
@@ -141,7 +141,7 @@ namespace TaskLeader.GUI
         /// - la seule valeur qui était sélectionné ne l'est plus
         /// - la liste a été intégralement rafraîchie
         /// </summary>
-        public event ParentValueEventHandler NoParentValue;
+        public event NewValueEventHandler NoParentValue;
         private void OnNoParentValue()
         {
             if (this.NoParentValue != null)
@@ -185,7 +185,7 @@ namespace TaskLeader.GUI
 
         #region Membres 'enfant'
 
-        private bool hasParent { get { return (this.type.parent != null); } }
+        private bool hasParent { get { return (this.type.parent != -1); } }
 
         /// <summary>
         /// Rend dépendant ce widget d'un autre
@@ -218,11 +218,11 @@ namespace TaskLeader.GUI
         {
             // Unregister de l'ancienne DB
             if (this.db != null)
-                this.db.unsubscribe_NewValue(this.type, new ParentValueEventHandler(newValue));
+                this.db.unsubscribe_NewValue(this.type, new NewValueEventHandler(newValue));
             // Mémorisation de la "nouvelle" DB
             this.db = database;
             // Register de la nouvelle DB
-            this.db.subscribe_NewValue(this.type, new ParentValueEventHandler(newValue));
+            this.db.subscribe_NewValue(this.type, new NewValueEventHandler(newValue));
 
             if (!this.hasParent) // Les contrôles enfants ne doivent pas être mis à jour directement
                 this.maj();
@@ -318,7 +318,7 @@ namespace TaskLeader.GUI
             this.pictureBox1.Visible = true;
 
             this.liste.Items.AddRange(this.db.getFilters().ToArray());
-            this.db.subscribe_NewValue(DB.filtre, new ParentValueEventHandler(maj));
+            this.db.subscribe_NewValue(DB.filtre, new NewValueEventHandler(maj));
         }
 
         /// <summary>
