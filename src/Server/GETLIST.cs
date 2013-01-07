@@ -17,8 +17,10 @@ namespace TaskLeader.Server
         actions = 3
     }
 
-    public class GetListRequest { public ListTypes type { get; set; } }
-    public class GetListRequestWithDB : GetListRequest { public string db { get; set; } }
+    public class GetListRequest {
+        public ListTypes type { get; set; }
+        public string db { get; set; }
+    }
 
     #endregion
 
@@ -60,7 +62,7 @@ namespace TaskLeader.Server
                             id = i,
                             label = DB.entities[i].nom,
                             parent = DB.entities[i].parent,
-                            values = TrayIcon.dbs[((GetListRequestWithDB)request).db].getTitres(DB.entities[i])
+                            values = TrayIcon.dbs[request.db].getTitres(DB.entities[i])
                         });
                     break;
 
