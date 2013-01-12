@@ -252,8 +252,9 @@ namespace TaskLeader.DAL
         }
 
         // Récupère un filtre en fonction de son titre
-        public Filtre getFilter(String name)
+        public List<Criterium> getFilterData(String name)
         {
+            var data = new List<Criterium>();
 
             // On récupère d'abord les checkbox all
             String titre = "'" + name.Replace("'", "''") + "'";
@@ -265,13 +266,22 @@ namespace TaskLeader.DAL
 
             DataRow resultat = results[0];
 
-            // On crée le filtre correspondant
-            Filtre filtre = new Filtre(this.name, (bool)resultat["AllCtxt"], (bool)resultat["AllSuj"], (bool)resultat["AllDest"], (bool)resultat["AllStat"]);
-            filtre.nom = name;
+            if (!(bool)resultat["AllCtxt"])
+                data.Add(new Criterium(DB.contexte));
+
+            if (!(bool)resultat["AllSuj"])
+                data.Add(new Criterium(DB.sujet));
+
+            if (!(bool)resultat["AllDest"])
+                data.Add(new Criterium(DB.destinataire));
+
+            if (!(bool)resultat["AllStat"])
+                data.Add(new Criterium(DB.statut));
+
             object[] liste;
 
             // On récupère les sélections si nécessaire
-            foreach (Criterium critere in filtre.criteria)
+            foreach (Criterium critere in data)
             {
                 // Récupération du nom de la table correspondante
                 String table = critere.entity.mainTable;
@@ -286,7 +296,7 @@ namespace TaskLeader.DAL
                     critere.valuesSelected.Add(item);
             }
 
-            return filtre;
+            return data;
         }
 
         /// <summary>
@@ -298,7 +308,7 @@ namespace TaskLeader.DAL
             List<Filtre> liste = new List<Filtre>();
 
             foreach (String filtreName in this.getTitres(DB.filtre))
-                liste.Add(this.getFilter(filtreName));
+                liste.Add(new Filtre() { dbName = this.name, nom = filtreName });
 
             return liste;
         }

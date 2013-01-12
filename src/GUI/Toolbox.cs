@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Windows.Forms;
 using TaskLeader.DAL;
@@ -212,9 +213,12 @@ namespace TaskLeader.GUI
         // Affichage des actions sur filtre manuel
         private void filtreManuel(object sender, EventArgs e)
         {
-            Filtre filtre = new Filtre(manuelDBcombo.Text);
+            var criteriaList = new List<Criterium>();
             foreach (CritereSelect widget in this.selectPanel.Controls)
-                filtre.addCriterium(widget.getCriterium());
+                if (widget.getCriterium() != null)
+                    criteriaList.Add(widget.getCriterium());
+
+            Filtre filtre = new Filtre() { dbName = manuelDBcombo.Text, criteria = criteriaList };
 
             if (saveFilterCheck.Checked) //Sauvegarde du filtre si checkbox cochée
             {
@@ -264,7 +268,7 @@ namespace TaskLeader.GUI
                 Filtre filtre;
                 foreach (DB db in this.dbSelect.getDBs())
                 {
-                    filtre = new Filtre(searchBox.Text, db.name);
+                    filtre = new Filtre() { recherche = searchBox.Text, dbName = db.name };
                     if (!TrayIcon.displayedFilters.Contains(filtre))
                         TrayIcon.displayedFilters.Add(filtre);
                     else
@@ -308,7 +312,7 @@ namespace TaskLeader.GUI
                     if (!TrayIcon.displayedFilters.Contains(filtre))
                         TrayIcon.displayedFilters.Add(filtre);
                     else
-                        TrayIcon.afficheMessage("Base d'actions "+filtre.dbName, "Le filtre " + filtre.ToString() + " est déjà affiché");
+                        TrayIcon.afficheMessage("Base d'actions " + filtre.dbName, "Le filtre " + filtre.ToString() + " est déjà affiché");
                 widget.clearChecked(false);
             }
         }
