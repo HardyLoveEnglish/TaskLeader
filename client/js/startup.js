@@ -1,7 +1,6 @@
 (function(window, $) {
   
 	$( "#tabs" ).tabs();
-  $("#actions").Grille();
 
   var WSclient = {};
   
@@ -43,6 +42,7 @@
   function init() {
     WSclient.Send('GETLIST',{ type:0});
     WSclient.Send('GETLIST',{ type:1, db:"Perso"});
+    WSclient.Send('GETLIST',{ type:3, filters:[{ dbName:"Perso", nom:"Test" }]});
   }
  
   function LogMessage(message) {
@@ -58,13 +58,18 @@
         $("#manuelDBcombo").append('<option>'+value.label+'</option>');
         $("#manuelDBcombo").show();
       });
-    }else if (message.answerType == 1) { //entities_list
+    } else if (message.answerType == 1) { //entities_list
       $.each(message.data,function(index,value) {
         $("#manuelSelects").addMultipleSelect({
           label: value.label,
           displayAll: true,
           values: value.values
         });
+      });
+    } else if (message.answerType == 3) { //actions_list
+      $("#actions").Grille({
+        columns: message.data.cols,
+        rows: message.data.rows
       });
     }
   }

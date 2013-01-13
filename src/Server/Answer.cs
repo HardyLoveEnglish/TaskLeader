@@ -10,7 +10,7 @@ namespace TaskLeader.Server
         dbs_list = 0,
         entities_list = 1,        
         filters_list =2,
-        criterias_list =3
+        actions_list =3
     }
 
     class Answer

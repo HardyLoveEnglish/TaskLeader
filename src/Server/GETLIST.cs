@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Data;
+using System.Linq;
 using System.Collections.Generic;
 using SuperWebSocket;
 using SuperWebSocket.SubProtocol;
 using TaskLeader.DAL;
 using TaskLeader.GUI;
+using TaskLeader.BO;
 
 namespace TaskLeader.Server
 {
@@ -17,9 +20,11 @@ namespace TaskLeader.Server
         actions = 3
     }
 
-    public class GetListRequest {
+    public class GetListRequest
+    {
         public ListTypes type { get; set; }
         public string db { get; set; }
+        public List<Filtre> filters { get; set; }
     }
 
     #endregion
@@ -35,6 +40,12 @@ namespace TaskLeader.Server
     }
     public class DbsListAnswerData : ListAnswerData { public bool defaut { get; set; } }
 
+    public class ActionsListAnswerData
+    {
+        public string[] cols { get; set; }
+        public object[][] rows { get; set; }
+    }
+
     #endregion
 
     public class GETLIST : JsonSubCommand<GetListRequest>
@@ -44,7 +55,12 @@ namespace TaskLeader.Server
             if (session.Logger.IsDebugEnabled)
                 session.Logger.Debug("GETLIST[" + Enum.GetName(typeof(ListTypes), commandInfo.type) + "] request received from " + session.RemoteEndPoint);
 
-            SendJsonMessage(session, String.Empty, getAnswer(commandInfo));
+            try { SendJsonMessage(session, String.Empty, getAnswer(commandInfo)); }
+            catch (Exception e)
+            {
+                if (session.Logger.IsErrorEnabled)
+                    session.Logger.Error(e.Message);
+            }
         }
 
         private Answer getAnswer(GetListRequest request)
@@ -64,19 +80,38 @@ namespace TaskLeader.Server
                             parent = DB.entities[i].parent,
                             values = TrayIcon.dbs[request.db].getTitres(DB.entities[i])
                         });
+                    answer.data = values;
                     break;
 
                 case ListTypes.dbs:
                     answer.answerType = AnswerTypes.dbs_list;
                     foreach (String dbName in TrayIcon.dbs.Keys)
                         values.Add(new DbsListAnswerData() { label = dbName });
+                    answer.data = values;
                     break;
 
                 case ListTypes.actions:
+
+                    if (request.filters == null || request.filters.Count == 0)
+                        throw new Exception("Missing filter in GETLIST[actions] request");
+
+                    answer.answerType = AnswerTypes.actions_list;
+
+                    DataTable data = request.filters[0].getActions();
+                    if (request.filters.Count > 1)
+                    {
+                        for (int i = 1; i < request.filters.Count; i++)
+                            data.Merge(request.filters[i].getActions());
+                    }
+
+                    var result = new ActionsListAnswerData(){
+                        cols = data.Columns.Cast<DataColumn>().Select(col => col.ColumnName).ToArray(),
+                        rows = data.Rows.Cast<DataRow>().Select(row => row.ItemArray).ToArray()
+                    };
+                    answer.data = result;
                     break;
             }
 
-            answer.data = values;
             return answer;
         }
     }
