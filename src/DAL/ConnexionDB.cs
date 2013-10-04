@@ -36,6 +36,9 @@ namespace TaskLeader.DAL
         /// TODO: sera normalisé dans la base 0.8
         /// </summary>
         public String foreignID;
+
+        [DataMember]
+        public int id;
     }
 
     public delegate void NewValueEventHandler(String parentValue);
@@ -74,10 +77,10 @@ namespace TaskLeader.DAL
         private String _connectionString { get { return _builder.ConnectionString; } }
 
         // "Schéma de base" = Nom de l'entité pour IHM, Nom de la colonne dans vueActions, Nom de la table principale, Nom de la colonne "All" dans la table Filtre
-        public static DBentity contexte = new DBentity() { nom = "Contextes", viewColName = "Contexte", mainTable = "Contextes", allColName = "AllCtxt" };
-        public static DBentity sujet = new DBentity() { nom = "Sujets", viewColName = "Sujet", mainTable = "Sujets", allColName = "AllSuj", parent = 0, foreignID = "CtxtID" };
-        public static DBentity destinataire = new DBentity() { nom = "Destinataires", viewColName = "Destinataire", mainTable = "Destinataires", allColName = "AllDest" };
-        public static DBentity statut = new DBentity() { nom = "Statuts", viewColName = "Statut", mainTable = "Statuts", allColName = "AllStat" };
+        public static DBentity contexte = new DBentity() { id = 0, nom = "Contextes", viewColName = "Contexte", mainTable = "Contextes", allColName = "AllCtxt" };
+        public static DBentity sujet = new DBentity() { id = 1, nom = "Sujets", viewColName = "Sujet", mainTable = "Sujets", allColName = "AllSuj", parent = 0, foreignID = "CtxtID" };
+        public static DBentity destinataire = new DBentity() { id = 2, nom = "Destinataires", viewColName = "Destinataire", mainTable = "Destinataires", allColName = "AllDest" };
+        public static DBentity statut = new DBentity() { id = 3, nom = "Statuts", viewColName = "Statut", mainTable = "Statuts", allColName = "AllStat" };
         public static DBentity filtre = new DBentity() { nom = "Filtres", viewColName = "", mainTable = "Filtres", allColName = "" };
         public static DBentity[] entities = { contexte, sujet, destinataire, statut };
 

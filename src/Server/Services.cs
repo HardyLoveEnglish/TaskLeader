@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.ServiceModel;
 using System.ServiceModel.Web; // Nécessite le .NET framework 4.0 (pas client profile)
-using System.Runtime.Serialization;
 using System.IO;
 using System.Net;
 using TaskLeader.DAL;
 using TaskLeader.GUI;
+
 
 namespace TaskLeader.Server
 {
@@ -17,17 +19,24 @@ namespace TaskLeader.Server
         [OperationContract]
         [WebGet(UriTemplate = "?f={filePath}")]
         Stream GetFile(string filePath);
-		
+
+        [OperationContract]
+        [WebGet(UriTemplate = "getActiveDatabases", ResponseFormat = WebMessageFormat.Json)]
+        List<String> getActiveDatabases();	
+
         [OperationContract]
         [WebGet(UriTemplate = "getDBentities", ResponseFormat = WebMessageFormat.Json)]
-        DBentity[] getDBentities(); //TODO: ajouter un ID ?		
-		
+        DBentity[] getDBentities();
+
         [OperationContract]
-        [WebGet(UriTemplate = "getDBentityValues?entity={entity}&db={db}", ResponseFormat = WebMessageFormat.Json)]
-        object[] getDBentityValues(String entity, String db); //TODO: éventuellement valeur parente			
+        [WebGet(UriTemplate = "getFilters?db={db}", ResponseFormat = WebMessageFormat.Json)]
+        object[] getFilters(String db);
+
+        [OperationContract]
+        [WebGet(UriTemplate = "getDBentityValues?db={db}&entityID={entity}&parent={parent}", ResponseFormat = WebMessageFormat.Json)]
+        object[] getDBentityValues(String db, int entity, String parent);		
 		
 		// Liste des web-services à prévoir		
-		// getDatabases() => [DAL.DB] exposer uniquement les attributs 'name' + ne retourner que les DB actives
 		
         #endregion
     }
@@ -36,13 +45,12 @@ namespace TaskLeader.Server
     {
         #region ImplementedMethods
 
-        public DBentity[] getDBentities()
-        {
-			return DB.entities;
-		}
-		
-		public object[] getDBentityValues(String entityName, String dbName){
-			return TrayIcon.dbs[dbName].getTitres(DB.entities[0]);
+        public List<String> getActiveDatabases() { return TrayIcon.activeDBs.ToList<String>(); }
+        public DBentity[] getDBentities() { return DB.entities; }
+
+        public object[] getFilters(String dbName) { return TrayIcon.dbs[dbName].getTitres(DB.filtre); }
+		public object[] getDBentityValues(String dbName, int entityID, String parentValue){
+            return TrayIcon.dbs[dbName].getTitres(DB.entities[entityID],parentValue);
 		}
 		
         public Stream GetFile(string filePath) {
