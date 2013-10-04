@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Configuration;
 using TaskLeader.BO;
+using System.Runtime.Serialization;
 
 namespace TaskLeader.DAL
 {
     // Structure listant les différentes informations liées à une entité de la base (Contexte, Destinataire ...)
+    [DataContract]
     public class DBentity
     {
         /// <summary>
         /// Nom de l'entité pour IHM, !!doit être unique !!
         /// </summary>
+        [DataMember]
         public String nom;
         /// <summary>
         /// Nom de la table principale
@@ -26,6 +29,7 @@ namespace TaskLeader.DAL
         /// </summary>
         public String allColName;
 
+        [DataMember]
         public int parent = -1;
         /// <summary>
         /// Nom de la colonne foreign key si entity parente

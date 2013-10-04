@@ -3,6 +3,8 @@ using System.Threading;
 using System.Windows.Forms;
 using TaskLeader.GUI;
 using TaskLeader.BLL;
+using System.ServiceModel.Web; // Nécessite le .NET framework 4.0 (pas client profile)
+using TaskLeader.Server;
 
 namespace TaskLeader
 {
@@ -28,9 +30,21 @@ namespace TaskLeader
                 //Hook d'outlook si possible
                 OutlookIF.Instance.tryHook(false);
 
+                //Lancement du serveur d'IHM
+                try
+                {
+                    Uri baseAddress = new Uri("http://localhost:80/Temporary_Listen_Addresses/");
+                    WebServiceHost host = new WebServiceHost(typeof(GuiService), baseAddress);
+                    host.Open();
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message,"Erreur");
+                }
+
                 //Affichage de la TrayIcon
-                Application.Run(new TrayIcon()); 
-            }         
+                Application.Run(new TrayIcon());
+            }
         }
     }
 }
