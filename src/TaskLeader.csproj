@@ -167,6 +167,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Server\Datatables.cs" />
     <Compile Include="Server\Services.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -377,6 +378,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\flag_finish.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\webservices.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

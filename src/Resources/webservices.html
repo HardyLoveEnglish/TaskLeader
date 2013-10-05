@@ -1,0 +1,54 @@
+<html>
+	<head>
+	<style type="text/css">
+		table { border:1px solid black }
+		td, th { border:1px solid black }
+	</style>
+	</head>
+	<body>
+		<table>
+			<caption>
+				<p>TaskLeader - liste des web-services</p>
+			</caption>
+			<thead>
+				<tr>
+					<th>URI</th>
+					<th>HTTP request method</th>
+					<th>Paramètres</th>
+					<th>Retour</th>
+					<th>Format</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>/aide</td>
+					<td>GET</td>
+					<td><i>Aucun</i></td>
+					<td>Cette page</td>
+					<td>HTML</td>
+				</tr>
+				<tr>
+					<td>/getActiveDatabases</td>
+					<td>GET</td>
+					<td><i>Aucun</i></td>
+					<td>Tableau des noms de databases actives</td>
+					<td>["DB1,"DB2"]</td>
+				</tr>
+				<tr>
+					<td>/getDBentities</td>
+					<td>GET</td>
+					<td><i>Aucun</i></td>
+					<td>Tableau des noms des entités de la table</td>
+					<td>["Contexte","Destinataire"]</td>
+				</tr>
+				<tr>
+					<td>/getFilters?db={db}</td>
+					<td>GET</td>
+					<td><b>db:</b> Nom de la base contenant les filtres</td>
+					<td>Tableau des noms des filtres</td>
+					<td>["AllOpen","A discuter"]</td>
+				</tr>
+			</tbody>
+		</table>
+	</body>
+</html>
