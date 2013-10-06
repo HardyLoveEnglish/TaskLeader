@@ -11,69 +11,44 @@ using TaskLeader.BO;
 
 namespace TaskLeader.Server
 {
-    [ServiceContract]
-    public interface IGuiService
+    [ServiceBehavior(IncludeExceptionDetailInFaults = true), ServiceContract]
+    public partial class GuiService
     {
-        #region OperationContracts
-		
-        [OperationContract]
-        [WebGet(UriTemplate = "?f={filePath}")]
-        Stream GetFile(string filePath);
 
         [OperationContract]
-        [WebGet(UriTemplate = "aide")]
-        Stream GetHelp();
-
-        [OperationContract]
-        [WebGet(UriTemplate = "getActiveDatabases", ResponseFormat = WebMessageFormat.Json)]
-        List<String> getActiveDatabases();	
-
-        [OperationContract]
-        [WebGet(UriTemplate = "getDBentities", ResponseFormat = WebMessageFormat.Json)]
-        DBentity[] getDBentities();
-
-        [OperationContract]
-        [WebGet(UriTemplate = "getFilters?db={db}", ResponseFormat = WebMessageFormat.Json)]
-        object[] getFilters(String db);
-
-        [OperationContract]
-        [WebGet(UriTemplate = "getDBentityValues?db={db}&entityID={entity}&parent={parent}", ResponseFormat = WebMessageFormat.Json)]
-        object[] getDBentityValues(String db, int entity, String parent); //TODO: non, tout doit être string
-
-        [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "getActions?db={db}",
-            RequestFormat = WebMessageFormat.Json,
+        [WebGet(UriTemplate = "getActiveDatabases",
             ResponseFormat = WebMessageFormat.Json)]
-        DTanswer getActions(String db, Filtre filtre);
-		
-        #endregion
-    }
-
-    public partial class GuiService : IGuiService
-    {
-        #region ImplementedMethods
-
         public List<String> getActiveDatabases() {
             return TrayIcon.activeDBs.ToList<String>();
         }
 
+        [OperationContract]
+        [WebGet(UriTemplate = "getDBentities",
+            ResponseFormat = WebMessageFormat.Json)]
         public DBentity[] getDBentities() {
             return DB.entities;
         }
 
+        [OperationContract]
+        [WebGet(UriTemplate = "getFilters?db={dbName}",
+            ResponseFormat = WebMessageFormat.Json)]
         public object[] getFilters(String dbName) {
             return TrayIcon.dbs[dbName].getTitres(DB.filtre);
         }
 
+        [OperationContract]
+        [WebGet(UriTemplate = "getDBentityValues?db={dbName}&entityID={entityID}&parent={parentValue}",
+            ResponseFormat = WebMessageFormat.Json)]
 		public object[] getDBentityValues(String dbName, int entityID, String parentValue){
             return TrayIcon.dbs[dbName].getTitres(DB.entities[entityID],parentValue);
 		}
 
-        public DTanswer getActions(String db, Filtre filtre)
+        [OperationContract]
+        [WebInvoke(Method = "POST", UriTemplate = "getActions",
+            RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json)]
+        public DTanswer getActions(DTrequest request)
         {
-            UriTemplateMatch uriMatch = WebOperationContext.Current.IncomingRequest.UriTemplateMatch;
-
-            DTrequest request = new DTrequest(uriMatch.QueryParameters);
             if(!request.paramsAreValid()){
                 WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.BadRequest;
                 return null;               
@@ -82,6 +57,8 @@ namespace TaskLeader.Server
             return request.getData();
         }
 
+        [OperationContract]
+        [WebGet(UriTemplate = "aide")]
         public Stream GetHelp()
         {
             MemoryStream stream = new MemoryStream();
@@ -94,23 +71,31 @@ namespace TaskLeader.Server
             return stream;
         }
 
+        [OperationContract]
+        [WebGet(UriTemplate = "client/{*filePath}")]
         public Stream GetFile(string filePath) {
-            if (string.IsNullOrEmpty(filePath)){
-                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.BadRequest;
-                return null;
-            }
-			
-			if(!File.Exists(filePath)){
-				WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
-				return null;
-			}
 
             WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
 
-            return File.OpenRead(filePath);
+            if (string.IsNullOrEmpty(filePath)){
+                return File.OpenRead("client/index.html");
+            }
+
+            if (!File.Exists("client/" + filePath))
+            {
+				WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
+                MemoryStream stream = new MemoryStream();
+                StreamWriter writer = new StreamWriter(stream, System.Text.Encoding.UTF8);
+                writer.Write("Le fichier client/" + filePath + " n'existe pas");
+                writer.Flush();
+                stream.Position = 0;
+                return stream;
+			}
+
+
+            return File.OpenRead("client/"+filePath);
         }
         
-		#endregion
     }
 
 }

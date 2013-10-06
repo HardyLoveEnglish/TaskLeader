@@ -5,6 +5,7 @@ using System.Linq;
 using System.Data;
 using TaskLeader.GUI;
 using TaskLeader.DAL;
+using System.Runtime.Serialization;
 
 namespace TaskLeader.BO
 {
@@ -57,7 +58,8 @@ namespace TaskLeader.BO
 
         #endregion
     }
-
+    
+    [DataContract]
     public class Filtre : IEquatable<Filtre>
     {
         /// <summary>
@@ -68,6 +70,7 @@ namespace TaskLeader.BO
         private int _type = 1;
 
         // DB d'application de ce filtre
+        [DataMember]
         public String dbName { get; set; }
         private DB db { get { return TrayIcon.dbs[this.dbName]; } }
 
@@ -88,10 +91,15 @@ namespace TaskLeader.BO
         }
 
         // Nom du filtre
+        [DataMember]
         public String nom = "";
 
         // Contenu de la recherche
-        public string recherche { set { this.nom = value; this._type = 2; } }
+        [DataMember]
+        public string recherche {
+            set { this.nom = value; this._type = 2; }
+            get { return this.nom;}
+        }
 
         /// <summary>
         /// Retourne une DataTable contenant les actions du filtre

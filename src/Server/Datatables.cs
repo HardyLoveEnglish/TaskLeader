@@ -4,9 +4,15 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Runtime.Serialization;
+using TaskLeader.BO;
 
 namespace TaskLeader.Server
 {
+    public struct NameValuePair{
+        public String name;
+        public String value;
+    }
+
     [DataContract]
     public class DTanswer {
 
@@ -24,9 +30,6 @@ namespace TaskLeader.Server
         //array	    aaData                  The data in a 2D array. Note that you can change the name of this parameter with sAjaxDataProp.
         #endregion
 
-        public DTanswer() {
-        }
-
         [DataMember]
         public int sEcho { get; set; }
         [DataMember]
@@ -38,47 +41,45 @@ namespace TaskLeader.Server
         [DataMember]
         public string sColumns { get; set; } //DEPRECATED
 
-        public void Import(string[] properties)
+        public DTanswer()
         {
-            sColumns = string.Empty;
-            for (int i = 0; i < properties.Length; i++)
-            {
-                sColumns += properties[i];
-                if (i < properties.Length - 1)
-                    sColumns += ",";
-            }
+            this.sEcho = 1;
+            this.iTotalRecords = 0;
+            this.iTotalDisplayRecords = 0;
+            this.aaData = new List<List<string>>();
         }
     }
 
+    [DataContract]
     public class DTrequest {
 
-        #region Reference : http://datatables.net/usage/server-side
-        //int       iDisplayStart	    Display start point in the current data set.
-        //int	    iDisplayLength	    Number of records that the table can display in the current draw.
-        //                              It is expected that the number of records returned will be equal to this number,
-        //                              unless the server has fewer records to return.
-        //int	    iColumns	        Number of columns being displayed (useful for getting individual column search info)
-        //string	sSearch	            Global search field
-        //bool	    bRegex	            True if the global filter should be treated as a regular expression for advanced filtering, false if not.
-        //bool	    bSearchable_(int)	Indicator for if a column is flagged as searchable or not on the client-side
-        //string	sSearch_(int)	    Individual column filter
-        //bool	    bRegex_(int)	    True if the individual column filter should be treated as a regular expression for advanced filtering,
-        //                              false if not
-        //bool	    bSortable_(int)	    Indicator for if a column is flagged as sortable or not on the client-side
-        //int	    iSortingCols	    Number of columns to sort on
-        //int	    iSortCol_(int)	    Column being sorted on (you will need to decode this number for your database)
-        //string	sSortDir_(int)	    Direction to be sorted - "desc" or "asc".
-        //string	mDataProp_(int)	    The value specified by mDataProp for each column.
-        //                              This can be useful for ensuring that the processing of data is independent from the order of the columns.
-        //string	sEcho	            Information for DataTables to use for rendering.
-        #endregion
+        /* http://datatables.net/usage/server-side
+         * int		iDisplayStart       Display start point in the current data set.
+         * int		iDisplayLength      Number of records that the table can display in the current draw.
+         *                              It is expected that the number of records returned will be equal to this number,
+         *                              unless the server has fewer records to return.
+         * int		iColumns	        Number of columns being displayed (useful for getting individual column search info)
+         * string	sSearch	            Global search field
+         * bool	    bRegex	            True if the global filter should be treated as a regular expression for advanced filtering, false if not.
+         * bool	    bSearchable_(int)	Indicator for if a column is flagged as searchable or not on the client-side
+         * string	sSearch_(int)	    Individual column filter
+         * bool	bRegex_(int)	    True if the individual column filter should be treated as a regular expression for advanced filtering,
+                                    false if not
+        bool	bSortable_(int)	    Indicator for if a column is flagged as sortable or not on the client-side
+        int		iSortingCols	    Number of columns to sort on
+        int		iSortCol_(int)	    Column being sorted on (you will need to decode this number for your database)
+        string	sSortDir_(int)	    Direction to be sorted - "desc" or "asc".
+        string	mDataProp_(int)	    The value specified by mDataProp for each column.
+                                    This can be useful for ensuring that the processing of data is independent from the order of the columns.
+        string	sEcho	            Information for DataTables to use for rendering.
+        */
+        
+        [DataMember]
+        public NameValuePair[] DTparams;
+        [DataMember]
+        public Filtre[] filtres;
 
-        private HashSet<String> DTrequestParams;
-
-        private NameValueCollection param;
-
-        public DTrequest(NameValueCollection parameters) {
-            DTrequestParams = new HashSet<String>(new String[] {
+        private HashSet<String> DTrequestParams = new HashSet<String>(new String[] {
                 "iDisplayStart",
                 "iDisplayLength",
                 "iColumns",
@@ -93,16 +94,74 @@ namespace TaskLeader.Server
                 "sSortDir_(int)",
                 "mDataProp_(int)",
                 "sEcho"
-            }, StringComparer.InvariantCultureIgnoreCase); //TODO: trouver un moyen de générer les "_(int)"
+            }, StringComparer.InvariantCultureIgnoreCase); //TODO: trouver un moyen de générer les "_(int)";
 
-            this.param = parameters;
-        }
+        private NameValueCollection param;
 
         public bool paramsAreValid(){
-            return DTrequestParams.IsSupersetOf(this.param.AllKeys);
+            return true;
+            //return DTrequestParams.IsSupersetOf(this.param.AllKeys);
         }
 
         public DTanswer getData(){
+			
+			/* Reference = http://datatables.net/development/server-side/php_mysql
+			
+			//TODO: Dev only
+			String[] aColumns = new String[] {"engine", "browser", "platform", "version", "grade"};
+			
+            // Paging
+            String sLimit = "";
+            if ( (this.param["iDisplayStart"] != null) && this.param["iDisplayLength"] != "-1" ){
+                sLimit = "LIMIT "+Convert.ToInt32(this.param["iDisplayStart"])+", "+Convert.ToInt32(this.param["iDisplayLength"]);
+            }
+			
+			// Ordering
+			String sOrder = "";
+			if (this.param["iSortCol_0"] != null) {
+				sOrder = "ORDER BY  ";
+				
+				for ( int i=0 ; i < Convert.ToInt32(this.param["iSortingCols"]) ; i++ ) {
+					if ( this.param["bSortable_"+Convert.ToInt32(this.param["iSortCol_"+i])] == "true" ){
+						sOrder += aColumns[Convert.ToInt32(this.param["iSortCol_"+i])];
+						sOrder += (this.param["sSortDir_"+i] == "asc") ? "asc" : "desc" + ", ";
+					}
+				}
+				
+				sOrder = sOrder.Substring(0, sOrder.Length - 2);
+				if ( sOrder == "ORDER BY" )
+					sOrder = "";
+			}
+			*/
+			/*
+			   Filtering
+			   NOTE: this does not match the built-in DataTables filtering which does it
+			   word by word on any field. It's possible to do here, but concerned about efficiency
+			   on very large tables, and MySQL's regex functionality is very limited
+			
+			String sWhere = "";
+			if ( (this.param["sSearch"] != null) && this.param["sSearch"] != "" ) {
+				sWhere = "WHERE (";
+				for ( int i=0 ; i < aColumns.Length ; i++ ) {
+					if ( (this.param["bSearchable_"+i] != null) && (this.param["bSearchable_"+i] == "true") )
+						sWhere += aColumns[i] + " LIKE '%" + this.param["sSearch"].Replace("'","''") + "%' OR ";
+				}
+				sWhere = sWhere.Substring(0, sWhere.Length - 3);
+				sWhere += ")";
+			}
+			
+			// Individual column filtering
+			for ( int i=0 ; i < aColumns.Length ; i++ ) {
+				if ( (this.param["bSearchable_"+i] != null) && (this.param["bSearchable_"+i] == "true") && (this.param["sSearch_"+i] != "" )) {
+					if (sWhere == "")
+						sWhere = "WHERE ";
+					else
+						sWhere += " AND ";
+					sWhere += aColumns[i] + " LIKE '%" + this.param["sSearch_"+i].Replace("'","''") + "%' ";
+				}
+			}
+            */
+
             return new DTanswer();
         }
     }

@@ -387,7 +387,8 @@
     <PostBuildEvent>xcopy /Q /Y "$(ProjectDir)..\references\Net40\x86\*" "$(TargetDir)x86\"
 xcopy /Q /Y "$(ProjectDir)..\references\Net40\x64\*" "$(TargetDir)x64\"
 xcopy /Q /Y "$(ProjectDir)..\database\*" "$(TargetDir)db\"
-xcopy /Q /Y "$(ProjectDir)..\database\Migration\*" "$(TargetDir)db\Migration\"</PostBuildEvent>
+xcopy /Q /Y "$(ProjectDir)..\database\Migration\*" "$(TargetDir)db\Migration\"
+xcopy /Q /Y /E "$(ProjectDir)..\client\*" "$(TargetDir)client\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
