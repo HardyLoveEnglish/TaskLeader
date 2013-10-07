@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -8,13 +9,15 @@ using TaskLeader.BO;
 
 namespace TaskLeader.Server
 {
-    public struct NameValuePair{
-        public String name;
-        public String value;
+    public struct NameValuePair
+    {
+        public string name;
+        public string value;
     }
 
     [DataContract]
-    public class DTanswer {
+    public class DTanswer
+    {
 
         #region Reference : http://datatables.net/usage/server-side
         //int	    iTotalRecords	        Total records, before filtering (i.e. the total number of records in the database)
@@ -41,17 +44,11 @@ namespace TaskLeader.Server
         [DataMember]
         public string sColumns { get; set; } //DEPRECATED
 
-        public DTanswer()
-        {
-            this.sEcho = 1;
-            this.iTotalRecords = 0;
-            this.iTotalDisplayRecords = 0;
-            this.aaData = new List<List<string>>();
-        }
     }
 
     [DataContract]
-    public class DTrequest {
+    public class DTrequest
+    {
 
         /* http://datatables.net/usage/server-side
          * int		iDisplayStart       Display start point in the current data set.
@@ -73,9 +70,30 @@ namespace TaskLeader.Server
                                     This can be useful for ensuring that the processing of data is independent from the order of the columns.
         string	sEcho	            Information for DataTables to use for rendering.
         */
-        
+
         [DataMember]
-        public NameValuePair[] DTparams;
+        public NameValuePair[] DTparams
+        {
+            get
+            {
+                List<NameValuePair> list = new List<NameValuePair>();
+                foreach (KeyValuePair<string, string> kvp in this.param)
+                {
+                    list.Add(new NameValuePair() { name = kvp.Key, value = kvp.Value });
+                }
+                return list.ToArray();
+            }
+            set
+            {
+                this.param = new Dictionary<string, string>();
+                foreach (NameValuePair nvp in value)
+                {
+                    this.param.Add(nvp.name, nvp.value);
+                }
+            }
+        }
+        private Dictionary<string, string> param;
+
         [DataMember]
         public Filtre[] filtres;
 
@@ -96,73 +114,100 @@ namespace TaskLeader.Server
                 "sEcho"
             }, StringComparer.InvariantCultureIgnoreCase); //TODO: trouver un moyen de générer les "_(int)";
 
-        private NameValueCollection param;
-
-        public bool paramsAreValid(){
+        public bool paramsAreValid()
+        {
             return true;
             //return DTrequestParams.IsSupersetOf(this.param.AllKeys);
         }
 
-        public DTanswer getData(){
-			
-			/* Reference = http://datatables.net/development/server-side/php_mysql
-			
-			//TODO: Dev only
-			String[] aColumns = new String[] {"engine", "browser", "platform", "version", "grade"};
-			
+        public DTanswer getData()
+        {
+
+            // Reference = http://datatables.net/development/server-side/php_mysql
+
+            //TODO: Dev only
+            String[] aColumns = new String[] { "engine", "browser", "platform", "version", "grade" };
+
             // Paging
             String sLimit = "";
-            if ( (this.param["iDisplayStart"] != null) && this.param["iDisplayLength"] != "-1" ){
-                sLimit = "LIMIT "+Convert.ToInt32(this.param["iDisplayStart"])+", "+Convert.ToInt32(this.param["iDisplayLength"]);
+            if ((this.param["iDisplayStart"] != null) && this.param["iDisplayLength"] != "-1")
+            {
+                sLimit = "LIMIT " + Convert.ToInt32(this.param["iDisplayStart"]) + ", " + Convert.ToInt32(this.param["iDisplayLength"]);
+            }
+
+            // Ordering
+            String sOrder = "";
+            if (this.param["iSortCol_0"] != null)
+            {
+                sOrder = "ORDER BY  ";
+
+                for (int i = 0; i < Convert.ToInt32(this.param["iSortingCols"]); i++)
+                {
+                    if (this.param["bSortable_" + Convert.ToInt32(this.param["iSortCol_" + i])] == "true")
+                    {
+                        sOrder += aColumns[Convert.ToInt32(this.param["iSortCol_" + i])];
+                        sOrder += (this.param["sSortDir_" + i] == "asc") ? "asc" : "desc" + ", ";
+                    }
+                }
+
+                sOrder = sOrder.Substring(0, sOrder.Length - 2);
+                if (sOrder == "ORDER BY")
+                    sOrder = "";
+            }
+
+            /* Filtering
+               NOTE: this does not match the built-in DataTables filtering which does it
+               word by word on any field. It's possible to do here, but concerned about efficiency
+               on very large tables, and MySQL's regex functionality is very limited
+			
+            String sWhere = "";
+            if ( (this.param["sSearch"] != null) && this.param["sSearch"] != "" ) {
+                sWhere = "WHERE (";
+                for ( int i=0 ; i < aColumns.Length ; i++ ) {
+                    if ( (this.param["bSearchable_"+i] != null) && (this.param["bSearchable_"+i] == "true") )
+                        sWhere += aColumns[i] + " LIKE '%" + this.param["sSearch"].Replace("'","''") + "%' OR ";
+                }
+                sWhere = sWhere.Substring(0, sWhere.Length - 3);
+                sWhere += ")";
             }
 			
-			// Ordering
-			String sOrder = "";
-			if (this.param["iSortCol_0"] != null) {
-				sOrder = "ORDER BY  ";
-				
-				for ( int i=0 ; i < Convert.ToInt32(this.param["iSortingCols"]) ; i++ ) {
-					if ( this.param["bSortable_"+Convert.ToInt32(this.param["iSortCol_"+i])] == "true" ){
-						sOrder += aColumns[Convert.ToInt32(this.param["iSortCol_"+i])];
-						sOrder += (this.param["sSortDir_"+i] == "asc") ? "asc" : "desc" + ", ";
-					}
-				}
-				
-				sOrder = sOrder.Substring(0, sOrder.Length - 2);
-				if ( sOrder == "ORDER BY" )
-					sOrder = "";
-			}
-			*/
-			/*
-			   Filtering
-			   NOTE: this does not match the built-in DataTables filtering which does it
-			   word by word on any field. It's possible to do here, but concerned about efficiency
-			   on very large tables, and MySQL's regex functionality is very limited
-			
-			String sWhere = "";
-			if ( (this.param["sSearch"] != null) && this.param["sSearch"] != "" ) {
-				sWhere = "WHERE (";
-				for ( int i=0 ; i < aColumns.Length ; i++ ) {
-					if ( (this.param["bSearchable_"+i] != null) && (this.param["bSearchable_"+i] == "true") )
-						sWhere += aColumns[i] + " LIKE '%" + this.param["sSearch"].Replace("'","''") + "%' OR ";
-				}
-				sWhere = sWhere.Substring(0, sWhere.Length - 3);
-				sWhere += ")";
-			}
-			
-			// Individual column filtering
-			for ( int i=0 ; i < aColumns.Length ; i++ ) {
-				if ( (this.param["bSearchable_"+i] != null) && (this.param["bSearchable_"+i] == "true") && (this.param["sSearch_"+i] != "" )) {
-					if (sWhere == "")
-						sWhere = "WHERE ";
-					else
-						sWhere += " AND ";
-					sWhere += aColumns[i] + " LIKE '%" + this.param["sSearch_"+i].Replace("'","''") + "%' ";
-				}
-			}
+            // Individual column filtering
+            for ( int i=0 ; i < aColumns.Length ; i++ ) {
+                if ( (this.param["bSearchable_"+i] != null) && (this.param["bSearchable_"+i] == "true") && (this.param["sSearch_"+i] != "" )) {
+                    if (sWhere == "")
+                        sWhere = "WHERE ";
+                    else
+                        sWhere += " AND ";
+                    sWhere += aColumns[i] + " LIKE '%" + this.param["sSearch_"+i].Replace("'","''") + "%' ";
+                }
+            }
             */
 
-            return new DTanswer();
+            // Récupération de la DataTable résultat
+            DataTable data = this.filtres[0].getActions();
+            if (this.filtres.Length > 1)
+            {
+                for (int i = 1; i < this.filtres.Length; i++)
+                {
+                    data.Merge(this.filtres[i].getActions());
+                }
+            }
+
+            // Conversion en tableau 2D
+            List<List<string>> DTdata = new List<List<string>>();
+            int total = data.Rows.Count;
+            foreach (DataRow row in data.Rows)
+            {
+                DTdata.Add(new List<string>(row.ItemArray.Select(o => o.ToString())));
+            }
+
+            return new DTanswer()
+            {
+                sEcho = Convert.ToInt32(this.param["sEcho"]),
+                iTotalRecords = total,
+                iTotalDisplayRecords = total,
+                aaData = DTdata
+            };
         }
     }
 }
