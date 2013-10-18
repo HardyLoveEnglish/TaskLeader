@@ -8,7 +8,11 @@ $(document).ready(function() {
 			{ "sTitle": "id" },
 			{ "sTitle": "Contexte" },
 			{ "sTitle": "Sujet" },
-			{ "sTitle": "Contenu", "sWidth": "20%" },
+			{ "sTitle": "Contenu", "sWidth": "20%",
+			  "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+				nTd.innerHTML = sData.replace(/\r\n|\r|\n/g, '<br />');
+			  }
+			},
 			{ "sTitle": "Liens" },
 			{ "sTitle": "Deadline" },
 			{ "sTitle": "Destinataire" },
