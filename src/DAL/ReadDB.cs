@@ -287,7 +287,9 @@ namespace TaskLeader.DAL
         /// <returns>Valeur par défaut de 'entity'</returns>
         public String getDefault(DBentity entity)
         {
-            Object[] resultat = getList("SELECT v.label FROM Entities_values v, Entities e WHERE e.id=" + entity.id + " AND v.id=e.defaultValueID;");
+            //TODO: non il faut faire une jointure
+
+            Object[] resultat = getList("SELECT v.label FROM Entities_values v, Entities e WHERE e.id=" + entity.id + " AND v.id=e.defaultValue;");
 
             if (resultat.Length == 1)
                 return resultat[0] as String;

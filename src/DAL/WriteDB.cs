@@ -155,12 +155,12 @@ namespace TaskLeader.DAL
             String requete;
 
             if (entity.parentID == 0)
-                requete = "INSERT INTO " + entity.mainTable + " (Titre) VALUES (" + sqlValue + ")";
+                requete = "INSERT INTO Entities_values (entityID,label) VALUES (" + entity.id + "," + sqlValue + ");";
             else
-                requete = "INSERT INTO " + entity.mainTable + " (" + entity.foreignID + ",Titre)" +
-                            " SELECT P.id, " + sqlValue +
-                            " FROM " + listEntities[entity.parentID].mainTable + " P" +
-                            " WHERE P.Titre = " + parent;
+                requete = "INSERT INTO Entities_values (entityID,label,parentID)" +
+                            " SELECT " + entity.id + "," + sqlValue + ",P.id " +
+                            " FROM Entities_values P" +
+                            " WHERE P.label = " + parent + " AND P.entityID=" + entity.parentID + ";";
 
             int result = execSQL(requete);
             if (result == 1)

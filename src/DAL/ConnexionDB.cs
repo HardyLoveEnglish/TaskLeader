@@ -9,11 +9,6 @@ namespace TaskLeader.DAL
     public class DBentity
     {
         /// <summary>
-        /// Default constructor
-        /// </summary>
-        public DBentity() { }
-
-        /// <summary>
         /// ID de l'entité dans la base
         /// </summary>
         public int id { get; set; }
@@ -31,7 +26,7 @@ namespace TaskLeader.DAL
         /// <summary>
         /// ID de l'entité parente
         /// </summary>
-        public int parentID;
+        public int parentID { get; set; }
     }
 
     public delegate void NewValueEventHandler(String parentValue);
