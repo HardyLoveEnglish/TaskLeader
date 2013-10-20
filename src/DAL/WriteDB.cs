@@ -141,7 +141,7 @@ namespace TaskLeader.DAL
             }
 
 
-            this.OnNewValue(DB.filtre);
+            this.OnNewValue("Filtre");
             // On affiche un message de statut sur la TrayIcon
             TrayIcon.afficheMessage("Bilan création/modification", "Nouveau filtre ajouté: " + filtre.nom);
 
@@ -154,17 +154,17 @@ namespace TaskLeader.DAL
             String parent = "'" + parentValue.Replace("'", "''") + "'";
             String requete;
 
-            if (entity.parent == -1)
+            if (entity.parentID == 0)
                 requete = "INSERT INTO " + entity.mainTable + " (Titre) VALUES (" + sqlValue + ")";
             else
                 requete = "INSERT INTO " + entity.mainTable + " (" + entity.foreignID + ",Titre)" +
                             " SELECT P.id, " + sqlValue +
-                            " FROM " + entities[entity.parent].mainTable + " P" +
+                            " FROM " + listEntities[entity.parentID].mainTable + " P" +
                             " WHERE P.Titre = " + parent;
 
             int result = execSQL(requete);
             if (result == 1)
-                this.OnNewValue(entity,parentValue);
+                this.OnNewValue(entity.nom,parentValue);
 
             return result;
         }

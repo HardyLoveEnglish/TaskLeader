@@ -62,8 +62,8 @@ namespace TaskLeader.BLL
             bool baseCompatible = TrayIcon.dbs[dbName].isVersionComp(Application.ProductVersion.Substring(0, 3));
 
             if (!baseCompatible)
-                if (TrayIcon.dbs[dbName].getLastVerComp() == "0.6")
-                    return tryMigration("06-07", dbName);
+                if (TrayIcon.dbs[dbName].getLastVerComp() == "0.7")
+                    return tryMigration("07-08", dbName);
                 else
                 {
                     MessageBox.Show("La base est trop ancienne pour une migration", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);

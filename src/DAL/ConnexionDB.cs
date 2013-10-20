@@ -1,8 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.Configuration;
-using TaskLeader.BO;
 
 namespace TaskLeader.DAL
 {
@@ -10,38 +9,46 @@ namespace TaskLeader.DAL
     public class DBentity
     {
         /// <summary>
-        /// Nom de l'entité pour IHM, !!doit être unique !!
+        /// Default constructor
         /// </summary>
-        public String nom;
-        /// <summary>
-        /// Nom de la table principale
-        /// </summary>
-        public String mainTable;
-        /// <summary>
-        /// Nom de la colonne dans vueActions
-        /// </summary>
-        public String viewColName;
-        /// <summary>
-        /// Nom de la colonne "All" dans la table Filtre
-        /// </summary>
-        public String allColName;
+        public DBentity() { }
 
-        public int parent = -1;
         /// <summary>
-        /// Nom de la colonne foreign key si entity parente
-        /// TODO: sera normalisé dans la base 0.8
+        /// ID de l'entité dans la base
         /// </summary>
-        public String foreignID;
+        public int id { get; set; }
+
+        /// <summary>
+        /// Nom de l'entité pour IHM
+        /// </summary>
+        public String nom { get; set; }
+
+        /// <summary>
+        /// Type de l'entité: List, Text, Date
+        /// </summary>
+        public String type { get; set; }
+
+        /// <summary>
+        /// ID de l'entité parente
+        /// </summary>
+        public int parentID;
     }
 
     public delegate void NewValueEventHandler(String parentValue);
     public delegate void ActionEditedEventHandler(String dbName, String actionID);
 
-    public partial class DB //TODO: détecter les ouvertures de fichier pour les limiter
+    public partial class DB
     {
         // Caractéristiques de la DB
-        public String path = "";
+        private String path = "";
         public String name = "";
+
+        /// <summary>
+        /// Array contenan toutes les DBentity de la base
+        /// </summary>
+        private List<DBentity> _entities;
+        public DBentity[] listEntities { get { return _entities.Where(entity => entity.type == "List").ToArray(); } }
+        public DBentity[] entities { get { return _entities.ToArray(); } }
 
         /// <summary>
         /// Retourne le nom de la base
@@ -52,46 +59,40 @@ namespace TaskLeader.DAL
         {
             this.path = System.IO.Path.GetFullPath(chemin);
             this.name = nom;
+            this._entities = this.getEntities();
 
             // ConnectionString definition
             _builder.DataSource = this.path;
             _builder.FailIfMissing = true;
             _builder.Pooling = true;
 
-            //TODO: ne pas harcoder les différents types
-            this.NewValue.Add(contexte.nom, null);
-            this.NewValue.Add(sujet.nom, null);
-            this.NewValue.Add(destinataire.nom, null);
-            this.NewValue.Add(statut.nom, null);
-            this.NewValue.Add(filtre.nom, null);
+            // Création des piles correspondant aux entities List
+            foreach (DBentity entity in this.listEntities)
+                this.NewValue.Add(entity.nom, null);
+
+            // Création de la pile pour les filtres
+            this.NewValue.Add("Filtre", null);
+
         }
 
-        SQLiteConnectionStringBuilder _builder = new SQLiteConnectionStringBuilder();
+        private SQLiteConnectionStringBuilder _builder = new SQLiteConnectionStringBuilder();
         private String _connectionString { get { return _builder.ConnectionString; } }
-
-        // "Schéma de base" = Nom de l'entité pour IHM, Nom de la colonne dans vueActions, Nom de la table principale, Nom de la colonne "All" dans la table Filtre
-        public static DBentity contexte = new DBentity() { nom = "Contextes", viewColName = "Contexte", mainTable = "Contextes", allColName = "AllCtxt" };
-        public static DBentity sujet = new DBentity() { nom = "Sujets", viewColName = "Sujet", mainTable = "Sujets", allColName = "AllSuj", parent = 0, foreignID = "CtxtID" };
-        public static DBentity destinataire = new DBentity() { nom = "Destinataires", viewColName = "Destinataire", mainTable = "Destinataires", allColName = "AllDest" };
-        public static DBentity statut = new DBentity() { nom = "Statuts", viewColName = "Statut", mainTable = "Statuts", allColName = "AllStat" };
-        public static DBentity filtre = new DBentity() { nom = "Filtres", viewColName = "", mainTable = "Filtres", allColName = "" };
-        public static DBentity[] entities = { contexte, sujet, destinataire, statut };
 
         #region Events
 
         // Gestion des évènements NewValue - http://msdn.microsoft.com/en-us/library/z4ka55h8(v=vs.80).aspx
         private Dictionary<String, Delegate> NewValue = new Dictionary<String, Delegate>();
-        public void subscribe_NewValue(DBentity entity, NewValueEventHandler value) { this.NewValue[entity.nom] = (NewValueEventHandler)this.NewValue[entity.nom] + value; }
-        public void unsubscribe_NewValue(DBentity entity, NewValueEventHandler value) { this.NewValue[entity.nom] = (NewValueEventHandler)this.NewValue[entity.nom] - value; }
+        public void subscribe_NewValue(String entityName, NewValueEventHandler value) { this.NewValue[entityName] = (NewValueEventHandler)this.NewValue[entityName] + value; }
+        public void unsubscribe_NewValue(String entityName, NewValueEventHandler value) { this.NewValue[entityName] = (NewValueEventHandler)this.NewValue[entityName] - value; }
         /// <summary>
         /// Génération de l'évènement NewValue
         /// </summary>
         /// <param name="entity">DBentity concernée</param>
         /// <param name="parentValue">La valeur courante de la DBentity parente</param>
-        private void OnNewValue(DBentity entity, String parentValue = null)
+        private void OnNewValue(String entityName, String parentValue = null)
         {
             NewValueEventHandler handler;
-            if (null != (handler = (NewValueEventHandler)this.NewValue[entity.nom]))
+            if (null != (handler = (NewValueEventHandler)this.NewValue[entityName]))
                 handler(parentValue);
         }
 

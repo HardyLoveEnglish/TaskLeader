@@ -185,7 +185,7 @@ namespace TaskLeader.GUI
 
         #region Membres 'enfant'
 
-        private bool hasParent { get { return (this.type.parent != -1); } }
+        private bool hasParent { get { return (this.type.parentID > 0); } }
 
         /// <summary>
         /// Rend dépendant ce widget d'un autre
@@ -218,11 +218,11 @@ namespace TaskLeader.GUI
         {
             // Unregister de l'ancienne DB
             if (this.db != null)
-                this.db.unsubscribe_NewValue(this.type, new NewValueEventHandler(newValue));
+                this.db.unsubscribe_NewValue(this.type.nom, new NewValueEventHandler(newValue));
             // Mémorisation de la "nouvelle" DB
             this.db = database;
             // Register de la nouvelle DB
-            this.db.subscribe_NewValue(this.type, new NewValueEventHandler(newValue));
+            this.db.subscribe_NewValue(this.type.nom, new NewValueEventHandler(newValue));
 
             if (!this.hasParent) // Les contrôles enfants ne doivent pas être mis à jour directement
                 this.maj();
@@ -234,7 +234,7 @@ namespace TaskLeader.GUI
 
             this.liste.Items.Clear(); // Vidage de la liste
 
-            foreach (object item in this.db.getTitres(this.type, key))
+            foreach (object item in this.db.getEntitiesLabels(this.type, key))
                 this.liste.Items.Add(item, true); // Sélection de toutes les valeurs
 
             this.box.Checked = true;
@@ -318,7 +318,7 @@ namespace TaskLeader.GUI
             this.pictureBox1.Visible = true;
 
             this.liste.Items.AddRange(this.db.getFilters().ToArray());
-            this.db.subscribe_NewValue(DB.filtre, new NewValueEventHandler(maj));
+            this.db.subscribe_NewValue("Filtre", new NewValueEventHandler(maj));
         }
 
         /// <summary>

@@ -11,7 +11,6 @@ namespace TaskLeader.BO
     public class Criterium : IEquatable<Criterium>
     {
         private DBentity _champ;
-        public int entityID { set { this._champ = DB.entities[value]; } }
         public DBentity entity { get { return _champ; } }
 
         public List<String> valuesSelected = new List<String>();
@@ -156,7 +155,7 @@ namespace TaskLeader.BO
             Dictionary<String, String> description = new Dictionary<string, string>();
             Dictionary<DBentity, Criterium> criteriaList = criteria.ToDictionary(c => c.entity, c => c);
 
-            foreach (DBentity entity in DB.entities)
+            foreach (DBentity entity in this.db.listEntities)
                 if (criteriaList.ContainsKey(entity))
                     description.Add(entity.nom, criteriaList[entity].ToString());
                 else

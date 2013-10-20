@@ -194,7 +194,7 @@ namespace TaskLeader.DAL
             {
                 // On affiche l'erreur.
                 MessageBox.Show(Ex.Message + Environment.NewLine + Ex.StackTrace,
-                    "Exception sur getInteger",
+                    "Impossible de récupérer la version de la base",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Exclamation);
 
@@ -204,46 +204,90 @@ namespace TaskLeader.DAL
 
         // =====================================================================================
 
-        // Vérification de la présence d'une nouvelle valeur d'une entité
+        /// <summary>
+        /// Vérification de la présence d'une nouvelle valeur d'une entité de type List
+        /// </summary>
+        /// <returns>true si 'title' est une nouvelle valeur de 'entity'</returns>
         public bool isNvo(DBentity entity, String title, String parentValue = "")
         {
             String titre = "'" + title.Replace("'", "''") + "'";
             String parent = "'" + parentValue.Replace("'", "''") + "'";
             String requete;
 
-            if (entity.parent == -1) // No parent entity
-                requete = "SELECT count(id) FROM " + entity.mainTable + " WHERE Titre=" + titre;
+            if (entity.parentID == 0) // No parent entity
+                requete = "SELECT count(id) FROM Entities_values WHERE label=" + titre + " AND entityID=" + entity.id + ";";
             else
-                requete = "SELECT count(M.id) FROM " + entity.mainTable + " M, " + DB.entities[entity.parent].mainTable + " P " +
-                "WHERE M." + entity.foreignID + " = P.id AND P.Titre =" + parent + " AND M.Titre=" + titre;
+                requete = "SELECT count(Child.id) FROM Entities_values Child, Entities_values Parent " +
+                "WHERE Child.entityID = " + entity.id + " AND Child.label=" + titre +
+                " AND Parent.label =" + parent + " AND Child.parentID = Parent.id;";
 
             return (getInteger(requete) == 0);
         }
 
+        public bool isNvoFiltre(String title)
+        {
+            //TODO:
+            return true;
+        }
+
         // =====================================================================================
 
-        // Récupération de la liste des valeurs d'une entité. Obsolète: getCtxt, getDest, getStatut, getFilters
-        public object[] getTitres(DBentity entity, string parentValue = "")
+        /// <summary>
+        /// Récupération de liste des entités
+        /// </summary>
+        /// <returns>List of DBentity</returns>
+        public List<DBentity> getEntities()
         {
+            var data = new List<DBentity>();
+
+            DataRowCollection results = getTable("SELECT id,label,contentType,parentID FROM Entities;").Rows;
+            foreach (DataRow row in results)
+            {
+                data.Add(new DBentity {
+                    id = (int)row["id"],
+                    nom = row["label"] as String,
+                    type = row["contentType"] as String,
+                    parentID = (int)row["parentID"]
+                });
+            }
+
+            return data;
+        }
+
+        /// <summary>
+        /// Récupération de la liste des valeurs d'une entité
+        /// </summary>
+        /// <returns>Object array des valeurs</returns>
+        public object[] getEntitiesLabels(DBentity entity, string parentValue = "")
+        {
+            String parent = "'" + parentValue.Replace("'", "''") + "'";
             string request;
 
-            if (entity.parent == -1) // No parent entity
-                request = "SELECT Titre FROM " + entity.mainTable + " ORDER BY Titre ASC";
+            if (entity.parentID == 0) // No parent entity
+                request = "SELECT label FROM Entities_values WHERE entityID=" + entity.id + " ORDER BY label ASC";
             else
-                request = "SELECT M.Titre FROM " + entity.mainTable + " M, " + DB.entities[entity.parent].mainTable + " P " +
-                    "WHERE M." + entity.foreignID + " = P.id AND P.Titre ='" + parentValue + "' ORDER BY M.Titre ASC";
+                request = "SELECT Child.label FROM Entities_values Child, Entities_values Parent " +
+                    "WHERE Child.entityId=" + entity.id +
+                    " AND Child.parentID = Parent.id AND Parent.label =" + parent +
+                    " ORDER BY Child.label ASC";
 
+            return getList(request);
+        }
+
+        public object[] getFiltersLabels()
+        {
+            string request = "";
+            //TODO
             return getList(request);
         }
 
         /// <summary>
         /// Récupération des valeurs par défaut
         /// </summary>
-        /// <param name="entity">DB.contexte, DB.destinataire ...</param>
-        /// <returns>Valeur par défaut de l'entité</returns>
+        /// <returns>Valeur par défaut de 'entity'</returns>
         public String getDefault(DBentity entity)
         {
-            Object[] resultat = getList("SELECT Titre FROM " + entity.mainTable + " WHERE Defaut='1'");
+            Object[] resultat = getList("SELECT v.label FROM Entities_values v, Entities e WHERE e.id=" + entity.id + " AND v.id=e.defaultValueID;");
 
             if (resultat.Length == 1)
                 return resultat[0] as String;
@@ -307,28 +351,51 @@ namespace TaskLeader.DAL
         {
             List<Filtre> liste = new List<Filtre>();
 
-            foreach (String filtreName in this.getTitres(DB.filtre))
+            foreach (String filtreName in this.getFiltersLabels())
                 liste.Add(new Filtre() { dbName = this.name, nom = filtreName });
 
             return liste;
         }
 
+        /// <summary>
+        /// Méthode permettant de factoriser la construction de la table Actions
+        /// </summary>
+        /// <param name="WHEREclause">WHERE part of the SQL request</param>
+        /// <returns>Requête complète</returns>
+        private String getActionsRequest(String WHEREclause)
+        {
+            // Création de la requête de filtrage
+            String requete = "SELECT a.id,";
+
+            // Définition des colonnes suivantes
+            foreach (DBentity entity in this.entities)
+                if (entity.type == "List")
+                    requete += "MAX(CASE WHEN a.entityID = " + entity.id + " THEN v.label ELSE NULL END) AS " + entity.id + ",";
+                else
+                    requete += "MAX(CASE WHEN a.entityID = " + entity.id + " THEN a.entityValue ELSE NULL END) AS " + entity.id + ",";
+            requete = requete.Substring(0, requete.Length - 1); //Suppression de la dernière virgule
+
+            requete += " FROM Actions a LEFT JOIN Entities_values v ON v.id = a.entityValue ";
+            requete += WHEREclause;
+            requete += " GROUP BY a.id;";
+
+            return requete;
+        }
+
         // Renvoie un DataTable de toutes les actions
         public DataTable getActions(List<Criterium> criteria)
         {
-            // Création de la requête de filtrage
-            String requete = "SELECT * FROM VueActions";
-
+            String requete = "";
             String selection, nomColonne;
 
             if (criteria.Count > 0) // Il n'y a de WHERE que si au moins un criterium a été entré
             {
-                requete += " WHERE ";
+                requete += "WHERE ";
 
                 foreach (Criterium critere in criteria) // On boucle sur tous les critères du filtre
                 {
-                    // On récupère le nom de la colonne correspondant au critère
-                    nomColonne = critere.entity.viewColName;
+                    // On récupère le nom de la colonne correspondant au critère (c'est l'entityID !)
+                    nomColonne = critere.entity.id.ToString();
 
                     if (critere.valuesSelected.Count > 0) // Requête SQL si au moins un élément a été sélectionné
                     {
@@ -350,14 +417,15 @@ namespace TaskLeader.DAL
                 requete = requete.Substring(0, requete.Length - 5); // On enlève le dernier AND en trop
             }
 
-            return getTable(requete);
+            return getTable(getActionsRequest(requete));
         }
-
-        /// <summary>Renvoie les données liées à une action</summary>
-        /// <param name="ID">ID de l'action dans la base</param>
+        
+        /// <summary>
+        /// Renvoie une DataRow de l'action 'ID'
+        /// </summary>
         public DataRow getAction(String ID)
         {
-            DataTable result = getTable("SELECT * FROM VueActions WHERE id='" + ID + "'");
+            DataTable result = getTable(getActionsRequest("WHERE a.id=" + ID));
             return result.Rows[0];
         }
 
@@ -399,22 +467,29 @@ namespace TaskLeader.DAL
         public DataTable searchActions(String keywords)
         {
             String words = keywords.Replace("'", "''");
+            String requete = "WHERE ";
 
-            String requete = "SELECT * FROM VueActions WHERE Titre LIKE '%" + words + "%' OR ";
-            requete += "id IN("; // Recherche dans les titres de mail
+            // Recherche sur toutes les colonnes
+            foreach(DBentity entity in this.entities)
+                requete += entity.id + " LIKE '%" + words + "%' OR ";
+
+            // Recherche dans les titres de mail
+            requete += "id IN("; 
             requete += "   SELECT E.ActionID FROM Mails M, Enclosures E";
             requete += "      WHERE M.Titre LIKE '%" + words + "%'";
             requete += "      AND M.id=E.EncID";
             requete += "      AND E.EncType='Mails'";
             requete += ") OR ";
-            requete += "id IN("; // Recherche dans les titres ou chemins des liens
+
+            // Recherche dans les titres ou chemins des liens
+            requete += "id IN("; 
             requete += "   SELECT E.ActionID FROM Links L, Enclosures E";
             requete += "      WHERE L.Titre LIKE '%" + words + "%'";
             requete += "      AND L.id=E.EncID";
             requete += "      AND E.EncType='Links'";
-            requete += ");";
+            requete += ")";
 
-            return getTable(requete);
+            return getTable(getActionsRequest(requete));
         }
     }
 }

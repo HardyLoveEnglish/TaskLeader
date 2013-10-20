@@ -28,7 +28,7 @@ namespace TaskLeader.GUI
         {
             // Contextes
             this.contexteBox.Items.Clear();
-            contexteBox.Items.AddRange(db.getTitres(DB.contexte));
+            contexteBox.Items.AddRange(db.getEntitiesLabels(DB.contexte));
             contexteBox.Text = _action.Contexte;
 
             // Sujets
@@ -38,12 +38,12 @@ namespace TaskLeader.GUI
 
             // Destinataires
             this.destBox.Items.Clear();
-            destBox.Items.AddRange(db.getTitres(DB.destinataire));
+            destBox.Items.AddRange(db.getEntitiesLabels(DB.destinataire));
             destBox.Text = _action.Destinataire;
 
             // Statuts
             this.statutBox.Items.Clear();
-            statutBox.Items.AddRange(db.getTitres(DB.statut)); // On remplit la liste des statuts
+            statutBox.Items.AddRange(db.getEntitiesLabels(DB.statut)); // On remplit la liste des statuts
             statutBox.SelectedItem = _action.Statut;
         }
 
@@ -97,7 +97,7 @@ namespace TaskLeader.GUI
             // On vide les sujets correspondants au contexte actuel
             sujetBox.Items.Clear();
 
-            foreach (String item in db.getTitres(DB.sujet, contexteBox.Text))
+            foreach (String item in db.getEntitiesLabels(DB.sujet, contexteBox.Text))
                 sujetBox.Items.Add(item);
         }
 
