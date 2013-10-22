@@ -128,6 +128,12 @@
     <Compile Include="GUI\Etiquette.Designer.cs">
       <DependentUpon>Etiquette.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\ListEntity.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\ListEntity.Designer.cs">
+      <DependentUpon>ListEntity.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\MultipleSelect.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -180,6 +186,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Etiquette.resx">
       <DependentUpon>Etiquette.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\ListEntity.resx">
+      <DependentUpon>ListEntity.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\MultipleSelect.resx">
       <DependentUpon>MultipleSelect.cs</DependentUpon>
