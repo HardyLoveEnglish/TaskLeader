@@ -346,15 +346,6 @@ namespace TaskLeader.GUI
                 action.save();
         }
 
-        // Copie de l'action dans le presse-papier
-        private void exportRow(object sender, EventArgs e)
-        {
-            new TLaction(
-                this.getDataFromRow(grilleData.SelectedRows[0].Index, "id"),
-                this.getDataFromRow(grilleData.SelectedRows[0].Index, "DB")
-            ).clip(((ToolStripItem)sender).Text);
-        }
-
         #endregion
 
         #region linksContext

@@ -282,19 +282,20 @@ namespace TaskLeader.DAL
         }
 
         /// <summary>
-        /// Récupération des valeurs par défaut
+        /// Récupération des valeurs par défaut pour tous les entités
         /// </summary>
-        /// <returns>Valeur par défaut de 'entity'</returns>
-        public String getDefault(DBentity entity)
+        /// <returns>Une DataRow </returns>
+        public DataRow getDefault()
         {
             //TODO: non il faut faire une jointure
+            //TODO: il faudrait retourner une DataRow avec toutes les valeurs plutôt (évite les lectures unitaires)
 
             Object[] resultat = getList("SELECT v.label FROM Entities_values v, Entities e WHERE e.id=" + entity.id + " AND v.id=e.defaultValue;");
 
             if (resultat.Length == 1)
-                return resultat[0] as String;
+                return new DataRow();
             else
-                return "";
+                return new DataRow();
         }
 
         // Récupère un filtre en fonction de son titre

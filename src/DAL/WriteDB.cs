@@ -364,7 +364,7 @@ namespace TaskLeader.DAL
                         insertPart += "Titre,"; // On a déjà vérifié que la chaîne n'était pas nulle
                         valuePart += action.TexteSQL + ",";
 
-                        if (action.hasDueDate)
+                        if (action.hasDueDate) // action.DueDate != DateTime.MinValue
                         {
                             insertPart += "DueDate,";
                             valuePart += action.DueDateSQL + ",";
@@ -411,7 +411,7 @@ namespace TaskLeader.DAL
             String datePart = "";
             if (action.dueDateHasChanged)
             {
-                if (action.hasDueDate)
+                if (action.hasDueDate) // action.DueDate != DateTime.MinValue
                     datePart = "DueDate=" + action.DueDateSQL + ",";
                 else
                     datePart = "DueDate=NULL,";

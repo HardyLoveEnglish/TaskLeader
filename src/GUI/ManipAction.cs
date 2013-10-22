@@ -115,6 +115,7 @@ namespace TaskLeader.GUI
 
             // Update de l'action avec les nouveaux champs
             _action.updateDefault(contexteBox.Text, sujetBox.Text, desField.Text, destBox.Text, statutBox.Text);
+            //TODO: utiliser _action.setValue pour chaque entité
 
             // Update de la DueDate que si c'est nécessaire
             if (noDueDate.Checked)

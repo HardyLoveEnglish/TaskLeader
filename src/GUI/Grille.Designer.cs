@@ -34,10 +34,9 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.grilleData = new System.Windows.Forms.DataGridView();
             this.listeContext = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.editActionItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statutTSMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.linksContext = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.editActionItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.grilleData)).BeginInit();
             this.listeContext.SuspendLayout();
             this.SuspendLayout();
@@ -90,11 +89,18 @@
             // 
             this.listeContext.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editActionItem,
-            this.statutTSMenuItem,
-            this.exportMenuItem});
+            this.statutTSMenuItem});
             this.listeContext.Name = "listeContext";
-            this.listeContext.Size = new System.Drawing.Size(159, 92);
+            this.listeContext.Size = new System.Drawing.Size(159, 48);
             this.listeContext.Opening += new System.ComponentModel.CancelEventHandler(this.listeContext_Opening);
+            // 
+            // editActionItem
+            // 
+            this.editActionItem.Image = global::TaskLeader.Properties.Resources.application_form_edit;
+            this.editActionItem.Name = "editActionItem";
+            this.editActionItem.Size = new System.Drawing.Size(158, 22);
+            this.editActionItem.Text = "Editer l\'action";
+            this.editActionItem.Click += new System.EventHandler(this.modifAction);
             // 
             // statutTSMenuItem
             // 
@@ -107,21 +113,6 @@
             // 
             this.linksContext.Name = "linksContext";
             this.linksContext.Size = new System.Drawing.Size(61, 4);
-            // 
-            // editActionItem
-            // 
-            this.editActionItem.Image = global::TaskLeader.Properties.Resources.application_form_edit;
-            this.editActionItem.Name = "editActionItem";
-            this.editActionItem.Size = new System.Drawing.Size(158, 22);
-            this.editActionItem.Text = "Editer l\'action";
-            this.editActionItem.Click += new System.EventHandler(this.modifAction);
-            // 
-            // exportMenuItem
-            // 
-            this.exportMenuItem.Image = global::TaskLeader.Properties.Resources.table_export;
-            this.exportMenuItem.Name = "exportMenuItem";
-            this.exportMenuItem.Size = new System.Drawing.Size(158, 22);
-            this.exportMenuItem.Text = "Exporter vers";
             // 
             // Grille
             // 
@@ -142,7 +133,6 @@
         private System.Windows.Forms.ContextMenuStrip listeContext;
         private System.Windows.Forms.ToolStripMenuItem editActionItem;
         private System.Windows.Forms.ToolStripMenuItem statutTSMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem exportMenuItem;
         private System.Windows.Forms.ContextMenuStrip linksContext;
 
     }
