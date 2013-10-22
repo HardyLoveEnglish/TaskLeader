@@ -243,8 +243,9 @@ namespace TaskLeader.DAL
             DataRowCollection results = getTable("SELECT id,label,contentType,parentID FROM Entities;").Rows;
             foreach (DataRow row in results)
             {
-                data.Add(new DBentity {
-                    id = (int)row["id"],
+                int id = (int)row["id"];
+                data.Insert(id,new DBentity {
+                    id = id,
                     nom = row["label"] as String,
                     type = row["contentType"] as String,
                     parentID = (int)row["parentID"]

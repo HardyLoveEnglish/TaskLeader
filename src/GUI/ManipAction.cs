@@ -26,9 +26,21 @@ namespace TaskLeader.GUI
         // Préparation des widgets
         private void loadWidgets()
         {
+            foreach (DBentity entity in this.db.entities)
+            {
+                switch (entity.type) {
+                    case("List"):
+                        var widget = new ListEntity(entity, this.db); //TODO: la valeur de l'action doit être spécifiée
+                        if (entity.parentID > 0)
+                            widget.addParent(this.entitiesPanel.Controls[this.db.entities[entity.parentID].nom] as ListEntity);
+                        this.entitiesPanel.Controls.Add(widget);
+                        break;
+                }          
+            }
+
             // Contextes
-            this.contexteBox.Items.Clear();
-            contexteBox.Items.AddRange(db.getEntitiesLabels(DB.contexte));
+            this.contexteBox.Items.Clear(); //OK
+            contexteBox.Items.AddRange(db.getEntitiesLabels(DB.contexte)); //OK
             contexteBox.Text = _action.Contexte;
 
             // Sujets
