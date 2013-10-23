@@ -110,6 +110,12 @@
     <Compile Include="GUI\ComplexTooltip.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GUI\DateEntity.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\DateEntity.Designer.cs">
+      <DependentUpon>DateEntity.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\DatePickerPopup.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -158,6 +164,12 @@
     <Compile Include="GUI\SaveLink.Designer.cs">
       <DependentUpon>SaveLink.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\TextEntity.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\TextEntity.Designer.cs">
+      <DependentUpon>TextEntity.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\Toolbox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -177,6 +189,9 @@
   <ItemGroup>
     <EmbeddedResource Include="GUI\AdminDefaut.resx">
       <DependentUpon>AdminDefaut.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\DateEntity.resx">
+      <DependentUpon>DateEntity.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\DatePickerPopup.resx">
       <DependentUpon>DatePickerPopup.cs</DependentUpon>
@@ -201,6 +216,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\SaveLink.resx">
       <DependentUpon>SaveLink.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\TextEntity.resx">
+      <DependentUpon>TextEntity.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Toolbox.resx">
       <DependentUpon>Toolbox.cs</DependentUpon>
