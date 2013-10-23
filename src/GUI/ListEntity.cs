@@ -1,47 +1,66 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using TaskLeader.DAL;
 
 namespace TaskLeader.GUI
 {
-    public partial class ListEntity : UserControl
+    public interface EntityControl
     {
-        private DBentity _entity;
+        int entityID;
+        object value;
+    }
+
+    public partial class ListEntity : UserControl, EntityControl
+    {
         private DB _db;
+
+        // EntityControl members
+        public int entityID;
+        public object value { get { return this.valuesList.Text; } }
+
+        private DBentity _entity { get { return this._db.entities[entityID]; } }
 
         #region Constructors
 
+        /// <summary>
+        /// Designer constructor
+        /// </summary>
         public ListEntity()
         {
             InitializeComponent();
         }
 
-        public ListEntity(DBentity entity, DB db)
+        /// <summary>
+        /// Primary constructor
+        /// </summary>
+        /// <param name="db">Source DB</param>
+        /// <param name="entityID">Related List entityID</param>
+        /// <param name="selectedValue">Value to be displayed for this list</param>
+        public ListEntity(DB db, int entityID, object selectedValue)
             : this()
         {
 
-            this._entity = entity;
+            this.entityID = entityID;
             this._db = db;
 
-            this.Name = entity.nom; //Permet de sélectionner ce contrôle avec son nom
-            this.nameLabel.Text = entity.nom;
-            this.valuesList.Items.Clear();
-            if(entity.parentID == 0)
-                this.valuesList.Items.AddRange(db.getEntitiesLabels(entity));
-            //TODO: il faut récupérer la valeur affichée par l'action
+            this.Name = _entity.nom; //Permet de sélectionner ce contrôle avec son nom
+            this.nameLabel.Text = _entity.nom;
+            if (_entity.parentID == 0)
+                this.valuesList.Items.AddRange(db.getEntitiesLabels(_entity));
+            this.valuesList.Text = selectedValue as String;
         }
 
         #endregion
 
+        /// <summary>
+        /// Add a parent widget
+        /// </summary>
+        /// <param name="widget">Parent ListEntity widget</param>
         public void addParent(ListEntity widget)
         {
-            //TODO: si parent affiche une valeur, l'enfant doit récupérer les valeurs correspondantes
+            String parentValue = widget.valuesList.Text;
+            if(parentValue != "")
+                this.valuesList.Items.AddRange(_db.getEntitiesLabels(_entity, parentValue));
             widget.valuesList.SelectedIndexChanged += new EventHandler(newParentValue);
         }
 

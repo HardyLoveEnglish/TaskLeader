@@ -26,37 +26,29 @@ namespace TaskLeader.GUI
         // Préparation des widgets
         private void loadWidgets()
         {
+            this.entitiesPanel.SuspendLayout();
+            this.entitiesPanel.Controls.Clear();
+
             foreach (DBentity entity in this.db.entities)
             {
+                UserControl widget = new UserControl();
                 switch (entity.type) {
                     case("List"):
-                        var widget = new ListEntity(entity, this.db); //TODO: la valeur de l'action doit être spécifiée
+                        widget = new ListEntity(this.db,entity.id,this._action.getValue(entity));
                         if (entity.parentID > 0)
-                            widget.addParent(this.entitiesPanel.Controls[this.db.entities[entity.parentID].nom] as ListEntity);
-                        this.entitiesPanel.Controls.Add(widget);
+                            ((ListEntity)widget).addParent(this.entitiesPanel.Controls[this.db.entities[entity.parentID].nom] as ListEntity);
                         break;
-                }          
+                    case("Text"):
+                        widget = new TextEntity(this.db, entity.id,this._action.getValue(entity));
+                        break;
+                    case("Date"):
+                        widget = new DateEntity(this.db, entity.id, this._action.getValue(entity));
+                        break;
+                }
+                this.entitiesPanel.Controls.Add(widget);
             }
 
-            // Contextes
-            this.contexteBox.Items.Clear(); //OK
-            contexteBox.Items.AddRange(db.getEntitiesLabels(DB.contexte)); //OK
-            contexteBox.Text = _action.Contexte;
-
-            // Sujets
-            if (contexteBox.Text != "")
-                updateSujet(); // Mise à jour de la liste des sujets
-            sujetBox.Text = _action.Sujet;
-
-            // Destinataires
-            this.destBox.Items.Clear();
-            destBox.Items.AddRange(db.getEntitiesLabels(DB.destinataire));
-            destBox.Text = _action.Destinataire;
-
-            // Statuts
-            this.statutBox.Items.Clear();
-            statutBox.Items.AddRange(db.getEntitiesLabels(DB.statut)); // On remplit la liste des statuts
-            statutBox.SelectedItem = _action.Statut;
+            this.entitiesPanel.ResumeLayout();
         }
 
         /// <summary>Constructeur de la fenêtre</summary>
@@ -79,13 +71,7 @@ namespace TaskLeader.GUI
             else
             {
                 this.Text += "Modifier une action - TaskLeader";
-
                 this.dbsBox.Enabled = false;
-
-                if (action.hasDueDate) // Attribut géré à part car pas de valeur par défaut
-                    actionDatePicker.Value = action.DueDate;
-                else
-                    noDueDate.Checked = true;
             }
 
             // Chargement des widgets
@@ -97,20 +83,6 @@ namespace TaskLeader.GUI
 
             this.linksView.Visible = (action.PJ.Count > 0);
 
-            // Affichage du descriptif de l'action
-            desField.Text = action.Texte;
-            desField.Select(desField.Text.Length, 0); // Curseur placé à la fin par défaut
-
-        }
-
-        // Mise à jour de la combobox présentant les sujets
-        private void updateSujet()
-        {
-            // On vide les sujets correspondants au contexte actuel
-            sujetBox.Items.Clear();
-
-            foreach (String item in db.getEntitiesLabels(DB.sujet, contexteBox.Text))
-                sujetBox.Items.Add(item);
         }
 
         // Sauvegarde de l'action
@@ -118,40 +90,15 @@ namespace TaskLeader.GUI
         {
             //TODO: griser le bouton Sauvegarder si rien n'a été édité
 
-            // Erreur lorsque le champ descriptif est vide
-            if (String.IsNullOrWhiteSpace(this.desField.Text))
-            {
-                this.errorLabel.Visible = true;
-                return;
-            }
-
             // Update de l'action avec les nouveaux champs
-            _action.updateDefault(contexteBox.Text, sujetBox.Text, desField.Text, destBox.Text, statutBox.Text);
-            //TODO: utiliser _action.setValue pour chaque entité
-
-            // Update de la DueDate que si c'est nécessaire
-            if (noDueDate.Checked)
-                _action.DueDate = DateTime.MinValue; // Remise à zéro de la dueDate
-            else
-                _action.DueDate = actionDatePicker.Value;
+            foreach (EntityControl control in this.entitiesPanel.Controls)
+                _action.setValue(this.db.entities[control.entityID], control.value);
 
             // On sauvegarde l'action
             _action.save();
 
             // Fermeture de la fenêtre
             this.Close();
-        }
-
-        // Demande de mise à jour des sujets quand le contexte sélectionné change
-        private void contexteBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            updateSujet();
-        }
-
-        // Mise à jour du widget date en fonction de la sélection de la checkbox
-        private void dateChosen_CheckedChanged(object sender, EventArgs e)
-        {
-            actionDatePicker.Enabled = !noDueDate.Checked;
         }
 
         /// <summary>
@@ -245,11 +192,6 @@ namespace TaskLeader.GUI
                 // Mise à jour des widgets
                 this.loadWidgets();
             }
-        }
-
-        private void desField_Enter(object sender, EventArgs e)
-        {
-            this.errorLabel.Visible = false;
         }
 
         #region Ajout de PJs

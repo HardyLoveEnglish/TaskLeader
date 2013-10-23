@@ -30,14 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             this.saveButton = new System.Windows.Forms.Button();
-            this.actionDatePicker = new System.Windows.Forms.DateTimePicker();
-            this.label4 = new System.Windows.Forms.Label();
-            this.desField = new System.Windows.Forms.TextBox();
-            this.noDueDate = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.entitiesPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.label3 = new System.Windows.Forms.Label();
-            this.errorLabel = new System.Windows.Forms.Label();
             this.flowLayoutPanel5 = new System.Windows.Forms.FlowLayoutPanel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -54,7 +48,6 @@
             this.deleteEncItem = new System.Windows.Forms.ToolStripMenuItem();
             this.biblio = new System.Windows.Forms.ImageList(this.components);
             this.tableLayoutPanel1.SuspendLayout();
-            this.entitiesPanel.SuspendLayout();
             this.flowLayoutPanel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.flowLayoutPanel3.SuspendLayout();
@@ -71,47 +64,6 @@
             this.saveButton.Text = "Sauvegarder";
             this.saveButton.UseVisualStyleBackColor = true;
             this.saveButton.Click += new System.EventHandler(this.sauveAction);
-            // 
-            // actionDatePicker
-            // 
-            this.actionDatePicker.Location = new System.Drawing.Point(75, 150);
-            this.actionDatePicker.Name = "actionDatePicker";
-            this.actionDatePicker.Size = new System.Drawing.Size(177, 20);
-            this.actionDatePicker.TabIndex = 18;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(15, 153);
-            this.label4.Margin = new System.Windows.Forms.Padding(15, 6, 3, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(54, 13);
-            this.label4.TabIndex = 17;
-            this.label4.Text = "Due date:";
-            // 
-            // desField
-            // 
-            this.entitiesPanel.SetFlowBreak(this.desField, true);
-            this.desField.Location = new System.Drawing.Point(3, 21);
-            this.desField.Multiline = true;
-            this.desField.Name = "desField";
-            this.desField.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.desField.Size = new System.Drawing.Size(312, 123);
-            this.desField.TabIndex = 16;
-            this.desField.Enter += new System.EventHandler(this.desField_Enter);
-            // 
-            // noDueDate
-            // 
-            this.noDueDate.AutoSize = true;
-            this.entitiesPanel.SetFlowBreak(this.noDueDate, true);
-            this.noDueDate.Location = new System.Drawing.Point(258, 153);
-            this.noDueDate.Margin = new System.Windows.Forms.Padding(3, 6, 3, 3);
-            this.noDueDate.Name = "noDueDate";
-            this.noDueDate.Size = new System.Drawing.Size(63, 17);
-            this.noDueDate.TabIndex = 24;
-            this.noDueDate.Text = "Aucune";
-            this.noDueDate.UseVisualStyleBackColor = true;
-            this.noDueDate.CheckedChanged += new System.EventHandler(this.dateChosen_CheckedChanged);
             // 
             // tableLayoutPanel1
             // 
@@ -132,40 +84,11 @@
             // 
             // entitiesPanel
             // 
-            this.entitiesPanel.Controls.Add(this.label3);
-            this.entitiesPanel.Controls.Add(this.errorLabel);
-            this.entitiesPanel.Controls.Add(this.desField);
-            this.entitiesPanel.Controls.Add(this.label4);
-            this.entitiesPanel.Controls.Add(this.actionDatePicker);
-            this.entitiesPanel.Controls.Add(this.noDueDate);
             this.entitiesPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.entitiesPanel.Location = new System.Drawing.Point(3, 45);
             this.entitiesPanel.Name = "entitiesPanel";
             this.entitiesPanel.Size = new System.Drawing.Size(394, 320);
             this.entitiesPanel.TabIndex = 17;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 5);
-            this.label3.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(54, 13);
-            this.label3.TabIndex = 15;
-            this.label3.Text = "Descriptif:";
-            // 
-            // errorLabel
-            // 
-            this.errorLabel.AutoSize = true;
-            this.entitiesPanel.SetFlowBreak(this.errorLabel, true);
-            this.errorLabel.ForeColor = System.Drawing.Color.Red;
-            this.errorLabel.Location = new System.Drawing.Point(63, 5);
-            this.errorLabel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
-            this.errorLabel.Name = "errorLabel";
-            this.errorLabel.Size = new System.Drawing.Size(163, 13);
-            this.errorLabel.TabIndex = 17;
-            this.errorLabel.Text = "le champ descriptif est obligatoire";
-            this.errorLabel.Visible = false;
             // 
             // flowLayoutPanel5
             // 
@@ -342,8 +265,6 @@
             this.TopMost = true;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ManipAction_FormClosed);
             this.tableLayoutPanel1.ResumeLayout(false);
-            this.entitiesPanel.ResumeLayout(false);
-            this.entitiesPanel.PerformLayout();
             this.flowLayoutPanel5.ResumeLayout(false);
             this.flowLayoutPanel5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -357,14 +278,9 @@
         #endregion
 
         private System.Windows.Forms.Button saveButton;
-        private System.Windows.Forms.DateTimePicker actionDatePicker;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox desField;
-        private System.Windows.Forms.CheckBox noDueDate;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.FlowLayoutPanel entitiesPanel;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label linksLabel;
         private System.Windows.Forms.ImageList biblio;
         private System.Windows.Forms.Button addMailBut;
@@ -376,7 +292,6 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox dbsBox;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label errorLabel;
         private System.Windows.Forms.Button addLinkBut;
         private System.Windows.Forms.ToolStripMenuItem renameEncItem;
         private System.Windows.Forms.ColumnHeader pjListViewCol;
