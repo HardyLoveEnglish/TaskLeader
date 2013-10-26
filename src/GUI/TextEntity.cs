@@ -25,10 +25,10 @@ namespace TaskLeader.GUI
             : this()
         {
             this.entityID = entityID;
-            DBentity _entity = db.entities[entityID];
+            String entityName = db.entities[entityID].nom;
 
-            this.Name = _entity.nom; //Permet de sélectionner ce contrôle avec son nom
-            this.nameLabel.Text = _entity.nom;
+            this.Name = entityName; //Permet de sélectionner ce contrôle avec son nom
+            this.nameLabel.Text = entityName;
 
             this.entityValue.Text = entityValue as String;
             this.entityValue.Select(this.entityValue.Text.Length, 0); // Curseur placé à la fin par défaut

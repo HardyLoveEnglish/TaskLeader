@@ -29,20 +29,22 @@ namespace TaskLeader.GUI
             this.entitiesPanel.SuspendLayout();
             this.entitiesPanel.Controls.Clear();
 
-            foreach (DBentity entity in this.db.entities)
+            foreach (int entityID in this.db.entities.Keys)
             {
                 UserControl widget = new UserControl();
-                switch (entity.type) {
+                switch (this.db.entities[entityID].type)
+                {
                     case("List"):
-                        widget = new ListEntity(this.db,entity.id,this._action.getValue(entity));
-                        if (entity.parentID > 0)
-                            ((ListEntity)widget).addParent(this.entitiesPanel.Controls[this.db.entities[entity.parentID].nom] as ListEntity);
+                        widget = new ListEntity(this.db, entityID, this._action.getValue(entityID));
+                        int parentID = this.db.entities[entityID].parentID;
+                        if (parentID > 0)
+                            ((ListEntity)widget).addParent(this.entitiesPanel.Controls[this.db.entities[parentID].nom] as ListEntity);
                         break;
                     case("Text"):
-                        widget = new TextEntity(this.db, entity.id,this._action.getValue(entity));
+                        widget = new TextEntity(this.db, entityID, this._action.getValue(entityID));
                         break;
                     case("Date"):
-                        widget = new DateEntity(this.db, entity.id, this._action.getValue(entity));
+                        widget = new DateEntity(this.db, entityID, this._action.getValue(entityID));
                         break;
                 }
                 this.entitiesPanel.Controls.Add(widget);

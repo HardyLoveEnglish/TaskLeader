@@ -73,8 +73,8 @@ namespace TaskLeader.BO
         /// <summary>
         /// Récupération de la valeur de 'entity' pour cette action
         /// </summary>
-        public object getValue(DBentity entity) {
-            return values[entity.id];
+        public object getValue(int entityID) {
+            return values[entityID];
         }
 
         /// <summary>
@@ -143,22 +143,22 @@ namespace TaskLeader.BO
         /// <summary>
         /// Initialise les valeurs des entités de l'action
         /// </summary>
-        /// <param name="values">DataRow de entityID => entityValue</param>
-        private void initValues(DataRow values)
+        /// <param name="values">Dictionnaire: entityID => entityValue</param>
+        private void initValues(Dictionary<int,String> values)
         {
-            foreach (DBentity entity in this.db.entities)
+            foreach (int entityID in this.db.entities.Keys)
             {
-                if (entity.type == "Date")
+                if (this.db.entities[entityID].type == "Date")
                 {
                     DateTime dateValue;
-                    DateTime.TryParse(values[entity.id] as String, out dateValue); // Si le TryParse échoue, dateValue = DateTime.MinValue
-                    this.values.Insert(entity.id, dateValue);
+                    DateTime.TryParse(values[entityID], out dateValue); // Si le TryParse échoue, dateValue = DateTime.MinValue
+                    this.values.Insert(entityID, dateValue);
                 }
                 else
                 {
-                    this.values.Insert(entity.id, values[entity.id] as String);
+                    this.values.Insert(entityID, values[entityID]);
                 }
-                this.entityHasChanged.Insert(entity.id, false);
+                this.entityHasChanged.Insert(entityID, false);
             }
             this.initialStateFrozen = true;
         }

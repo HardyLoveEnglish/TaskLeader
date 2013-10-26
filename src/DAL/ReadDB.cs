@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -224,10 +225,16 @@ namespace TaskLeader.DAL
             return (getInteger(requete) == 0);
         }
 
+        /// <summary>
+        /// Vérification de la présence d'un nouveau filtre
+        /// </summary>
+        /// <param name="title">Titre du filtre</param>
+        /// <returns>false si le titre existe déjà en base</returns>
         public bool isNvoFiltre(String title)
         {
-            //TODO:
-            return true;
+            String titre = "'" + title.Replace("'", "''") + "'";
+            String requete = "SELECT count(id) FROM Filtres WHERE titre=" + titre;
+            return (getInteger(requete) == 0);
         }
 
         // =====================================================================================
@@ -235,24 +242,19 @@ namespace TaskLeader.DAL
         /// <summary>
         /// Récupération de liste des entités
         /// </summary>
-        /// <returns>List of DBentity</returns>
-        public List<DBentity> getEntities()
+        private void getEntities()
         {
-            var data = new List<DBentity>();
-
             DataRowCollection results = getTable("SELECT id,label,contentType,parentID FROM Entities;").Rows;
             foreach (DataRow row in results)
             {
                 int id = (int)row["id"];
-                data.Insert(id,new DBentity {
+                this.entities.Add(id,new DBentity {
                     id = id,
                     nom = row["label"] as String,
                     type = row["contentType"] as String,
                     parentID = (int)row["parentID"]
                 });
             }
-
-            return data;
         }
 
         /// <summary>
@@ -265,84 +267,58 @@ namespace TaskLeader.DAL
             string request;
 
             if (entity.parentID == 0) // No parent entity
-                request = "SELECT label FROM Entities_values WHERE entityID=" + entity.id + " ORDER BY label ASC";
+                request = "SELECT label FROM Entities_values WHERE entityID=" + entity.id + " ORDER BY label ASC;";
             else
                 request = "SELECT Child.label FROM Entities_values Child, Entities_values Parent " +
                     "WHERE Child.entityId=" + entity.id +
                     " AND Child.parentID = Parent.id AND Parent.label =" + parent +
-                    " ORDER BY Child.label ASC";
+                    " ORDER BY Child.label ASC;";
 
             return getList(request);
         }
 
+        /// <summary>
+        /// Récupération de la liste des titres de filtres
+        /// </summary>
         public object[] getFiltersLabels()
         {
-            string request = "";
-            //TODO
+            string request = "SELECT titre FROM Filtres ORDER BY titre ASC;";
             return getList(request);
         }
 
         /// <summary>
         /// Récupération des valeurs par défaut pour tous les entités
         /// </summary>
-        /// <returns>Une DataRow </returns>
-        public DataRow getDefault()
+        /// <returns>Dictionnaire: entityID => valeur par défaut</returns>
+        public Dictionary<int,String> getDefault()
         {
-            //TODO: non il faut faire une jointure
-            //TODO: il faudrait retourner une DataRow avec toutes les valeurs plutôt (évite les lectures unitaires)
+            Dictionary<int, String> data = new Dictionary<int, string>();
 
-            Object[] resultat = getList("SELECT v.label FROM Entities_values v, Entities e WHERE e.id=" + entity.id + " AND v.id=e.defaultValue;");
+            Object[] resultat = getList("SELECT e.id,f.label FROM Entities e LEFT JOIN Entities_values f ON e.defaultValue = f.id;");
+            for (int i = 0; i < resultat.Length; i++)
+            {
+                data.Add(i + 1, resultat[i] as String);
+            }
 
-            if (resultat.Length == 1)
-                return new DataRow();
-            else
-                return new DataRow();
+            return data;
         }
 
         // Récupère un filtre en fonction de son titre
         public List<Criterium> getFilterData(String name)
         {
             var data = new List<Criterium>();
-
-            // On récupère d'abord les checkbox all
             String titre = "'" + name.Replace("'", "''") + "'";
-            String requete = "SELECT AllCtxt, AllSuj, AllDest, AllStat FROM Filtres WHERE Titre=" + titre;
-            DataRowCollection results = getTable(requete).Rows;
 
-            if (results.Count == 0)
-                return null;
+            char[] separator = new char[]{'#'};
+            String requete =
+                "SELECT c.entityID AS entityID,GROUP_CONCAT(c.entityValue,'" + separator + "') AS values" +
+                " FROM Filtres_cont c, Filtres f" +
+                " WHERE c.filtreID = f.id AND f.titre=" + titre +
+                " GROUP BY c.entityID";
+            DataTable resultat = this.getTable(requete);
 
-            DataRow resultat = results[0];
-
-            if (!(bool)resultat["AllCtxt"])
-                data.Add(new Criterium(DB.contexte));
-
-            if (!(bool)resultat["AllSuj"])
-                data.Add(new Criterium(DB.sujet));
-
-            if (!(bool)resultat["AllDest"])
-                data.Add(new Criterium(DB.destinataire));
-
-            if (!(bool)resultat["AllStat"])
-                data.Add(new Criterium(DB.statut));
-
-            object[] liste;
-
-            // On récupère les sélections si nécessaire
-            foreach (Criterium critere in data)
-            {
-                // Récupération du nom de la table correspondante
-                String table = critere.entity.mainTable;
-                // Création de la requête
-                requete = "SELECT TP.Titre FROM " + table + " TP, Filtres_cont TF, Filtres F ";
-                requete += "WHERE F.Titre =" + titre + " AND TF.FiltreID=F.rowid AND TF.FiltreType='" + table + "' AND TF.SelectedID=TP.rowid";
-                // Récupération de la liste
-                liste = getList(requete);
-
-                // On met à jour le critère du filtre correspondant
-                foreach (String item in liste)
-                    critere.valuesSelected.Add(item);
-            }
+            foreach (DataRow row in resultat.Rows)
+                data.Add(new Criterium((int)row["entityID"], ((String)row["values"]).Split(separator)));
 
             return data;
         }
@@ -372,11 +348,11 @@ namespace TaskLeader.DAL
             String requete = "SELECT a.id,";
 
             // Définition des colonnes suivantes
-            foreach (DBentity entity in this.entities)
-                if (entity.type == "List")
-                    requete += "MAX(CASE WHEN a.entityID = " + entity.id + " THEN v.label ELSE NULL END) AS " + entity.id + ",";
+            foreach (int entityID in this.entities.Keys)
+                if (this.entities[entityID].type == "List")
+                    requete += "MAX(CASE WHEN a.entityID = " + entityID + " THEN v.label ELSE NULL END) AS " + entityID + ",";
                 else
-                    requete += "MAX(CASE WHEN a.entityID = " + entity.id + " THEN a.entityValue ELSE NULL END) AS " + entity.id + ",";
+                    requete += "MAX(CASE WHEN a.entityID = " + entityID + " THEN a.entityValue ELSE NULL END) AS " + entityID + ",";
             requete = requete.Substring(0, requete.Length - 1); //Suppression de la dernière virgule
 
             requete += " FROM Actions a LEFT JOIN Entities_values v ON v.id = a.entityValue ";
@@ -425,12 +401,15 @@ namespace TaskLeader.DAL
         }
         
         /// <summary>
-        /// Renvoie une DataRow de l'action 'ID'
+        /// Renvoie un dico entityID => entityValue de l'action 'ID'
         /// </summary>
-        public DataRow getAction(String ID)
+        public Dictionary<int,String> getAction(String ID)
         {
             DataTable result = getTable(getActionsRequest("WHERE a.id=" + ID));
-            return result.Rows[0];
+
+            return result.Columns
+                .Cast<DataColumn>()
+                .ToDictionary(col => Convert.ToInt32(col.ColumnName), col => result.Rows[0].Field<String>(col.ColumnName));
         }
 
         /// <summary>Récupération des liens attachés à une action</summary>
@@ -474,8 +453,8 @@ namespace TaskLeader.DAL
             String requete = "WHERE ";
 
             // Recherche sur toutes les colonnes
-            foreach(DBentity entity in this.entities)
-                requete += entity.id + " LIKE '%" + words + "%' OR ";
+            foreach(int entityID in this.entities.Keys)
+                requete += entityID + " LIKE '%" + words + "%' OR ";
 
             // Recherche dans les titres de mail
             requete += "id IN("; 

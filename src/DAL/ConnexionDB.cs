@@ -35,15 +35,18 @@ namespace TaskLeader.DAL
     public partial class DB
     {
         // Caractéristiques de la DB
-        private String path = "";
+        public String path = "";
         public String name = "";
 
         /// <summary>
-        /// Array contenan toutes les DBentity de la base
+        /// Dictionnaire entityID => DBentity des entités de cette base
         /// </summary>
-        private List<DBentity> _entities;
-        public DBentity[] listEntities { get { return _entities.Where(entity => entity.type == "List").ToArray(); } }
-        public DBentity[] entities { get { return _entities.ToArray(); } }
+        public Dictionary<int,DBentity> entities;
+        /// <summary>
+        /// Liste des DBentity de type 'List'.
+        /// /!\ L'index dans la liste n'est pas l'id de l'entité
+        /// </summary>
+        public DBentity[] listEntities;
 
         /// <summary>
         /// Retourne le nom de la base
@@ -54,7 +57,11 @@ namespace TaskLeader.DAL
         {
             this.path = System.IO.Path.GetFullPath(chemin);
             this.name = nom;
-            this._entities = this.getEntities();
+
+            this.getEntities();
+            this.listEntities = entities.Where(kvp => kvp.Value.type == "List")
+                    .ToDictionary(kvp => kvp.Key,kvp => kvp.Value).Values
+                    .ToList<DBentity>().ToArray();
 
             // ConnectionString definition
             _builder.DataSource = this.path;

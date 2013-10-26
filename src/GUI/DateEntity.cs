@@ -32,10 +32,10 @@ namespace TaskLeader.GUI
             :this()
         {
             this.entityID = entityID;
-            DBentity _entity = db.entities[entityID];
+            String entityName = db.entities[entityID].nom;
 
-            this.Name = _entity.nom; //Permet de sélectionner ce contrôle avec son nom
-            this.nameLabel.Text = _entity.nom;
+            this.Name = entityName; //Permet de sélectionner ce contrôle avec son nom
+            this.nameLabel.Text = entityName;
 
             DateTime value = (DateTime)entityValue;
             if (value.Date != DateTime.MinValue.Date)

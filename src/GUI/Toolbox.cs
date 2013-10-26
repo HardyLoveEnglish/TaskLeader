@@ -184,7 +184,7 @@ namespace TaskLeader.GUI
             {
                 widget = new CritereSelect(entity);
                 if (entity.parentID > 0)
-                    widget.addParent(this.selectPanel.Controls[db.listEntities[entity.parentID].nom] as CritereSelect);
+                    widget.addParent(this.selectPanel.Controls[db.entities[entity.parentID].nom] as CritereSelect);
                 this.selectPanel.Controls.Add(widget);
             }
             this.selectPanel.ResumeLayout();

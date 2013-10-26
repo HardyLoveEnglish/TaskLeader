@@ -10,14 +10,14 @@ namespace TaskLeader.BO
 {
     public class Criterium : IEquatable<Criterium>
     {
-        private DBentity _champ;
+        private int _entityID;
         public DBentity entity { get { return _champ; } }
 
         public List<String> valuesSelected = new List<String>();
 
-        public Criterium(DBentity entity, IList criteres = null)
+        public Criterium(int entityID, IList criteres = null)
         {
-            this._champ = entity;
+            this._entityID = entityID;
 
             if (criteres as IEnumerable<String> != null)
                 this.valuesSelected.AddRange(criteres as IEnumerable<String>);
