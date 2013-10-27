@@ -45,6 +45,8 @@
             // 
             // flowLayoutPanel1
             // 
+            this.flowLayoutPanel1.Controls.Add(this.filterCombo);
+            this.flowLayoutPanel1.Controls.Add(this.label5);
             this.flowLayoutPanel1.Controls.Add(this.ctxtListBox);
             this.flowLayoutPanel1.Controls.Add(this.label1);
             this.flowLayoutPanel1.Controls.Add(this.sujetListBox);
@@ -53,8 +55,6 @@
             this.flowLayoutPanel1.Controls.Add(this.label3);
             this.flowLayoutPanel1.Controls.Add(this.statutListBox);
             this.flowLayoutPanel1.Controls.Add(this.label4);
-            this.flowLayoutPanel1.Controls.Add(this.filterCombo);
-            this.flowLayoutPanel1.Controls.Add(this.label5);
             this.flowLayoutPanel1.Controls.Add(this.saveBut);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
@@ -67,7 +67,7 @@
             // 
             this.ctxtListBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ctxtListBox.FormattingEnabled = true;
-            this.ctxtListBox.Location = new System.Drawing.Point(80, 12);
+            this.ctxtListBox.Location = new System.Drawing.Point(80, 39);
             this.ctxtListBox.Margin = new System.Windows.Forms.Padding(3, 12, 10, 3);
             this.ctxtListBox.Name = "ctxtListBox";
             this.ctxtListBox.Size = new System.Drawing.Size(180, 21);
@@ -78,7 +78,7 @@
             // 
             this.label1.AutoSize = true;
             this.flowLayoutPanel1.SetFlowBreak(this.label1, true);
-            this.label1.Location = new System.Drawing.Point(22, 15);
+            this.label1.Location = new System.Drawing.Point(22, 42);
             this.label1.Margin = new System.Windows.Forms.Padding(3, 15, 3, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(52, 13);
@@ -89,7 +89,7 @@
             // 
             this.sujetListBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.sujetListBox.FormattingEnabled = true;
-            this.sujetListBox.Location = new System.Drawing.Point(80, 39);
+            this.sujetListBox.Location = new System.Drawing.Point(80, 66);
             this.sujetListBox.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
             this.sujetListBox.Name = "sujetListBox";
             this.sujetListBox.Size = new System.Drawing.Size(180, 21);
@@ -99,7 +99,7 @@
             // 
             this.label2.AutoSize = true;
             this.flowLayoutPanel1.SetFlowBreak(this.label2, true);
-            this.label2.Location = new System.Drawing.Point(40, 43);
+            this.label2.Location = new System.Drawing.Point(40, 70);
             this.label2.Margin = new System.Windows.Forms.Padding(3, 7, 3, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(34, 13);
@@ -110,7 +110,7 @@
             // 
             this.destListBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.destListBox.FormattingEnabled = true;
-            this.destListBox.Location = new System.Drawing.Point(80, 66);
+            this.destListBox.Location = new System.Drawing.Point(80, 93);
             this.destListBox.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
             this.destListBox.Name = "destListBox";
             this.destListBox.Size = new System.Drawing.Size(180, 21);
@@ -120,7 +120,7 @@
             // 
             this.label3.AutoSize = true;
             this.flowLayoutPanel1.SetFlowBreak(this.label3, true);
-            this.label3.Location = new System.Drawing.Point(8, 70);
+            this.label3.Location = new System.Drawing.Point(8, 97);
             this.label3.Margin = new System.Windows.Forms.Padding(3, 7, 3, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(66, 13);
@@ -131,7 +131,7 @@
             // 
             this.statutListBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.statutListBox.FormattingEnabled = true;
-            this.statutListBox.Location = new System.Drawing.Point(80, 93);
+            this.statutListBox.Location = new System.Drawing.Point(80, 120);
             this.statutListBox.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
             this.statutListBox.Name = "statutListBox";
             this.statutListBox.Size = new System.Drawing.Size(180, 21);
@@ -140,7 +140,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(36, 97);
+            this.label4.Location = new System.Drawing.Point(36, 124);
             this.label4.Margin = new System.Windows.Forms.Padding(3, 7, 3, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(38, 13);
@@ -151,7 +151,7 @@
             // 
             this.filterCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.filterCombo.FormattingEnabled = true;
-            this.filterCombo.Location = new System.Drawing.Point(80, 120);
+            this.filterCombo.Location = new System.Drawing.Point(80, 3);
             this.filterCombo.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
             this.filterCombo.Name = "filterCombo";
             this.filterCombo.Size = new System.Drawing.Size(180, 21);
@@ -160,7 +160,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(42, 124);
+            this.label5.Location = new System.Drawing.Point(42, 7);
             this.label5.Margin = new System.Windows.Forms.Padding(3, 7, 3, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(32, 13);

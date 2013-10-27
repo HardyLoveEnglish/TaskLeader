@@ -84,6 +84,7 @@
             // 
             // entitiesPanel
             // 
+            this.entitiesPanel.AutoScroll = true;
             this.entitiesPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.entitiesPanel.Location = new System.Drawing.Point(3, 45);
             this.entitiesPanel.Name = "entitiesPanel";

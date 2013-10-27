@@ -93,7 +93,7 @@ namespace TaskLeader.GUI
             //TODO: griser le bouton Sauvegarder si rien n'a été édité
 
             // Update de l'action avec les nouveaux champs
-            foreach (EntityControl control in this.entitiesPanel.Controls)
+            foreach (IValueRetrievable control in this.entitiesPanel.Controls)
                 _action.setValue(this.db.entities[control.entityID], control.value);
 
             // On sauvegarde l'action

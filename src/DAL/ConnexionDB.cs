@@ -5,7 +5,7 @@ using System.Data.SQLite;
 
 namespace TaskLeader.DAL
 {
-    // Structure listant les différentes informations liées à une entité de la base (Contexte, Destinataire ...)
+    // Structure listant les différentes informations liées à une entité de la base
     public class DBentity
     {
         /// <summary>
@@ -29,8 +29,10 @@ namespace TaskLeader.DAL
         public int parentID { get; set; }
     }
 
-    public delegate void NewValueEventHandler(String parentValue);
-    public delegate void ActionEditedEventHandler(String dbName, String actionID);
+    public class EditedActionEventArgs {
+        public String actionID { get; set; }
+    }
+    public delegate void ActionEditedEventHandler(DB sender, EditedActionEventArgs args);
 
     public partial class DB
     {
@@ -84,18 +86,17 @@ namespace TaskLeader.DAL
 
         // Gestion des évènements NewValue - http://msdn.microsoft.com/en-us/library/z4ka55h8(v=vs.80).aspx
         private Dictionary<String, Delegate> NewValue = new Dictionary<String, Delegate>();
-        public void subscribe_NewValue(String entityName, NewValueEventHandler value) { this.NewValue[entityName] = (NewValueEventHandler)this.NewValue[entityName] + value; }
-        public void unsubscribe_NewValue(String entityName, NewValueEventHandler value) { this.NewValue[entityName] = (NewValueEventHandler)this.NewValue[entityName] - value; }
+        public void subscribe_NewValue(String entityName, EventHandler handler) { this.NewValue[entityName] = (EventHandler)this.NewValue[entityName] + handler; }
+        public void unsubscribe_NewValue(String entityName, EventHandler handler) { this.NewValue[entityName] = (EventHandler)this.NewValue[entityName] - handler; }
         /// <summary>
         /// Génération de l'évènement NewValue
         /// </summary>
-        /// <param name="entity">DBentity concernée</param>
-        /// <param name="parentValue">La valeur courante de la DBentity parente</param>
-        private void OnNewValue(String entityName, String parentValue = null)
+        /// <param name="entity">Nom de la DBentity concernée</param>
+        private void OnNewValue(String entityName)
         {
-            NewValueEventHandler handler;
-            if (null != (handler = (NewValueEventHandler)this.NewValue[entityName]))
-                handler(parentValue);
+            EventHandler handler;
+            if (null != (handler = (EventHandler)this.NewValue[entityName]))
+                handler(this,new EventArgs());
         }
 
         // Gestion de l'évènement ActionEdited
@@ -107,7 +108,7 @@ namespace TaskLeader.DAL
         private void OnActionEdited(String actionID)
         {
             if (this.ActionEdited != null)
-                this.ActionEdited(this.name, actionID); //Invoque le délégué
+                this.ActionEdited(this, new EditedActionEventArgs() { actionID = actionID }); //Invoque le délégué
         }
 
         #endregion

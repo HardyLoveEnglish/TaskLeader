@@ -111,10 +111,10 @@ namespace TaskLeader.GUI
         /// <summary>
         /// Mise à jour du contenu de la table quand une action est créée/modifiée
         /// </summary>
-        private void actionEdited(String db, String id)
+        private void actionEdited(DB db, EditedActionEventArgs args)
         {
             // Mise à jour des DataTables liées à la base de l'action
-            foreach (Filtre filtre in this.getFiltersFromDB(db))
+            foreach (Filtre filtre in this.getFiltersFromDB(db.name))
                 this.data[filtre] = filtre.getActions().Copy();
 
             // Rafraîchissement de la mergeTable
@@ -126,7 +126,7 @@ namespace TaskLeader.GUI
 
             // Sélection de la bonne ligne
             this.grilleData.Rows.Cast<DataGridViewRow>()
-                .Where(r => r.Cells["Ref"].Value.ToString().Equals(db + Environment.NewLine + "#" + id))
+                .Where(r => r.Cells["Ref"].Value.ToString().Equals(db + Environment.NewLine + "#" + args.actionID))
                 .ToList().ForEach(r => r.Selected = true);
         }
 

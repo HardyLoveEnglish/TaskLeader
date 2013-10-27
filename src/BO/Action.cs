@@ -60,15 +60,15 @@ namespace TaskLeader.BO
         #region Gestion des valeurs des entités
 
         /// <summary>
-        /// Liste des valeurs des différentes entités: entityID => valeur
+        /// Dictionnaire des valeurs des différentes entités: entityID => valeur
         /// Pas de typage car contenu de type String ou DateTime
         /// </summary>
-        private List<object> values = new List<object>();
+        private Dictionary<int, object> values = new Dictionary<int, object>();
 
         /// <summary>
-        /// Liste des changements des valeurs des entités: entityID => bool
+        /// Dictionnaire des changements des valeurs des entités: entityID => bool
         /// </summary>
-        private List<bool> entityHasChanged = new List<bool>();
+        private Dictionary<int, bool> entityHasChanged = new Dictionary<int, bool>();
 
         /// <summary>
         /// Récupération de la valeur de 'entity' pour cette action
@@ -152,13 +152,13 @@ namespace TaskLeader.BO
                 {
                     DateTime dateValue;
                     DateTime.TryParse(values[entityID], out dateValue); // Si le TryParse échoue, dateValue = DateTime.MinValue
-                    this.values.Insert(entityID, dateValue);
+                    this.values.Add(entityID, dateValue);
                 }
                 else
                 {
-                    this.values.Insert(entityID, values[entityID]);
+                    this.values.Add(entityID, values[entityID]);
                 }
-                this.entityHasChanged.Insert(entityID, false);
+                this.entityHasChanged.Add(entityID, false);
             }
             this.initialStateFrozen = true;
         }

@@ -10,10 +10,11 @@ using TaskLeader.DAL;
 
 namespace TaskLeader.GUI
 {
-    public partial class DateEntity : UserControl, EntityControl
+    public partial class DateEntity : UserControl, IValueRetrievable
     {
         // EntityControl members
-        public int entityID;
+        private int _entityID;
+        public int entityID { get { return _entityID; } }
         public object value {
             get {
                 if (noDate.Checked)
@@ -31,7 +32,7 @@ namespace TaskLeader.GUI
         public DateEntity(DB db, int entityID, object entityValue)
             :this()
         {
-            this.entityID = entityID;
+            this._entityID = entityID;
             String entityName = db.entities[entityID].nom;
 
             this.Name = entityName; //Permet de sélectionner ce contrôle avec son nom

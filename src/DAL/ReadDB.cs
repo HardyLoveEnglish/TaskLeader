@@ -260,21 +260,26 @@ namespace TaskLeader.DAL
         /// <summary>
         /// Récupération de la liste des valeurs d'une entité
         /// </summary>
-        /// <returns>Object array des valeurs</returns>
-        public object[] getEntitiesLabels(DBentity entity, string parentValue = "")
+        /// <param name="entity">DBentity à récupérer</param>
+        /// <param name="parentValueID">ID de la valeur parente (type String)</param>
+        /// <returns>List<EntityValue> des valeurs</returns>
+        public List<EntityValue> getEntitiesValues(DBentity entity, int parentValueID = 0)
         {
-            String parent = "'" + parentValue.Replace("'", "''") + "'";
+            List<EntityValue> result = new List<EntityValue>();
             string request;
 
             if (entity.parentID == 0) // No parent entity
-                request = "SELECT label FROM Entities_values WHERE entityID=" + entity.id + " ORDER BY label ASC;";
+                request = "SELECT id,label FROM Entities_values WHERE entityID=" + entity.id + " ORDER BY label ASC;";
             else
-                request = "SELECT Child.label FROM Entities_values Child, Entities_values Parent " +
-                    "WHERE Child.entityId=" + entity.id +
-                    " AND Child.parentID = Parent.id AND Parent.label =" + parent +
-                    " ORDER BY Child.label ASC;";
+                request = "SELECT id,label FROM Entities_values" +
+                    " WHERE entityId=" + entity.id + " AND parentID = " + parentValueID.ToString() +
+                    " ORDER BY label ASC;";
+            DataTable resultats = getTable(request);
 
-            return getList(request);
+            foreach (DataRow row in resultats.Rows)
+                result.Add(new EntityValue() { id = (int)row["id"], value = (String)row["label"] });
+
+            return result;
         }
 
         /// <summary>
@@ -375,7 +380,7 @@ namespace TaskLeader.DAL
                 foreach (Criterium critere in criteria) // On boucle sur tous les critères du filtre
                 {
                     // On récupère le nom de la colonne correspondant au critère (c'est l'entityID !)
-                    nomColonne = critere.entity.id.ToString();
+                    nomColonne = critere.entityID.ToString();
 
                     if (critere.valuesSelected.Count > 0) // Requête SQL si au moins un élément a été sélectionné
                     {

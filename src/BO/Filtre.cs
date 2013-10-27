@@ -10,17 +10,15 @@ namespace TaskLeader.BO
 {
     public class Criterium : IEquatable<Criterium>
     {
-        private int _entityID;
-        public DBentity entity { get { return _champ; } }
-
+        public int entityID;
         public List<String> valuesSelected = new List<String>();
 
-        public Criterium(int entityID, IList criteres = null)
+        public Criterium(int entityID, List<EntityValue> criteres)
         {
-            this._entityID = entityID;
-
-            if (criteres as IEnumerable<String> != null)
-                this.valuesSelected.AddRange(criteres as IEnumerable<String>);
+            this.entityID = entityID;
+            this.valuesSelected = criteres;
+            //if (criteres as IEnumerable<String> != null)
+            //    this.valuesSelected.AddRange(criteres as IEnumerable<String>);
         }
 
         public override String ToString()
@@ -39,7 +37,7 @@ namespace TaskLeader.BO
             if (compCriter == null)
                 return false;
 
-            return ((this._champ.nom == compCriter._champ.nom) && this.valuesSelected.SequenceEqual(compCriter.valuesSelected));
+            return ((this.entityID == compCriter.entityID) && this.valuesSelected.SequenceEqual(compCriter.valuesSelected));
         }
 
         public override bool Equals(Object obj)
@@ -153,7 +151,7 @@ namespace TaskLeader.BO
         public Dictionary<String, String> getDescription()
         {
             Dictionary<String, String> description = new Dictionary<string, string>();
-            Dictionary<DBentity, Criterium> criteriaList = criteria.ToDictionary(c => c.entity, c => c);
+            Dictionary<DBentity, Criterium> criteriaList = criteria.ToDictionary(c => this.db.entities[c.entityID], c => c);
 
             foreach (DBentity entity in this.db.listEntities)
                 if (criteriaList.ContainsKey(entity))

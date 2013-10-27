@@ -25,11 +25,11 @@ namespace TaskLeader.GUI
         {        
             //Remplissage des combos
             ctxtListBox.Items.Add(empty);
-            ctxtListBox.Items.AddRange(db.getEntitiesLabels(DB.contexte));
+            ctxtListBox.Items.AddRange(db.getEntitiesValues(DB.contexte));
             destListBox.Items.Add(empty);
-            destListBox.Items.AddRange(db.getEntitiesLabels(DB.destinataire));
+            destListBox.Items.AddRange(db.getEntitiesValues(DB.destinataire));
             statutListBox.Items.Add(empty);
-            statutListBox.Items.AddRange(db.getEntitiesLabels(DB.statut));
+            statutListBox.Items.AddRange(db.getEntitiesValues(DB.statut));
             filterCombo.Items.Add(empty);
             filterCombo.Items.AddRange(db.getFiltersLabels());
 
@@ -64,7 +64,7 @@ namespace TaskLeader.GUI
             if (ctxtListBox.SelectedIndex > 0) // Uniquement si contexte différent de "Aucun"
             {
                 // Remplissage de la liste
-                sujetListBox.Items.AddRange(db.getEntitiesLabels(DB.sujet,ctxtListBox.Text));
+                sujetListBox.Items.AddRange(db.getEntitiesValues(DB.sujet,ctxtListBox.Text));
 
                 // Sélection du sujet par défaut
                 sujetListBox.Text = db.getDefault(DB.sujet);

@@ -4,10 +4,12 @@ using TaskLeader.DAL;
 
 namespace TaskLeader.GUI
 {
-    public partial class TextEntity : UserControl, EntityControl
+    public partial class TextEntity : UserControl, IValueRetrievable
     {
+        private int _entityID;
+
         // EntityControl members
-        public int entityID;
+        public int entityID { get { return _entityID; } }
         public object value { get { return this.entityValue.Text; } }
 
         public TextEntity()
@@ -24,7 +26,7 @@ namespace TaskLeader.GUI
         public TextEntity(DB db, int entityID, object entityValue)
             : this()
         {
-            this.entityID = entityID;
+            this._entityID = entityID;
             String entityName = db.entities[entityID].nom;
 
             this.Name = entityName; //Permet de sélectionner ce contrôle avec son nom

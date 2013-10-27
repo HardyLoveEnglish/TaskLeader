@@ -4,13 +4,13 @@ using TaskLeader.DAL;
 
 namespace TaskLeader.GUI
 {
-    public interface EntityControl
+    public interface IValueRetrievable
     {
-        int entityID;
-        object value;
+        int entityID {get;}
+        object value {get;}
     }
 
-    public partial class ListEntity : UserControl, EntityControl
+    public partial class ListEntity : UserControl, IValueRetrievable
     {
         private DB _db;
 
@@ -46,7 +46,7 @@ namespace TaskLeader.GUI
             this.Name = _entity.nom; //Permet de sélectionner ce contrôle avec son nom
             this.nameLabel.Text = _entity.nom;
             if (_entity.parentID == 0)
-                this.valuesList.Items.AddRange(db.getEntitiesLabels(_entity));
+                this.valuesList.Items.AddRange(db.getEntitiesValues(_entity).ToArray());
             this.valuesList.Text = selectedValue as String;
         }
 
@@ -58,9 +58,9 @@ namespace TaskLeader.GUI
         /// <param name="widget">Parent ListEntity widget</param>
         public void addParent(ListEntity widget)
         {
-            String parentValue = widget.valuesList.Text;
+            String parentValue = widget.value;
             if(parentValue != "")
-                this.valuesList.Items.AddRange(_db.getEntitiesLabels(_entity, parentValue));
+                this.valuesList.Items.AddRange(_db.getEntitiesValues(_entity, parentValue));
             widget.valuesList.SelectedIndexChanged += new EventHandler(newParentValue);
         }
 
@@ -68,7 +68,7 @@ namespace TaskLeader.GUI
         {
             String parentValue = ((ComboBox)sender).Text;
             this.valuesList.Items.Clear();
-            this.valuesList.Items.AddRange(_db.getEntitiesLabels(_entity,parentValue));
+            this.valuesList.Items.AddRange(_db.getEntitiesValues(_entity,parentValue));
         }
 
     }
