@@ -53,7 +53,7 @@
             this.valuesList.Name = "valuesList";
             this.valuesList.Size = new System.Drawing.Size(240, 21);
             this.valuesList.TabIndex = 13;
-            this.valuesList.SelectedIndexChanged += new System.EventHandler(this.valuesList_SelectedIndexChanged);
+            this.valuesList.TextUpdate += new System.EventHandler(this.valuesList_TextUpdate);
             // 
             // flowLayoutPanel1
             // 

@@ -206,26 +206,6 @@ namespace TaskLeader.DAL
         // =====================================================================================
 
         /// <summary>
-        /// Vérification de la présence d'une nouvelle valeur d'une entité de type List
-        /// </summary>
-        /// <returns>true si 'title' est une nouvelle valeur de 'entity'</returns>
-        public bool isNvo(DBentity entity, String title, String parentValue = "")
-        {
-            String titre = "'" + title.Replace("'", "''") + "'";
-            String parent = "'" + parentValue.Replace("'", "''") + "'";
-            String requete;
-
-            if (entity.parentID == 0) // No parent entity
-                requete = "SELECT count(id) FROM Entities_values WHERE label=" + titre + " AND entityID=" + entity.id + ";";
-            else
-                requete = "SELECT count(Child.id) FROM Entities_values Child, Entities_values Parent " +
-                "WHERE Child.entityID = " + entity.id + " AND Child.label=" + titre +
-                " AND Parent.label =" + parent + " AND Child.parentID = Parent.id;";
-
-            return (getInteger(requete) == 0);
-        }
-
-        /// <summary>
         /// Vérification de la présence d'un nouveau filtre
         /// </summary>
         /// <param name="title">Titre du filtre</param>
@@ -262,22 +242,25 @@ namespace TaskLeader.DAL
         /// </summary>
         /// <param name="entity">DBentity à récupérer</param>
         /// <param name="parentValueID">ID de la valeur parente (type String)</param>
-        /// <returns>List<EntityValue> des valeurs</returns>
-        public List<EntityValue> getEntitiesValues(DBentity entity, int parentValueID = 0)
+        /// <returns>List "EntityValue" des valeurs</returns>
+        public List<EntityValue> getEntitiesValues(int entityID, int parentValueID = 0)
         {
             List<EntityValue> result = new List<EntityValue>();
             string request;
 
-            if (entity.parentID == 0) // No parent entity
-                request = "SELECT id,label FROM Entities_values WHERE entityID=" + entity.id + " ORDER BY label ASC;";
+            if (this.entities[entityID].parentID == 0) // No parent entity
+                request = "SELECT id,label FROM Entities_values WHERE entityID=" + entityID + " ORDER BY label ASC;";
             else
                 request = "SELECT id,label FROM Entities_values" +
-                    " WHERE entityId=" + entity.id + " AND parentID = " + parentValueID.ToString() +
+                    " WHERE entityId=" + entityID + " AND parentID = " + parentValueID.ToString() +
                     " ORDER BY label ASC;";
             DataTable resultats = getTable(request);
 
             foreach (DataRow row in resultats.Rows)
-                result.Add(new EntityValue() { id = (int)row["id"], value = (String)row["label"] });
+                result.Add(new EntityValue() {
+                    id = (int)row["id"],
+                    value = (String)row["label"]
+                });
 
             return result;
         }
@@ -294,12 +277,12 @@ namespace TaskLeader.DAL
         /// <summary>
         /// Récupération des valeurs par défaut pour tous les entités
         /// </summary>
-        /// <returns>Dictionnaire: entityID => valeur par défaut</returns>
-        public Dictionary<int,String> getDefault()
+        /// <returns>Dictionnaire: entityID => EntityValue par défaut</returns>
+        public Dictionary<int,EntityValue> getDefault()
         {
-            Dictionary<int, String> data = new Dictionary<int, string>();
+            Dictionary<int, EntityValue> data = new Dictionary<int, EntityValue>();
 
-            Object[] resultat = getList("SELECT e.id,f.label FROM Entities e LEFT JOIN Entities_values f ON e.defaultValue = f.id;");
+            Object[] resultat = getList("SELECT e.id,e.defaultValue,f.label FROM Entities e LEFT JOIN Entities_values f ON e.defaultValue = f.id;");
             for (int i = 0; i < resultat.Length; i++)
             {
                 data.Add(i + 1, resultat[i] as String);
@@ -309,6 +292,7 @@ namespace TaskLeader.DAL
         }
 
         // Récupère un filtre en fonction de son titre
+        //TODO: plus paramètre un filtreID
         public List<Criterium> getFilterData(String name)
         {
             var data = new List<Criterium>();
@@ -323,7 +307,10 @@ namespace TaskLeader.DAL
             DataTable resultat = this.getTable(requete);
 
             foreach (DataRow row in resultat.Rows)
-                data.Add(new Criterium((int)row["entityID"], ((String)row["values"]).Split(separator)));
+                data.Add(new Criterium() {
+                    entityID = (int)row["entityID"],
+                    valuesSelected = ((String)row["values"]).Split(separator)
+                });
 
             return data;
         }

@@ -35,7 +35,7 @@ namespace TaskLeader.GUI
                 switch (this.db.entities[entityID].type)
                 {
                     case("List"):
-                        widget = new ListEntity(this.db, entityID, this._action.getValue(entityID));
+                        widget = new ListEntity(_action.dbName, entityID, this._action.getValue(entityID));
                         int parentID = this.db.entities[entityID].parentID;
                         if (parentID > 0)
                             ((ListEntity)widget).addParent(this.entitiesPanel.Controls[this.db.entities[parentID].nom] as ListEntity);
@@ -94,7 +94,7 @@ namespace TaskLeader.GUI
 
             // Update de l'action avec les nouveaux champs
             foreach (IValueRetrievable control in this.entitiesPanel.Controls)
-                _action.setValue(this.db.entities[control.entityID], control.value);
+                _action.setValue(control.entityID, control.value);
 
             // On sauvegarde l'action
             _action.save();

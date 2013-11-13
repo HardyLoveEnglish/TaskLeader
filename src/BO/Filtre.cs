@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
@@ -10,20 +9,12 @@ namespace TaskLeader.BO
 {
     public class Criterium : IEquatable<Criterium>
     {
-        public int entityID;
-        public List<String> valuesSelected = new List<String>();
-
-        public Criterium(int entityID, List<EntityValue> criteres)
-        {
-            this.entityID = entityID;
-            this.valuesSelected = criteres;
-            //if (criteres as IEnumerable<String> != null)
-            //    this.valuesSelected.AddRange(criteres as IEnumerable<String>);
-        }
+        public int entityID { get; set; }
+        public List<EntityValue> valuesSelected { get; set; }
 
         public override String ToString()
         {
-            return String.Join(" + ", this.valuesSelected);
+            return String.Join(" + ", this.valuesSelected.Select(ev => ev.value).ToList<String>());
         }
 
         #region Implémentation de IEquatable http://msdn.microsoft.com/en-us/library/ms131190.aspx

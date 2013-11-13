@@ -61,7 +61,7 @@ namespace TaskLeader.BO
 
         /// <summary>
         /// Dictionnaire des valeurs des différentes entités: entityID => valeur
-        /// Pas de typage car contenu de type String ou DateTime
+        /// Pas de typage car contenu de type EntityValue ou DateTime
         /// </summary>
         private Dictionary<int, object> values = new Dictionary<int, object>();
 
@@ -80,11 +80,11 @@ namespace TaskLeader.BO
         /// <summary>
         /// Assignation de 'value' à l'entité 'entity' de cette action
         /// </summary>
-        public void setValue(DBentity entity, object value){
-            if (value != values[entity.id])
+        public void setValue(int entityID, object value){
+            if (value != values[entityID]) //TODO: value sera de type EntityValue, pas string
             {
-                entityHasChanged[entity.id] = this.initialStateFrozen;
-                values[entity.id] = value;
+                entityHasChanged[entityID] = this.initialStateFrozen;
+                values[entityID] = value;
             }            
         }
 
@@ -212,6 +212,7 @@ namespace TaskLeader.BO
             int resultat;
 
             // Vérification des nouveautés
+            // TODO: tout simplement les valeurs dont l'id de l'EntityValue est -1 !!
             foreach (DBentity entity in this.db.listEntities)
             {
                 if (this.entityHasChanged[entity.id])

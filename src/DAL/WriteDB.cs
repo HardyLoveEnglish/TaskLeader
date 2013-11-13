@@ -21,10 +21,29 @@ namespace TaskLeader.DAL
         /// <summary>
         /// String représentant la valeur
         /// </summary>
-        public String value;
+        public String value { get; set; }
 
         public String ToString(){
             return value;
+        }
+
+        public static bool operator ==(EntityValue a, EntityValue b)
+        {
+            // If both are null, or both are same instance, return true.
+            if (System.Object.ReferenceEquals(a, b))
+                return true;
+
+            // If one is null, but not both, return false.
+            if (((object)a == null) || ((object)b == null))
+                return false;
+
+            // Return true if the fields match:
+            return (a.id == b.id && (a.id > 0 || a.value == b.value));
+        }
+
+        public static bool operator !=(EntityValue a, EntityValue b)
+        {
+            return !(a == b);
         }
     }
 

@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using TaskLeader.DAL;
 
+
 namespace TaskLeader.GUI
 {
     public interface IValueRetrievable
@@ -12,13 +13,26 @@ namespace TaskLeader.GUI
 
     public partial class ListEntity : UserControl, IValueRetrievable
     {
-        private DB _db;
+        private String _dbName;
+        private DB _db { get { return TrayIcon.dbs[this._dbName]; } }
 
-        // EntityControl members
-        public int entityID;
-        public object value { get { return this.valuesList.Text; } }
+        #region IValueRetrievable members
 
-        private DBentity _entity { get { return this._db.entities[entityID]; } }
+        public int entityID { get; set; }
+
+        /// <summary>
+        /// Valeur de type EntityValue
+        /// </summary>
+        public object value {
+			get {
+                if (this.valuesList.SelectedIndex >= 0)
+                    return this.valuesList.SelectedItem;
+                else
+                    return new EntityValue() { id = -1, value = this.valuesList.Text };
+			}
+		}
+
+        #endregion
 
         #region Constructors
 
@@ -36,21 +50,35 @@ namespace TaskLeader.GUI
         /// <param name="db">Source DB</param>
         /// <param name="entityID">Related List entityID</param>
         /// <param name="selectedValue">Value to be displayed for this list</param>
-        public ListEntity(DB db, int entityID, object selectedValue)
+        public ListEntity(String dbName, int entityID, object selectedValue)
             : this()
         {
-
+            this._dbName = dbName;
             this.entityID = entityID;
-            this._db = db;
 
-            this.Name = _entity.nom; //Permet de sélectionner ce contrôle avec son nom
-            this.nameLabel.Text = _entity.nom;
-            if (_entity.parentID == 0)
-                this.valuesList.Items.AddRange(db.getEntitiesValues(_entity).ToArray());
+            DBentity entity = _db.entities[entityID];
+
+            this.Name = entity.nom; //Permet de sélectionner ce contrôle avec son nom
+            this.nameLabel.Text = entity.nom;
+            if (entity.parentID == 0)
+                this.valuesList.Items.AddRange(_db.getEntitiesValues(entityID).ToArray());
             this.valuesList.Text = selectedValue as String;
         }
 
+        /// <summary>
+        /// Ajouté pour couvrir le cas: le texte entré à la main correspond à une valeur de la liste.
+        /// Avec l'implémentation actuelle, SelectedIndex n'est pas mis à jour.
+        /// </summary>
+        private void valuesList_TextUpdate(object sender, EventArgs e)
+        {
+            int index = valuesList.FindStringExact(valuesList.Text);
+            if (index >= 0)
+                valuesList.SelectedIndex = index;
+        }
+
         #endregion
+
+        #region Relation parent/enfant
 
         /// <summary>
         /// Add a parent widget
@@ -58,18 +86,30 @@ namespace TaskLeader.GUI
         /// <param name="widget">Parent ListEntity widget</param>
         public void addParent(ListEntity widget)
         {
-            String parentValue = widget.value;
-            if(parentValue != "")
-                this.valuesList.Items.AddRange(_db.getEntitiesValues(_entity, parentValue));
+            EntityValue parentValue = widget.value as EntityValue;
+            if (parentValue.id > 0)
+                this.valuesList.Items.AddRange(_db.getEntitiesValues(this.entityID, parentValue.id).ToArray());
             widget.valuesList.SelectedIndexChanged += new EventHandler(newParentValue);
+            widget.valuesList.TextUpdate += new EventHandler(parentValuesList_TextUpdate);
         }
 
         private void newParentValue(object sender, EventArgs e)
         {
-            String parentValue = ((ComboBox)sender).Text;
-            this.valuesList.Items.Clear();
-            this.valuesList.Items.AddRange(_db.getEntitiesValues(_entity,parentValue));
+            EntityValue parentValue = ((ListEntity)sender).value as EntityValue;
+            if (parentValue.id > 0)
+            {
+                this.valuesList.Items.Clear();
+                this.valuesList.Items.AddRange(_db.getEntitiesValues(this.entityID, parentValue.id).ToArray());
+            }
         }
 
+        // Clear de la liste si le texte de la ComboBox est manuel
+        private void parentValuesList_TextUpdate(object sender, EventArgs e)
+        {
+            if (((ComboBox)sender).SelectedIndex < 0)
+                this.valuesList.Items.Clear();
+        }
+
+        #endregion
     }
 }
