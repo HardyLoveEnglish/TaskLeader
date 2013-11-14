@@ -243,9 +243,9 @@ namespace TaskLeader.DAL
         /// <param name="entity">DBentity à récupérer</param>
         /// <param name="parentValueID">ID de la valeur parente (type String)</param>
         /// <returns>List "EntityValue" des valeurs</returns>
-        public List<EntityValue> getEntitiesValues(int entityID, int parentValueID = 0)
+        public List<ListValue> getEntitiesValues(int entityID, int parentValueID = 0)
         {
-            List<EntityValue> result = new List<EntityValue>();
+            List<ListValue> result = new List<ListValue>();
             string request;
 
             if (this.entities[entityID].parentID == 0) // No parent entity
@@ -257,7 +257,7 @@ namespace TaskLeader.DAL
             DataTable resultats = getTable(request);
 
             foreach (DataRow row in resultats.Rows)
-                result.Add(new EntityValue() {
+                result.Add(new ListValue() {
                     id = (int)row["id"],
                     value = (String)row["label"]
                 });
@@ -275,18 +275,20 @@ namespace TaskLeader.DAL
         }
 
         /// <summary>
-        /// Récupération des valeurs par défaut pour tous les entités
+        /// Récupération des valeurs par défaut pour tous les entités.
         /// </summary>
-        /// <returns>Dictionnaire: entityID => EntityValue par défaut</returns>
+        /// <returns>Dictionnaire: entityID => EntityValue</returns>
         public Dictionary<int,EntityValue> getDefault()
         {
-            Dictionary<int, EntityValue> data = new Dictionary<int, EntityValue>();
+            Dictionary<int, object> data = new Dictionary<int, object>();
 
-            Object[] resultat = getList("SELECT e.id,e.defaultValue,f.label FROM Entities e LEFT JOIN Entities_values f ON e.defaultValue = f.id;");
-            for (int i = 0; i < resultat.Length; i++)
-            {
-                data.Add(i + 1, resultat[i] as String);
-            }
+            String request = "SELECT e.id AS entityID,e.contentType AS type,e.defaultValue AS value,f.label AS label "+
+                "FROM Entities e LEFT JOIN Entities_values f "+
+                "ON e.defaultValue = f.id;";
+            DataTable resultats = getTable(request);
+
+            foreach (DataRow row in resultats.Rows)
+                data.Add((int)row["entityID"]);
 
             return data;
         }
@@ -393,9 +395,9 @@ namespace TaskLeader.DAL
         }
         
         /// <summary>
-        /// Renvoie un dico entityID => entityValue de l'action 'ID'
+        /// Renvoie un dico entityID => EntityValue de l'action 'ID'
         /// </summary>
-        public Dictionary<int,String> getAction(String ID)
+        public Dictionary<int,EntityValue> getAction(String ID)
         {
             DataTable result = getTable(getActionsRequest("WHERE a.id=" + ID));
 

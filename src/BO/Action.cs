@@ -42,9 +42,6 @@ namespace TaskLeader.BO
 
     public class TLaction
     {
-        // Méthode privée pour fabriquer des string compatible sql
-        private String sqlFactory(String original) { return "'" + original.Replace("'", "''") + "'"; }
-
         // Membre privé permettant de détecter des updates
         private bool initialStateFrozen = false;
 
@@ -60,10 +57,9 @@ namespace TaskLeader.BO
         #region Gestion des valeurs des entités
 
         /// <summary>
-        /// Dictionnaire des valeurs des différentes entités: entityID => valeur
-        /// Pas de typage car contenu de type EntityValue ou DateTime
+        /// Dictionnaire des valeurs des différentes entités: entityID => EntityValue
         /// </summary>
-        private Dictionary<int, object> values = new Dictionary<int, object>();
+        private Dictionary<int, EntityValue> values = new Dictionary<int, EntityValue>();
 
         /// <summary>
         /// Dictionnaire des changements des valeurs des entités: entityID => bool
@@ -73,30 +69,19 @@ namespace TaskLeader.BO
         /// <summary>
         /// Récupération de la valeur de 'entity' pour cette action
         /// </summary>
-        public object getValue(int entityID) {
+        public EntityValue getValue(int entityID) {
             return values[entityID];
         }
 
         /// <summary>
         /// Assignation de 'value' à l'entité 'entity' de cette action
         /// </summary>
-        public void setValue(int entityID, object value){
-            if (value != values[entityID]) //TODO: value sera de type EntityValue, pas string
+        public void setValue(int entityID, EntityValue value){
+            if (value != values[entityID])
             {
                 entityHasChanged[entityID] = this.initialStateFrozen;
                 values[entityID] = value;
             }            
-        }
-
-        /// <summary>
-        /// Récupération de la valeur de 'entity' au format SQL pour cette action
-        /// </summary>
-        public String getSQLvalue(DBentity entity)
-        {
-            if (entity.type == "Date")
-                return "'" + ((DateTime)values[entity.id]).ToString("yyyy-MM-dd") + "'";
-            else
-                return sqlFactory(values[entity.id].ToString());
         }
 
         #endregion
@@ -144,20 +129,11 @@ namespace TaskLeader.BO
         /// Initialise les valeurs des entités de l'action
         /// </summary>
         /// <param name="values">Dictionnaire: entityID => entityValue</param>
-        private void initValues(Dictionary<int,String> values)
+        private void initValues(Dictionary<int,EntityValue> _values)
         {
+            this.values = _values;
             foreach (int entityID in this.db.entities.Keys)
             {
-                if (this.db.entities[entityID].type == "Date")
-                {
-                    DateTime dateValue;
-                    DateTime.TryParse(values[entityID], out dateValue); // Si le TryParse échoue, dateValue = DateTime.MinValue
-                    this.values.Add(entityID, dateValue);
-                }
-                else
-                {
-                    this.values.Add(entityID, values[entityID]);
-                }
                 this.entityHasChanged.Add(entityID, false);
             }
             this.initialStateFrozen = true;
@@ -181,11 +157,10 @@ namespace TaskLeader.BO
             this.v_TLID = ID;
 
            //Récupération des données de l'action
-           this.initValues(db.getAction(ID));
+           this.initValues(this.db.getAction(ID));
 
            //Récupération des liens
            _links.AddRange(db.getPJ(ID).Select(enc => new EncWithStatus(enc, EncStatus.original)));
-
         }
 
         /// <summary>
@@ -212,18 +187,19 @@ namespace TaskLeader.BO
             int resultat;
 
             // Vérification des nouveautés
-            // TODO: tout simplement les valeurs dont l'id de l'EntityValue est -1 !!
             foreach (DBentity entity in this.db.listEntities)
             {
-                if (this.entityHasChanged[entity.id])
-                    if (db.isNvo(entity, this.values[entity.id] as String))
+                int entityID = entity.id;
+                if (this.entityHasChanged[entityID])
+                    if (((ListValue)this.values[entityID]).id < 0)
                     {
                         if (entity.parentID > 0)
-                            resultat = db.insert(entity, this.values[entity.id] as String, this.values[entity.parentID] as String);
+                            resultat = db.insert(entity, (ListValue)this.values[entity.id],((ListValue)this.values[entity.parentID]).id);
                         else
-                            resultat = db.insert(entity, this.values[entity.id] as String);
-                        if(resultat == 1)
+                            resultat = db.insert(entity, this.values[entity.id] as ListValue);
+                        if(resultat > 0)
                             bilan += "Nouveau " + entity.nom + " enregistré\n";
+                        ((ListValue)this.values[entityID]).id = resultat;
                     }
             }
 

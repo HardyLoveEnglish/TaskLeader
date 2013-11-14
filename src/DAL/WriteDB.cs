@@ -8,45 +8,6 @@ using System.IO;
 
 namespace TaskLeader.DAL
 {
-    /// <summary>
-    /// Classe permettant de stocker des valeurs des entités de type List
-    /// </summary>
-    public class EntityValue
-    {
-        /// <summary>
-        /// Id de la valeur dans la  base
-        /// </summary>
-        public int id {get; set;}
-
-        /// <summary>
-        /// String représentant la valeur
-        /// </summary>
-        public String value { get; set; }
-
-        public String ToString(){
-            return value;
-        }
-
-        public static bool operator ==(EntityValue a, EntityValue b)
-        {
-            // If both are null, or both are same instance, return true.
-            if (System.Object.ReferenceEquals(a, b))
-                return true;
-
-            // If one is null, but not both, return false.
-            if (((object)a == null) || ((object)b == null))
-                return false;
-
-            // Return true if the fields match:
-            return (a.id == b.id && (a.id > 0 || a.value == b.value));
-        }
-
-        public static bool operator !=(EntityValue a, EntityValue b)
-        {
-            return !(a == b);
-        }
-    }
-
     public partial class DB
     {
         // Méthode générique pour exécuter une requête sql fournie en paramètre, retourne le nombre de lignes modifiées
@@ -146,24 +107,23 @@ namespace TaskLeader.DAL
         }
 
         // Méthode générique d'insertion de certaines DBentity
-        public int insert(DBentity entity, String value, String parentValue = "")
+        public int insert(DBentity entity, ListValue value, int parentValueID = -1)
         {
-            String sqlValue = "'" + value.Replace("'", "''") + "'";
             String parent = "'" + parentValue.Replace("'", "''") + "'";
             String requete;
 
             if (entity.parentID == 0)
-                requete = "INSERT INTO Entities_values (entityID,label) VALUES (" + entity.id + "," + sqlValue + ");";
+                requete = "INSERT INTO Entities_values (entityID,label) VALUES (" + entity.id + "," + value.sqlValue + ");";
             else
                 requete = "INSERT INTO Entities_values (entityID,label,parentID)" +
-                            " SELECT " + entity.id + "," + sqlValue + ",P.id " +
+                            " SELECT " + entity.id + "," + value.sqlValue + ",P.id " +
                             " FROM Entities_values P" +
                             " WHERE P.label = " + parent + " AND P.entityID=" + entity.parentID + ";";
 
             int result = execSQL(requete);
             if (result == 1)
                 this.OnNewValue(entity.nom);
-
+            //TODO: retourner l'ID créé
             return result;
         }
 

@@ -160,7 +160,7 @@ namespace TaskLeader.GUI
             {
                 // On ne lève l'évènement que si un seul item est tické
                 if ((this.liste.CheckedIndices.Count == 0) && (e.NewValue == CheckState.Checked))
-                    this.OnNewParentValue(((EntityValue)this.liste.Items[e.Index]).id);
+                    this.OnNewParentValue(((ListValue)this.liste.Items[e.Index]).id);
                 else if ((this.liste.CheckedIndices.Count == 2) && (e.NewValue == CheckState.Unchecked))
                 {
                     int index;
@@ -169,7 +169,7 @@ namespace TaskLeader.GUI
                     else
                         index = 0;
 
-                    this.OnNewParentValue(((EntityValue)this.liste.Items[this.liste.CheckedIndices[index]]).id);
+                    this.OnNewParentValue(((ListValue)this.liste.Items[this.liste.CheckedIndices[index]]).id);
                 }
                 else if (this.liste.CheckedIndices.Count == 1)
                     this.OnNoParentValue();
@@ -211,7 +211,7 @@ namespace TaskLeader.GUI
         public Criterium getCriterium()
         {
             if (!box.Checked)
-                return new Criterium(type.id, liste.CheckedItems.Cast<EntityValue>().ToList<EntityValue>());
+                return new Criterium(type.id, liste.CheckedItems.Cast<ListValue>().ToList<ListValue>());
             else
                 return null;
         }
@@ -240,7 +240,7 @@ namespace TaskLeader.GUI
 
             this.liste.Items.Clear(); // Vidage de la liste
 
-            foreach (EntityValue item in this.db.getEntitiesValues(this.type, parentID))
+            foreach (ListValue item in this.db.getEntitiesValues(this.type, parentID))
                 this.liste.Items.Add(item, true); // Sélection de toutes les valeurs
 
             this.box.Checked = true;

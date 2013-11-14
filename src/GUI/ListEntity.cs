@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using TaskLeader.DAL;
-
+using TaskLeader.BO;
 
 namespace TaskLeader.GUI
 {
@@ -28,7 +28,7 @@ namespace TaskLeader.GUI
                 if (this.valuesList.SelectedIndex >= 0)
                     return this.valuesList.SelectedItem;
                 else
-                    return new EntityValue() { id = -1, value = this.valuesList.Text };
+                    return new ListValue() { id = -1, value = this.valuesList.Text };
 			}
 		}
 
@@ -86,7 +86,7 @@ namespace TaskLeader.GUI
         /// <param name="widget">Parent ListEntity widget</param>
         public void addParent(ListEntity widget)
         {
-            EntityValue parentValue = widget.value as EntityValue;
+            ListValue parentValue = widget.value as ListValue;
             if (parentValue.id > 0)
                 this.valuesList.Items.AddRange(_db.getEntitiesValues(this.entityID, parentValue.id).ToArray());
             widget.valuesList.SelectedIndexChanged += new EventHandler(newParentValue);
@@ -95,7 +95,7 @@ namespace TaskLeader.GUI
 
         private void newParentValue(object sender, EventArgs e)
         {
-            EntityValue parentValue = ((ListEntity)sender).value as EntityValue;
+            ListValue parentValue = ((ListEntity)sender).value as ListValue;
             if (parentValue.id > 0)
             {
                 this.valuesList.Items.Clear();

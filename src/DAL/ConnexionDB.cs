@@ -2,33 +2,10 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using TaskLeader.BO;
 
 namespace TaskLeader.DAL
 {
-    // Structure listant les différentes informations liées à une entité de la base
-    public class DBentity
-    {
-        /// <summary>
-        /// ID de l'entité dans la base
-        /// </summary>
-        public int id { get; set; }
-
-        /// <summary>
-        /// Nom de l'entité pour IHM
-        /// </summary>
-        public String nom { get; set; }
-
-        /// <summary>
-        /// Type de l'entité: List, Text, Date
-        /// </summary>
-        public String type { get; set; }
-
-        /// <summary>
-        /// ID de l'entité parente
-        /// </summary>
-        public int parentID { get; set; }
-    }
-
     public class EditedActionEventArgs {
         public String actionID { get; set; }
     }

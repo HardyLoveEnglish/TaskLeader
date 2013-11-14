@@ -10,7 +10,7 @@ namespace TaskLeader.BO
     public class Criterium : IEquatable<Criterium>
     {
         public int entityID { get; set; }
-        public List<EntityValue> valuesSelected { get; set; }
+        public List<ListValue> valuesSelected { get; set; }
 
         public override String ToString()
         {
