@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using TaskLeader.DAL;
+using TaskLeader.BO;
 
 namespace TaskLeader.GUI
 {
@@ -15,12 +9,12 @@ namespace TaskLeader.GUI
         // EntityControl members
         private int _entityID;
         public int entityID { get { return _entityID; } }
-        public object value {
+        public EntityValue value {
             get {
                 if (noDate.Checked)
-                    return DateTime.MinValue;
+                    return new DateValue();
                 else
-                    return datePicker.Value;
+                    return new DateValue() { value = datePicker.Value };
             }
         }
 
@@ -29,11 +23,11 @@ namespace TaskLeader.GUI
             InitializeComponent();
         }
 
-        public DateEntity(DB db, int entityID, object entityValue)
+        public DateEntity(String dbName, int entityID, object entityValue)
             :this()
         {
             this._entityID = entityID;
-            String entityName = db.entities[entityID].nom;
+            String entityName = TrayIcon.dbs[dbName].entities[entityID].nom;
 
             this.Name = entityName; //Permet de sélectionner ce contrôle avec son nom
             this.nameLabel.Text = entityName;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using TaskLeader.DAL;
+using TaskLeader.BO;
 
 namespace TaskLeader.GUI
 {
@@ -10,7 +11,7 @@ namespace TaskLeader.GUI
 
         // EntityControl members
         public int entityID { get { return _entityID; } }
-        public object value { get { return this.entityValue.Text; } }
+        public EntityValue value { get { return new TextValue() { value = this.entityValue.Text }; } }
 
         public TextEntity()
         {
@@ -23,16 +24,16 @@ namespace TaskLeader.GUI
         /// <param name="db">Source DB</param>
         /// <param name="entityID">Related Text EntityID</param>
         /// <param name="entityValue">Value to be displayed in the text field</param>
-        public TextEntity(DB db, int entityID, object entityValue)
+        public TextEntity(String dbName, int entityID, EntityValue entityValue)
             : this()
         {
             this._entityID = entityID;
-            String entityName = db.entities[entityID].nom;
+            String entityName = TrayIcon.dbs[dbName].entities[entityID].nom;
 
             this.Name = entityName; //Permet de sélectionner ce contrôle avec son nom
             this.nameLabel.Text = entityName;
-
-            this.entityValue.Text = entityValue as String;
+            
+            this.entityValue.Text = entityValue.ToString();
             this.entityValue.Select(this.entityValue.Text.Length, 0); // Curseur placé à la fin par défaut
         }
     }

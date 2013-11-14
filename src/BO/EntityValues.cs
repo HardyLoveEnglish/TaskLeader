@@ -27,16 +27,24 @@ namespace TaskLeader.BO
         /// </summary>
         public int parentID { get; set; }
 
-        public UserControl getWidget(String dbName)
+        /// <summary>
+        /// Retourne le widget IHM correspondant au type
+        /// </summary>
+        /// <param name="dbName">Nom de la DB correspondante</param>
+        /// <param name="value">EntityValue à sélectionner</param>
+        /// <returns></returns>
+        public UserControl getWidget(String dbName, EntityValue value)
         {
             switch (this.type)
             {
                 case "List":
                     return new ListEntity(dbName, this.id, value);
                 case "Text":
-                    return new TextEntity(dbName, this.id,value);
+                    return new TextEntity(dbName, this.id, value);
                 case "Date":
-                    return new DateEntity(dbName, this.id, ValueType);
+                    return new DateEntity(dbName, this.id, value);
+                default:
+                    return null;
             } 
         }    
     }
@@ -47,7 +55,7 @@ namespace TaskLeader.BO
         protected String sqlFactory(String original) { return "'" + original.Replace("'", "''") + "'"; }
         public abstract String sqlValue { get; }
 
-        protected abstract bool Equals(EntityValue b);
+        public abstract bool Equals(EntityValue b);
 
         public override bool Equals(Object obj)
         {
@@ -102,28 +110,52 @@ namespace TaskLeader.BO
             return value;
         }
 
-        public override bool Equals(ListValue b)
+        public override bool Equals(EntityValue b)
         {
             // Return true if the fields match:
-            return (this.id == b.id && (this.id > 0 || this.value == b.value));
+            return (this.id == ((ListValue)b).id && (this.id > 0 || this.value == ((ListValue)b).value));
         }
     }
 
     public class DateValue : EntityValue
     {
         private DateTime _value;
-        public DateTime value { get { return _value; } }
-        public String sqlValue { get { return "'" + this._value.ToString("yyyy-MM-dd") + "'"; } }
+        public DateTime value {
+            get { return _value; }
+            set { _value = value; }
+        }
+        public override String sqlValue { get { return "'" + this._value.ToString("yyyy-MM-dd") + "'"; } }
 
         public DateValue(String valeur)
         {
             DateTime.TryParse(valeur, out this._value); // Si le TryParse échoue, dateValue = DateTime.MinValue
+        }
+
+        public DateValue()
+        {
+            this._value = DateTime.MinValue;
+        }
+
+        public override bool Equals(EntityValue b)
+        {
+            // Return true if the fields match:
+            return (this._value == ((DateValue)b).value);
         }
     }
 
     public class TextValue : EntityValue
     {
         public String value { get; set; }
-        public String sqlValue { get { return this.sqlFactory(this.value); } }
+        public override String sqlValue { get { return this.sqlFactory(this.value); } }
+
+        public override bool Equals(EntityValue b)
+        {
+            return (this.value == ((TextValue)b).value);
+        }
+
+        public override string ToString()
+        {
+            return this.value;
+        }
     }
 }

@@ -7,8 +7,8 @@ namespace TaskLeader.GUI
 {
     public interface IValueRetrievable
     {
-        int entityID {get;}
-        object value {get;}
+        int entityID { get; }
+        EntityValue value { get; }
     }
 
     public partial class ListEntity : UserControl, IValueRetrievable
@@ -23,10 +23,10 @@ namespace TaskLeader.GUI
         /// <summary>
         /// Valeur de type EntityValue
         /// </summary>
-        public object value {
+        public EntityValue value {
 			get {
                 if (this.valuesList.SelectedIndex >= 0)
-                    return this.valuesList.SelectedItem;
+                    return this.valuesList.SelectedItem as ListValue;
                 else
                     return new ListValue() { id = -1, value = this.valuesList.Text };
 			}
