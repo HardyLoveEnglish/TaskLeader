@@ -307,39 +307,6 @@ namespace TaskLeader.GUI
 
         #endregion
 
-        #region listeContext
-
-        private void listeContext_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            // Remplissage du menu des différents statuts
-            statutTSMenuItem.DropDown.Items.Clear();
-
-            DB db = TrayIcon.dbs[this.getDataFromRow(grilleData.SelectedRows[0].Index, "DB")];
-            foreach (object item in db.getEntitiesLabels(DB.statut)) //TODO: mettre en cache la valeur des statuts
-                statutTSMenuItem.DropDown.Items.Add(item.ToString(), null, this.changeStat);
-
-            ((ToolStripDropDownMenu)statutTSMenuItem.DropDown).ShowImageMargin = false;
-        }
-
-        // Mise à jour du statut d'une action via le menu contextuel
-        private void changeStat(object sender, EventArgs e)
-        {
-            // Récupération de l'action
-            TLaction action = new TLaction(
-                this.getDataFromRow(grilleData.SelectedRows[0].Index, "id"),
-                this.getDataFromRow(grilleData.SelectedRows[0].Index, "DB")
-            );
-
-            // On récupère le nouveau statut
-            action.Statut = ((ToolStripItem)sender).Text;
-
-            // On met à jour le statut de l'action que s'il a changé
-            if (action.statusHasChanged)
-                action.save();
-        }
-
-        #endregion
-
         #region linksContext
 
         // Ouverture du lien

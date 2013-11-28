@@ -35,7 +35,6 @@
             this.grilleData = new System.Windows.Forms.DataGridView();
             this.listeContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.editActionItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.statutTSMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.linksContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.grilleData)).BeginInit();
             this.listeContext.SuspendLayout();
@@ -88,26 +87,17 @@
             // listeContext
             // 
             this.listeContext.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.editActionItem,
-            this.statutTSMenuItem});
+            this.editActionItem});
             this.listeContext.Name = "listeContext";
-            this.listeContext.Size = new System.Drawing.Size(159, 48);
-            this.listeContext.Opening += new System.ComponentModel.CancelEventHandler(this.listeContext_Opening);
+            this.listeContext.Size = new System.Drawing.Size(153, 48);
             // 
             // editActionItem
             // 
             this.editActionItem.Image = global::TaskLeader.Properties.Resources.application_form_edit;
             this.editActionItem.Name = "editActionItem";
-            this.editActionItem.Size = new System.Drawing.Size(158, 22);
+            this.editActionItem.Size = new System.Drawing.Size(152, 22);
             this.editActionItem.Text = "Editer l\'action";
             this.editActionItem.Click += new System.EventHandler(this.modifAction);
-            // 
-            // statutTSMenuItem
-            // 
-            this.statutTSMenuItem.Image = global::TaskLeader.Properties.Resources.flag_finish;
-            this.statutTSMenuItem.Name = "statutTSMenuItem";
-            this.statutTSMenuItem.Size = new System.Drawing.Size(158, 22);
-            this.statutTSMenuItem.Text = "Passer l\'action à";
             // 
             // linksContext
             // 
@@ -132,7 +122,6 @@
         private System.Windows.Forms.DataGridView grilleData;
         private System.Windows.Forms.ContextMenuStrip listeContext;
         private System.Windows.Forms.ToolStripMenuItem editActionItem;
-        private System.Windows.Forms.ToolStripMenuItem statutTSMenuItem;
         private System.Windows.Forms.ContextMenuStrip linksContext;
 
     }

@@ -179,7 +179,6 @@ namespace TaskLeader.GUI
             else // Demande d'ajout de mail à une action
             {
                 TLaction action = new TLaction();
-                action.Texte = e.Mail.Titre;
                 action.addPJ(e.Mail);
                 new ManipAction(action).Show();
             }

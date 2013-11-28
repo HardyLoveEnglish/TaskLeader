@@ -30,14 +30,7 @@ namespace TaskLeader.GUI
             this.entitiesPanel.Controls.Clear();
 
             foreach (DBentity entity in this.db.entities.Values)
-            {
-                UserControl widget = entity.getWidget(_action.dbName, this._action.getValue(entity.id));
-
-                if (entity.parentID > 0)
-                    ((ListEntity)widget).addParent(this.entitiesPanel.Controls[this.db.entities[entity.parentID].nom] as ListEntity);
-
-                this.entitiesPanel.Controls.Add(widget);
-            }
+                this.entitiesPanel.Controls.Add(entity.getWidget(_action.dbName, this._action.getValue(entity.id), this.entitiesPanel));
 
             this.entitiesPanel.ResumeLayout();
         }

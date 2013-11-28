@@ -23,7 +23,7 @@ namespace TaskLeader.GUI
             InitializeComponent();
         }
 
-        public DateEntity(String dbName, int entityID, object entityValue)
+        public DateEntity(String dbName, int entityID, EntityValue entityValue)
             :this()
         {
             this._entityID = entityID;
@@ -32,12 +32,11 @@ namespace TaskLeader.GUI
             this.Name = entityName; //Permet de sélectionner ce contrôle avec son nom
             this.nameLabel.Text = entityName;
 
-            DateTime value = (DateTime)entityValue;
-            if (value.Date != DateTime.MinValue.Date)
-                datePicker.Value = value;
+            DateValue date = entityValue as DateValue;
+            if (date.isSet)
+                datePicker.Value = date.value;
             else
                 noDate.Checked = true;
-
         }
 
         // Mise à jour du widget date en fonction de la sélection de la checkbox

@@ -50,19 +50,27 @@ namespace TaskLeader.GUI
         /// <param name="db">Source DB</param>
         /// <param name="entityID">Related List entityID</param>
         /// <param name="selectedValue">Value to be displayed for this list</param>
-        public ListEntity(String dbName, int entityID, object selectedValue)
+        public ListEntity(String dbName, int entityID, EntityValue selectedValue, Control parent)
             : this()
         {
             this._dbName = dbName;
             this.entityID = entityID;
 
             DBentity entity = _db.entities[entityID];
-
             this.Name = entity.nom; //Permet de sélectionner ce contrôle avec son nom
             this.nameLabel.Text = entity.nom;
-            if (entity.parentID == 0)
+
+            if (entity.parentID == 0) {
                 this.valuesList.Items.AddRange(_db.getEntitiesValues(entityID).ToArray());
-            this.valuesList.Text = selectedValue as String;
+            } else {
+                ListEntity widget = parent.Controls[_db.entities[entity.parentID].nom] as ListEntity; 
+                ListValue parentValue = widget.value as ListValue;
+                if (parentValue.id > 0)
+                    this.valuesList.Items.AddRange(_db.getEntitiesValues(this.entityID, parentValue.id).ToArray());
+                widget.valuesList.SelectedIndexChanged += new EventHandler(newParentValue);
+                widget.valuesList.TextUpdate += new EventHandler(parentValuesList_TextUpdate);
+            }
+            this.valuesList.Text = selectedValue.ToString();
         }
 
         /// <summary>
@@ -78,20 +86,7 @@ namespace TaskLeader.GUI
 
         #endregion
 
-        #region Relation parent/enfant
-
-        /// <summary>
-        /// Add a parent widget
-        /// </summary>
-        /// <param name="widget">Parent ListEntity widget</param>
-        public void addParent(ListEntity widget)
-        {
-            ListValue parentValue = widget.value as ListValue;
-            if (parentValue.id > 0)
-                this.valuesList.Items.AddRange(_db.getEntitiesValues(this.entityID, parentValue.id).ToArray());
-            widget.valuesList.SelectedIndexChanged += new EventHandler(newParentValue);
-            widget.valuesList.TextUpdate += new EventHandler(parentValuesList_TextUpdate);
-        }
+        #region Gestion des évènements parents
 
         private void newParentValue(object sender, EventArgs e)
         {

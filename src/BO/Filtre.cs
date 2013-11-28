@@ -9,7 +9,13 @@ namespace TaskLeader.BO
 {
     public class Criterium : IEquatable<Criterium>
     {
+        /// <summary>
+        /// Id de l'entité de ce critère
+        /// </summary>
         public int entityID { get; set; }
+        /// <summary>
+        /// Liste de ListValue sélectionnées pour ce critère
+        /// </summary>
         public List<ListValue> valuesSelected { get; set; }
 
         public override String ToString()
@@ -105,6 +111,7 @@ namespace TaskLeader.BO
             DataTable data = dbData.Clone(); // Copie du schéma uniquement
             foreach (DataColumn column in data.Columns)
                 column.DataType = typeof(String);
+            //TODO:typage des colonnes de type Date
             data.Columns["Deadline"].DataType = typeof(DateTime);
             foreach (DataRow row in dbData.Rows)
                 data.ImportRow(row);

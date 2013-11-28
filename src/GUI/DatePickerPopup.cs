@@ -21,16 +21,19 @@ namespace TaskLeader.GUI
 
         // Déclaration de l'action associée
         private TLaction v_action;
+        private int _entityID;
         public String ID { get { return v_action.ID; } }
 
-        public DatePickerPopup(TLaction action)
+        public DatePickerPopup(TLaction action, int entityID)
         {
             InitializeComponent();
             v_action = action;
+            _entityID = entityID;
+            DateValue date = action.getValue(entityID) as DateValue;
 
             // Initialisation du composant calendar
-            if (action.hasDueDate)
-                calendar.SelectionStart = action.DueDate;
+            if (date.isSet)
+                calendar.SelectionStart = date.value;
             else
                 this.noDueDate.Checked = true;
         }
@@ -46,9 +49,9 @@ namespace TaskLeader.GUI
         {
             // Update de la DueDate que si c'est nécessaire
             if (noDueDate.Checked)
-                v_action.DueDate = DateTime.MinValue; // Remise à zéro de la dueDate
+                v_action.setValue(_entityID, new DateValue());
             else
-                v_action.DueDate = calendar.SelectionStart.Date;
+                v_action.setValue(_entityID, new DateValue(calendar.SelectionStart.Date));
 
             // On sauvegarde l'action
             v_action.save();

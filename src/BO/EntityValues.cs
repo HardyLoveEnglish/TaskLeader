@@ -32,13 +32,12 @@ namespace TaskLeader.BO
         /// </summary>
         /// <param name="dbName">Nom de la DB correspondante</param>
         /// <param name="value">EntityValue à sélectionner</param>
-        /// <returns></returns>
-        public UserControl getWidget(String dbName, EntityValue value)
+        public UserControl getWidget(String dbName, EntityValue value, Control parentPanel)
         {
             switch (this.type)
             {
                 case "List":
-                    return new ListEntity(dbName, this.id, value);
+                    return new ListEntity(dbName, this.id, value, parentPanel);
                 case "Text":
                     return new TextEntity(dbName, this.id, value);
                 case "Date":
@@ -46,7 +45,22 @@ namespace TaskLeader.BO
                 default:
                     return null;
             } 
-        }    
+        }
+
+        public EntityValue getEntityValue(String value, int id = -1)
+        {
+            switch (this.type)
+            {
+                case "List":
+                    return new ListValue() { id = id, value = value };
+                case "Text":
+                    return new TextValue() { value = value };
+                case "Date":
+                    return new DateValue(value);
+                default:
+                    return null;
+            }
+        }
     }
 
     public abstract class EntityValue
@@ -126,6 +140,15 @@ namespace TaskLeader.BO
         }
         public override String sqlValue { get { return "'" + this._value.ToString("yyyy-MM-dd") + "'"; } }
 
+        public bool isSet { get { return this._value != DateTime.MinValue; } }
+
+        #region Constructeurs
+
+        public DateValue(DateTime date)
+        {
+            this._value = date;
+        }
+
         public DateValue(String valeur)
         {
             DateTime.TryParse(valeur, out this._value); // Si le TryParse échoue, dateValue = DateTime.MinValue
@@ -135,6 +158,8 @@ namespace TaskLeader.BO
         {
             this._value = DateTime.MinValue;
         }
+
+        #endregion
 
         public override bool Equals(EntityValue b)
         {

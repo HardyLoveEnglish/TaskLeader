@@ -211,7 +211,11 @@ namespace TaskLeader.GUI
         public Criterium getCriterium()
         {
             if (!box.Checked)
-                return new Criterium(type.id, liste.CheckedItems.Cast<ListValue>().ToList<ListValue>());
+                return new Criterium()
+                {
+                    entityID = type.id,
+                    valuesSelected = liste.CheckedItems.Cast<ListValue>().ToList<ListValue>()
+                };
             else
                 return null;
         }
@@ -240,7 +244,7 @@ namespace TaskLeader.GUI
 
             this.liste.Items.Clear(); // Vidage de la liste
 
-            foreach (ListValue item in this.db.getEntitiesValues(this.type, parentID))
+            foreach (ListValue item in this.db.getEntitiesValues(this.type.id, parentID))
                 this.liste.Items.Add(item, true); // Sélection de toutes les valeurs
 
             this.box.Checked = true;

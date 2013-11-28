@@ -10,6 +10,8 @@ namespace TaskLeader.DAL
 {
     public partial class DB
     {
+        #region Méthodes utilitaires
+
         // Méthode générique pour exécuter une requête sql fournie en paramètre, retourne le nombre de lignes modifiées
         public int execSQL(String requete)
         {
@@ -43,15 +45,9 @@ namespace TaskLeader.DAL
             }
         }
 
-        // Insertion d'une valeur par défaut
-        public void insertDefaut(Dictionary<int,String> values)
-        {
-            String requete = "";
-            foreach (var kvp in values)
-                requete += "UPDATE Entities SET defaultValue=" + kvp.Value + " WHERE id=" + kvp.Key + ";";
-            //TODO: vérifier ce que rendra l'IHM: int, string ?
-            execSQL(requete);
-        }
+        #endregion
+
+        #region Filtres
 
         // Insertion en base d'un nouveau filtre
         public void insertFiltre(Filtre filtre)
@@ -106,6 +102,14 @@ namespace TaskLeader.DAL
 
         }
 
+        public void insertDefaultFilter(String name)
+        {
+        }
+
+        #endregion
+
+        #region Entités
+
         // Méthode générique d'insertion de certaines DBentity
         public int insert(DBentity entity, ListValue value, int parentValueID = -1)
         {
@@ -126,6 +130,18 @@ namespace TaskLeader.DAL
             //TODO: retourner l'ID créé
             return result;
         }
+
+        // Insertion d'une valeur par défaut
+        public void insertDefaut(Dictionary<int, EntityValue> values)
+        {
+            String requete = "";
+            foreach (var kvp in values)
+                requete += "UPDATE Entities SET defaultValue=" + kvp.Value + " WHERE id=" + kvp.Key + ";";
+            //TODO: vérifier ce que rendra l'IHM: int, string ?
+            execSQL(requete);
+        }
+
+        #endregion
 
         #region Pièces jointes
 
@@ -288,6 +304,8 @@ namespace TaskLeader.DAL
 
         #endregion
 
+        #region Actions
+
         // Insertion d'une nouvelle action
         // Renvoie l'ID de stockage de l'action
         public String insertAction(TLaction action)
@@ -385,5 +403,7 @@ namespace TaskLeader.DAL
             else
                 return 0;
         }
+
+        #endregion
     }
 }
