@@ -62,15 +62,24 @@ namespace TaskLeader.BO
         private Dictionary<int, EntityValue> values = new Dictionary<int, EntityValue>();
 
         /// <summary>
+        /// Récupération de la valeur de 'entity' pour cette action
+        /// </summary>
+        public EntityValue getValue(int entityID)
+        {
+            return values[entityID];
+        }
+
+        /// <summary>
         /// Dictionnaire des changements des valeurs des entités: entityID => bool
         /// </summary>
         private Dictionary<int, bool> entityHasChanged = new Dictionary<int, bool>();
 
         /// <summary>
-        /// Récupération de la valeur de 'entity' pour cette action
+        /// Vérification de l'update des valeurs des entités
         /// </summary>
-        public EntityValue getValue(int entityID) {
-            return values[entityID];
+        public bool hasChanged(int entityID)
+        {
+            return entityHasChanged[entityID];
         }
 
         /// <summary>

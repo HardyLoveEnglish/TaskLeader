@@ -259,7 +259,6 @@ namespace TaskLeader.DAL
         /// <summary>
         /// Retourne le nom du filtre par défaut
         /// </summary>
-        /// <returns></returns>
         public String getDefaultFilterName()
         {
             object[] result = getList("SELECT titre FROM Filtres WHERE defaut=1");
@@ -327,7 +326,7 @@ namespace TaskLeader.DAL
             foreach (DataRow row in resultats.Rows)
                 result.Add(new ListValue() {
                     id = (int)row["id"],
-                    value = (String)row["label"]
+                    label = (String)row["label"]
                 });
 
             return result;
@@ -353,7 +352,7 @@ namespace TaskLeader.DAL
                     id,
                     this.entities[id].getEntityValue(
                         row["value"] as String,
-                        0//TODO: il faut récupérer l'ID de la valeur
+                        row["label"] as String
                     )
                 );
             }
@@ -372,7 +371,7 @@ namespace TaskLeader.DAL
         private String getActionsRequest(String WHEREclause)
         {
             // Création de la requête de filtrage
-            String requete = "SELECT a.id AS id,";
+            String requete = "SELECT a.id,";
 
             // Définition des colonnes suivantes
             foreach (int entityID in this.entities.Keys)
@@ -422,6 +421,7 @@ namespace TaskLeader.DAL
         
         /// <summary>
         /// Renvoie un dico entityID => EntityValue de l'action 'ID'
+        /// /!\ Les entités dont la valeur est nulle ne sont pas listées
         /// </summary>
         public Dictionary<int,EntityValue> getAction(String ID)
         {
@@ -435,11 +435,16 @@ namespace TaskLeader.DAL
             foreach (DataRow row in result.Rows)
             {
                 int entityID = (int)row["entityID"];
-                values.Add(
-                    entityID,
-                    this.entities[entityID].getEntityValue(row["entityID"]);
-                    //TODO: il faut aussi récupérer les id des valeurs, pas simple
-                );
+                if (this.entities[entityID].type == "List")
+                    values.Add(
+                        entityID,
+                        this.entities[entityID].getEntityValue(row["label"] as String, (int)row["entityValue"])
+                    );
+                else
+                    values.Add(
+                        entityID,
+                        this.entities[entityID].getEntityValue(row["entityValue"] as String)
+                    );
             }
 
             return values;

@@ -47,12 +47,17 @@ namespace TaskLeader.BO
             } 
         }
 
-        public EntityValue getEntityValue(String value, int id = -1)
+        /// <summary>
+        /// Création de l'EntityValue correspondante
+        /// </summary>
+        /// <param name="value">Valeur de l'entité: Date, Texte ou ID</param>
+        /// <param name="label">Dans le cas d'un type List, valeur du label</param>
+        public EntityValue getEntityValue(String value, String label = "")
         {
             switch (this.type)
             {
                 case "List":
-                    return new ListValue() { id = id, value = value };
+                    return new ListValue() { id = Int32.Parse(value), label = label };
                 case "Text":
                     return new TextValue() { value = value };
                 case "Date":
@@ -112,22 +117,33 @@ namespace TaskLeader.BO
         /// Id de la valeur dans la  base
         /// </summary>
         public int id { get; set; }
+        /// <summary>
+        /// Valeur SQL de l'entité= ID !
+        /// </summary>
+        public override String sqlValue {
+            get {
+                if (this.id > 0)
+                    return this.id.ToString();
+                else
+                    return "NULL";
+            }
+        }
 
         /// <summary>
         /// String représentant la valeur
         /// </summary>
-        public String value { get; set; }
-        public override String sqlValue { get { return this.sqlFactory(this.value); } }
+        public String label { get; set; }
+        public String sqlLabel { get { return this.sqlFactory(this.label); } }
 
         public override String ToString()
         {
-            return value;
+            return label;
         }
 
         public override bool Equals(EntityValue b)
         {
             // Return true if the fields match:
-            return (this.id == ((ListValue)b).id && (this.id > 0 || this.value == ((ListValue)b).value));
+            return (this.id == ((ListValue)b).id && (this.id > 0 || this.label == ((ListValue)b).label));
         }
     }
 
@@ -138,7 +154,16 @@ namespace TaskLeader.BO
             get { return _value; }
             set { _value = value; }
         }
-        public override String sqlValue { get { return "'" + this._value.ToString("yyyy-MM-dd") + "'"; } }
+        public override String sqlValue
+        {
+            get
+            {
+                if (this._value == DateTime.MinValue)
+                    return "NULL";
+                else
+                    return "'" + this._value.ToString("yyyy-MM-dd") + "'";
+            }
+        }
 
         public bool isSet { get { return this._value != DateTime.MinValue; } }
 
@@ -171,7 +196,14 @@ namespace TaskLeader.BO
     public class TextValue : EntityValue
     {
         public String value { get; set; }
-        public override String sqlValue { get { return this.sqlFactory(this.value); } }
+        public override String sqlValue {
+            get {
+                if(String.IsNullOrWhiteSpace(this.value))
+                    return "NULL";
+                else
+                    return this.sqlFactory(this.value);
+            }
+        }
 
         public override bool Equals(EntityValue b)
         {

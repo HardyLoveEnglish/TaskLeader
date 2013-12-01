@@ -37,11 +37,11 @@ namespace TaskLeader.GUI
         /// <summary>
         /// Retourne une DataGridViewTextBoxColumn à partir du nom de la colonne fournie
         /// </summary>
-        private DataGridViewTextBoxColumn createSimpleColumn(String name)
+        private DataGridViewTextBoxColumn createSimpleColumn(String name, String property)
         {
             DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn();
             col.Name = name;
-            col.DataPropertyName = name;
+            col.DataPropertyName = property;
 
             return col;
         }
@@ -52,19 +52,20 @@ namespace TaskLeader.GUI
 
             this.grilleData.AutoGenerateColumns = false; //Les colonnes sont créées manuellement
 
-            grilleData.Columns.Insert(0, this.createSimpleColumn("Ref"));
-            grilleData.Columns.Insert(1, this.createSimpleColumn("Contexte"));
-            grilleData.Columns.Insert(2, this.createSimpleColumn("Sujet"));
-
-            grilleData.Columns.Insert(3, this.createSimpleColumn("Titre"));
-            grilleData.Columns["Titre"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            grilleData.Columns.Insert(0, this.createSimpleColumn("Ref","Ref"));
 
             // Création de la colonne des liens
             DataGridViewImageColumn linkCol = new DataGridViewImageColumn();
             linkCol.Name = "Liens";
             linkCol.DataPropertyName = "Liens";
-            grilleData.Columns.Insert(4, linkCol);
+            grilleData.Columns.Insert(1, linkCol);
 
+            foreach(int entityID in this.entities
+
+            grilleData.Columns.Insert(1, this.createSimpleColumn("Contexte"));
+            grilleData.Columns.Insert(2, this.createSimpleColumn("Sujet"));
+            grilleData.Columns.Insert(3, this.createSimpleColumn("Titre"));
+            grilleData.Columns["Titre"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
             grilleData.Columns.Insert(5, this.createSimpleColumn("Deadline"));
             grilleData.Columns.Insert(6, this.createSimpleColumn("Destinataire"));
             grilleData.Columns.Insert(7, this.createSimpleColumn("Statut"));

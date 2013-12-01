@@ -20,7 +20,7 @@ namespace TaskLeader.BO
 
         public override String ToString()
         {
-            return String.Join(" + ", this.valuesSelected.Select(ev => ev.value).ToList<String>());
+            return String.Join(" + ", this.valuesSelected.Select(ev => ev.label).ToList<String>());
         }
 
         #region Implémentation de IEquatable http://msdn.microsoft.com/en-us/library/ms131190.aspx

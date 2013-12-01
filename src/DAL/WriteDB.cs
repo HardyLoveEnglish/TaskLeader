@@ -49,7 +49,9 @@ namespace TaskLeader.DAL
 
         #region Filtres
 
-        // Insertion en base d'un nouveau filtre
+        /// <summary>
+        /// Insertion en base d'un nouveau filtre
+        /// </summary>
         public void insertFiltre(Filtre filtre)
         {
             using (SQLiteConnection SQLC = new SQLiteConnection(this._connectionString))
@@ -71,22 +73,27 @@ namespace TaskLeader.DAL
                         // On insère ensuite dans les tables annexes les données sélectionnées
                         foreach (Criterium critere in filtre.criteria)
                         {
-                            String selection;
-
-                            // On crée la requête pour insertion des critères dans les tables annexes
-                            String requete = "INSERT INTO Filtres_cont VALUES (";
-                            requete += "(SELECT max(id) FROM Filtres)," + critere.entityID + ",(SELECT id FROM Entities_values WHERE Titre=@Titre));";
-                            // On récupère le rowid du filtre frâichement créé
-                            //TODO: il faudrait les ID des valeurs plutôt que les labels !!
-
-                            SQLCmd.CommandText = requete;
-                            SQLiteParameter p_Titre = new SQLiteParameter("@Titre");
-                            SQLCmd.Parameters.Add(p_Titre);
-
-                            foreach (String item in critere.valuesSelected)
+                            if (critere.valuesSelected.Count > 0)
                             {
-                                selection = item.Replace("'", "''"); // On gère les simple quote
-                                p_Titre.Value = selection;
+                                // On crée la requête pour insertion des critères dans les tables annexes
+                                String requete = "INSERT INTO Filtres_cont VALUES "+
+                                    "((SELECT max(id) FROM Filtres)," + critere.entityID + ",@entityValueID);";
+                                // On récupère le rowid du filtre frâichement créé
+
+                                SQLCmd.CommandText = requete;
+                                SQLiteParameter p_ValueID = new SQLiteParameter("@entityValueID");
+                                SQLCmd.Parameters.Add(p_ValueID);
+
+                                foreach (ListValue item in critere.valuesSelected)
+                                {
+                                    p_ValueID.Value = item.id;
+                                    SQLCmd.ExecuteNonQuery();
+                                }
+                            }
+                            else
+                            {
+                                SQLCmd.CommandText = "INSERT INTO Filtres_cont (filtreID,entityID) " +
+                                    "VALUES ((SELECT max(id) FROM Filtres)," + critere.entityID + ");";
                                 SQLCmd.ExecuteNonQuery();
                             }
                         }
@@ -95,50 +102,81 @@ namespace TaskLeader.DAL
                 }
             }
 
-
             this.OnNewValue("Filtre");
             // On affiche un message de statut sur la TrayIcon
             TrayIcon.afficheMessage("Bilan création/modification", "Nouveau filtre ajouté: " + filtre.nom);
-
         }
 
+        /// <summary>
+        /// Modifie le filtre par défaut
+        /// </summary>
+        /// <param name="name">Nom du filtre</param>
         public void insertDefaultFilter(String name)
         {
+            //TODO: serait plus propre par un ID
+            String nomFiltre = "'" + name.Replace("'", "''") + "'";
+            execSQL("UPDATE Filtre SET defaut=1 WHERE titre=" + nomFiltre + ";");
         }
 
         #endregion
 
         #region Entités
 
-        // Méthode générique d'insertion de certaines DBentity
+        /// <summary>
+        /// Insertion des valeurs d'entités de type List
+        /// </summary>
+        /// <param name="entity">DBentity de la valeur à insérer</param>
+        /// <param name="value">ListValue à insérer</param>
+        /// <param name="parentValueID">ID de la valeur parent le cas échéant</param>
+        /// <returns>ID de la valeur nouvellement créée</returns>
         public int insert(DBentity entity, ListValue value, int parentValueID = -1)
         {
-            String parent = "'" + parentValue.Replace("'", "''") + "'";
             String requete;
+            String parentCol = "";
+            String parentValue= "";
 
-            if (entity.parentID == 0)
-                requete = "INSERT INTO Entities_values (entityID,label) VALUES (" + entity.id + "," + value.sqlValue + ");";
-            else
-                requete = "INSERT INTO Entities_values (entityID,label,parentID)" +
-                            " SELECT " + entity.id + "," + value.sqlValue + ",P.id " +
-                            " FROM Entities_values P" +
-                            " WHERE P.label = " + parent + " AND P.entityID=" + entity.parentID + ";";
+            if (entity.parentID > 0){
+                parentCol = ",parentID";
+                parentValue = ","+parentValueID;
+            }
+            requete = "INSERT INTO Entities_values (entityID,label" + parentCol + ") VALUES (" + entity.id + "," + value.sqlLabel + parentValue + ");";
 
             int result = execSQL(requete);
             if (result == 1)
+            {
                 this.OnNewValue(entity.nom);
-            //TODO: retourner l'ID créé
-            return result;
+                return this.getInteger("SELECT max(id) FROM Entities_values;");
+            }
+            else
+                return -1;
         }
 
-        // Insertion d'une valeur par défaut
+        /// <summary>
+        /// Insertion des valeurs par défaut
+        /// </summary>
+        /// <param name="values"></param>
         public void insertDefaut(Dictionary<int, EntityValue> values)
         {
-            String requete = "";
-            foreach (var kvp in values)
-                requete += "UPDATE Entities SET defaultValue=" + kvp.Value + " WHERE id=" + kvp.Key + ";";
-            //TODO: vérifier ce que rendra l'IHM: int, string ?
-            execSQL(requete);
+            using (SQLiteConnection SQLC = new SQLiteConnection(this._connectionString))
+            {
+                if (File.Exists(this.path))
+                    SQLC.Open();
+                else
+                    throw new Exception("Base inaccessible");
+
+                using (SQLiteTransaction mytransaction = SQLC.BeginTransaction())
+                {
+                    using (SQLiteCommand SQLCmd = new SQLiteCommand(SQLC))
+                    {
+                        foreach (var kvp in values)
+                        {
+                            SQLCmd.CommandText = "UPDATE Entities SET defaultValue=" + kvp.Value.sqlValue + " WHERE id=" + kvp.Key + ";";
+                            SQLCmd.ExecuteNonQuery();
+                        }
+                    }
+                    mytransaction.Commit();
+                }
+            }
         }
 
         #endregion
@@ -306,8 +344,11 @@ namespace TaskLeader.DAL
 
         #region Actions
 
-        // Insertion d'une nouvelle action
-        // Renvoie l'ID de stockage de l'action
+        /// <summary>
+        /// Insertion d'une nouvelle action
+        /// </summary>
+        /// <param name="action">TLaction à insérer en base</param>
+        /// <returns>ID de l'action</returns>
         public String insertAction(TLaction action)
         {
             String actionID;
@@ -323,30 +364,19 @@ namespace TaskLeader.DAL
                 {
                     using (SQLiteCommand SQLCmd = new SQLiteCommand(SQLC))
                     {
+                        SQLCmd.CommandText = "SELECT max(id)+1 FROM Actions;";
+                        actionID = SQLCmd.ExecuteScalar() as String;
+
                         foreach (int entityID in this.entities.Keys)
                         {
-                            switch(this.entities[entityID].type){ //TODO: à part le if tout semble identique ! à optimiser
-                                case("List"):
-                                    if (action.getValue(entityID) != "") //TODO: KO: il faut insérer l'ID de l'entityValue, pas son label
-                                        SQLCmd.CommandText += "INSERT INTO Actions (id,entityID,entityValue)" +
-                                            "SELECT max(id)+1," + entityID + "," + action.getSQLvalue(this.entities[entityID]) + " FROM Actions;";
-                                    break;
-                                case ("Text"):
-                                    if (action.getValue(entityID) != "")
-                                        SQLCmd.CommandText += "INSERT INTO Actions (id,entityID,entityValue)" +
-                                            "SELECT max(id)+1," + entityID + "," + action.getSQLvalue(this.entities[entityID]) + " FROM Actions;";
-                                    break;
-                                case ("Date"):
-                                    if (((DateTime)action.getValue(entityID)).Date != DateTime.MinValue.Date)
-                                        SQLCmd.CommandText += "INSERT INTO Actions (id,entityID,entityValue)" +
-                                            "SELECT max(id)+1," + entityID + "," + action.getSQLvalue(this.entities[entityID]) + " FROM Actions;";
-                                    break;
+                            String value = action.getValue(entityID).sqlValue;
+                            if (value != "NULL")
+                            {
+                                SQLCmd.CommandText = "INSERT INTO Actions (id,entityID,entityValue) " +
+                                    "VALUES (" + actionID + "," + entityID + "," + value + ");";
+                                SQLCmd.ExecuteNonQuery();
                             }
                         }
-                        SQLCmd.ExecuteNonQuery();
-
-                        SQLCmd.CommandText = "SELECT max(id) FROM Actions;";
-                        actionID = SQLCmd.ExecuteScalar().ToString();
                     }
                     mytransaction.Commit();
                 }
@@ -358,38 +388,37 @@ namespace TaskLeader.DAL
         // Mise à jour d'une action (flexible)
         public int updateAction(TLaction action)
         {
-            // Préparation des sous requêtes
-            String ctxtPart = "";
-            if (action.ctxtHasChanged)
-                ctxtPart = "CtxtID=(SELECT id FROM Contextes WHERE Titre=" + action.ContexteSQL + "),";
-
-            String sujetPart = "";
-            if (action.sujetHasChanged)
-                sujetPart = "SujtID=(SELECT id FROM Sujets WHERE Titre=" + action.SujetSQL + "),";
-
-            String actionPart = "";
-            if (action.texteHasChanged)
-                actionPart = "Titre=" + action.TexteSQL + ",";
-
-            String datePart = "";
-            if (action.dueDateHasChanged)
+            using (SQLiteConnection SQLC = new SQLiteConnection(this._connectionString))
             {
-                if (action.hasDueDate) // action.DueDate != DateTime.MinValue
-                    datePart = "DueDate=" + action.DueDateSQL + ",";
+                if (File.Exists(this.path))
+                    SQLC.Open();
                 else
-                    datePart = "DueDate=NULL,";
+                    throw new Exception("Base inaccessible");
+
+                using (SQLiteTransaction mytransaction = SQLC.BeginTransaction())
+                {
+                    using (SQLiteCommand SQLCmd = new SQLiteCommand(SQLC))
+                    {
+                        //UPDATE Actions SET entityValue=XX WHERE id=N AND entityID=3
+                        foreach (int entityID in this.entities.Keys)
+                            if (action.hasChanged(entityID))
+                            {
+                                String value = action.getValue(entityID).sqlValue;
+                                if (value == "NULL") //Si valeur NULL, on supprime toutes les lignes
+                                {
+                                    SQLCmd.CommandText = "DELETE FROM Actions WHERE id=" + action.ID + " AND entityID=" + entityID + ";";
+                                    SQLCmd.ExecuteNonQuery();
+                                }
+                                else //Si valeur non nulle, INSERT OR UPDATE
+                                {
+                                    SQLCmd.CommandText = "INSERT OR REPLACE INTO Actions VALUES(" + action.ID + " AND entityID=" + entityID + ";";
+                                    SQLCmd.ExecuteNonQuery();
+                                }
+                            }
+                    }
+                    mytransaction.Commit();
+                }
             }
-
-            String destPart = "";
-            if (action.destHasChanged)
-                destPart = "DestID=(SELECT id FROM Destinataires WHERE Titre=" + action.DestinataireSQL + "),";
-
-            String statPart = "";
-            if (action.statusHasChanged)
-                statPart = "StatID=(SELECT id FROM Statuts WHERE Titre=" + action.StatutSQL + "),";
-            // Il y a volontairement une virgule à la fin dans le cas où le statut n'a pas été mis à jour
-
-            String updatePart = ctxtPart + sujetPart + actionPart + datePart + destPart + statPart;
 
             String requete;
             if (updatePart.Length > 0)
