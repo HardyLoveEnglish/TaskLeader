@@ -217,10 +217,10 @@ namespace TaskLeader.GUI
         // Affichage des actions sur filtre manuel
         private void filtreManuel(object sender, EventArgs e)
         {
-            var criteriaList = new List<Criterium>();
+            Dictionary<int, List<ListValue>> criteriaList = new Dictionary<int, List<ListValue>>();
             foreach (CritereSelect widget in this.selectPanel.Controls)
-                if (widget.getCriterium() != null)
-                    criteriaList.Add(widget.getCriterium());
+                if (widget.criterium != null)
+                    criteriaList.Add(widget.entityID,widget.criterium);
 
             Filtre filtre = new Filtre() { dbName = manuelDBcombo.Text, criteria = criteriaList };
 

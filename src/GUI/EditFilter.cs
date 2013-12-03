@@ -30,7 +30,7 @@ namespace TaskLeader.GUI
             this.dbLabel.Text = filtre.dbName;
 
             int rowsCount = this.tablePanel.RowCount;
-            foreach (KeyValuePair<String,String> kvp in filtre.getDescription())
+            foreach (KeyValuePair<String,String> kvp in filtre.description)
             {
                 this.tablePanel.Controls.Add(new SimpleLabel(kvp.Key, FontStyle.Bold), 0, rowsCount);
                 

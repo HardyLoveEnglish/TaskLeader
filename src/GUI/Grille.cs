@@ -60,8 +60,6 @@ namespace TaskLeader.GUI
             linkCol.DataPropertyName = "Liens";
             grilleData.Columns.Insert(1, linkCol);
 
-            foreach(int entityID in this.entities
-
             grilleData.Columns.Insert(1, this.createSimpleColumn("Contexte"));
             grilleData.Columns.Insert(2, this.createSimpleColumn("Sujet"));
             grilleData.Columns.Insert(3, this.createSimpleColumn("Titre"));

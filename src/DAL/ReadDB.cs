@@ -232,26 +232,37 @@ namespace TaskLeader.DAL
             return getList(request);
         }
 
-        // Récupère un filtre en fonction de son titre
-        public List<Criterium> getFilterData(String name)
+        /// <summary>
+        /// Récupération d'un filtre en fonction de son titre
+        /// </summary>
+        /// <param name="name">Nom du filtre</param>
+        public Dictionary<int,List<ListValue>> getFilterData(String name)
         {
-            var data = new List<Criterium>();
+            Dictionary<int, List<ListValue>> data = new Dictionary<int, List<ListValue>>();
             String titre = "'" + name.Replace("'", "''") + "'";
 
-            char[] separator = new char[] { '#' };
             String requete =
-                "SELECT c.entityID AS entityID,GROUP_CONCAT(c.entityValue,'" + separator + "') AS values" +
-                " FROM Filtres_cont c, Filtres f" +
-                " WHERE c.filtreID = f.id AND f.titre=" + titre +
-                " GROUP BY c.entityID";
+                "SELECT c.entityID,c.entityValue,ev.label " +
+                "FROM Filtres f, Filtres_cont c " +
+                "LEFT JOIN Entities_values ev ON c.entityValue=ev.id " +
+                "WHERE c.filtreID = f.id AND f.titre=" + titre + ";";
             DataTable resultat = this.getTable(requete);
 
             foreach (DataRow row in resultat.Rows)
-                data.Add(new Criterium()
+            {
+                int entityID = (int)row["entityID"];
+
+                if (row["entityValue"] == null)
+                    data[entityID] = null;
+                else
                 {
-                    entityID = (int)row["entityID"],
-                    valuesSelected = ((String)row["values"]).Split(separator)
-                });
+                    ListValue value = new ListValue() { id = (int)row["entityValue"], label = row["label"] as String };
+                    if (data.ContainsKey(entityID))
+                        data[entityID].Add(value);
+                    else
+                        data[entityID] = new List<ListValue>() { value };
+                }
+            }
 
             return data;
         }
@@ -376,9 +387,9 @@ namespace TaskLeader.DAL
             // Définition des colonnes suivantes
             foreach (int entityID in this.entities.Keys)
                 if (this.entities[entityID].type == "List")
-                    requete += "MAX(CASE WHEN a.entityID = " + entityID + " THEN v.label ELSE NULL END) AS " + entityID + ",";
+                    requete += "MAX(CASE WHEN a.entityID = " + entityID + " THEN v.label ELSE NULL END) AS '" + entityID + "',";
                 else
-                    requete += "MAX(CASE WHEN a.entityID = " + entityID + " THEN a.entityValue ELSE NULL END) AS " + entityID + ",";
+                    requete += "MAX(CASE WHEN a.entityID = " + entityID + " THEN a.entityValue ELSE NULL END) AS '" + entityID + "',";
             requete = requete.Substring(0, requete.Length - 1); //Suppression de la dernière virgule
 
             requete += " FROM Actions a LEFT JOIN Entities_values v ON v.id = a.entityValue ";
@@ -389,31 +400,48 @@ namespace TaskLeader.DAL
         }
 
         // Renvoie un DataTable de toutes les actions
-        public DataTable getActions(List<Criterium> criteria)
+        public DataTable getActions(Dictionary<int, List<ListValue>> criteria)
         {
-            // Requête de la forme "WHERE a.entityValue IN (23,45,43,56)"
+            /* Requête de la forme
+             * WHERE a.id IN
+             *  (SELECT id FROM
+             *      (SELECT id,
+             *      MAX(CASE WHEN entityID = 1 THEN entityValue ELSE 0 END) AS Ent1,
+             *      MAX(CASE WHEN entityID = 2 THEN entityValue ELSE 0 END) AS Ent2,
+             *      MAX(CASE WHEN entityID = 5 THEN entityValue ELSE 0 END) AS Ent5,
+             *      MAX(CASE WHEN entityID = 6 THEN entityValue ELSE 0 END) AS Ent6
+             *      FROM Actions GROUP BY id)
+             *  WHERE Ent6 IN (‘93’,’94') AND Ent5=0)
+             */
+
             String where = "";
 
             if (criteria.Count > 0) // Il n'y a de WHERE que si au moins un criterium a été entré
             {
-                where += "WHERE a.entityValue IN (";
-                String idList = "";
-                String nullPart = "";
+                where += "WHERE a.id IN " +
+                                "(SELECT id FROM " +
+                                    "(SELECT id,";
 
-                foreach (Criterium critere in criteria) // On boucle sur tous les critères du filtre
+                List<String> columnList = new List<string>();
+                List<String> whereList = new List<string>();
+
+                foreach (var critere in criteria) // On boucle sur tous les critères du filtre
                 {
-                    if (critere.valuesSelected.Count > 0) // Requête SQL si au moins un élément a été sélectionné
-                        foreach (ListValue item in critere.valuesSelected)
-                            idList += item.id + ",";
+                    columnList.Add("MAX(CASE WHEN entityID=" + critere.Key + " THEN entityValue ELSE 0 END) AS Ent" + critere.Key);
+                    
+                    String wherePart = "Ent" + critere.Key;
+                    if (critere.Value != null)
+                        wherePart += " IN (" +
+                            String.Join(",", critere.Value.Select(lv => "'" + lv.id.ToString() + "'").ToList<String>()) +
+                            ")";
                     else
-                        nullPart += " AND " + critere.entityID.ToString() + " a.entityValue IS NULL";
-                        //TODO: non ça ne marche pas.
+                        wherePart += "=0";
+                    whereList.Add(wherePart);
                 }
 
-                idList = idList.Substring(0, idList.Length - 1) + ")"; // On remplace la dernière virgule par une )
-                //TODO: supprimer un AND de nullPart
-
-                where += idList + nullPart;
+                where += String.Join(",", columnList) +
+                    " FROM Actions GROUP BY id)" +
+                    " WHERE " + String.Join(" AND ", whereList) + ")";
             }
 
             return getTable(getActionsRequest(where));
@@ -438,7 +466,7 @@ namespace TaskLeader.DAL
                 if (this.entities[entityID].type == "List")
                     values.Add(
                         entityID,
-                        this.entities[entityID].getEntityValue(row["label"] as String, (int)row["entityValue"])
+                        this.entities[entityID].getEntityValue(row["entityValue"] as String, row["label"] as String)
                     );
                 else
                     values.Add(

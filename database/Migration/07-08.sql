@@ -32,7 +32,8 @@
 	CREATE TABLE [Actions](
 		[id] INTEGER NOT NULL,
 		[entityID] REFERENCES [Entities]([id]),
-		[entityValue] VARCHAR(500)
+		[entityValue] VARCHAR(500),
+		PRIMARY KEY(id,entityID)
 	);
 
 	-- Table du contenu des filtres

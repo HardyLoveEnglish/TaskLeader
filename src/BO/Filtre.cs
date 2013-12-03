@@ -7,56 +7,11 @@ using TaskLeader.DAL;
 
 namespace TaskLeader.BO
 {
-    public class Criterium : IEquatable<Criterium>
-    {
-        /// <summary>
-        /// Id de l'entité de ce critère
-        /// </summary>
-        public int entityID { get; set; }
-        /// <summary>
-        /// Liste de ListValue sélectionnées pour ce critère
-        /// </summary>
-        public List<ListValue> valuesSelected { get; set; }
-
-        public override String ToString()
-        {
-            return String.Join(" + ", this.valuesSelected.Select(ev => ev.label).ToList<String>());
-        }
-
-        #region Implémentation de IEquatable http://msdn.microsoft.com/en-us/library/ms131190.aspx
-
-        /// <summary>
-        /// Méthode permettant la comparaison de 2 Criterium
-        /// </summary>
-        /// <param name="compCriter">Filtre à comparer</param>
-        public bool Equals(Criterium compCriter)
-        {
-            if (compCriter == null)
-                return false;
-
-            return ((this.entityID == compCriter.entityID) && this.valuesSelected.SequenceEqual(compCriter.valuesSelected));
-        }
-
-        public override bool Equals(Object obj)
-        {
-            if (obj == null)
-                return false;
-
-            Criterium compCriter = obj as Criterium;
-            if (compCriter == null)
-                return false;
-            else
-                return Equals(compCriter);
-        }
-
-        #endregion
-    }
-
     public class Filtre : IEquatable<Filtre>
     {
         /// <summary>
         /// Type du filtre: 1=Critères, 2=Recherche
-        /// Default value is 1.
+        /// Default value is 1
         /// </summary>
         public int type { get { return _type; } }
         private int _type = 1;
@@ -66,8 +21,8 @@ namespace TaskLeader.BO
         private DB db { get { return TrayIcon.dbs[this.dbName]; } }
 
         // Tableau qui donne la liste des critères sélectionnés autre que ALL
-        private List<Criterium> _criteria;
-        public List<Criterium> criteria
+        private Dictionary<int, List<ListValue>> _criteria;
+        public Dictionary<int, List<ListValue>> criteria
         {
             get
             {
@@ -146,18 +101,23 @@ namespace TaskLeader.BO
         /// Retourne un Dictionnaire DBentity => Valeur décrivant le filtre.
         /// Valeur = "" si All sélectionné.
         /// </summary>
-        public Dictionary<String, String> getDescription()
+        public Dictionary<String, String> description
         {
-            Dictionary<String, String> description = new Dictionary<string, string>();
-            Dictionary<DBentity, Criterium> criteriaList = criteria.ToDictionary(c => this.db.entities[c.entityID], c => c);
+            get
+            {
+                Dictionary<String, String> description = new Dictionary<string, string>();
 
-            foreach (DBentity entity in this.db.listEntities)
-                if (criteriaList.ContainsKey(entity))
-                    description.Add(entity.nom, criteriaList[entity].ToString());
-                else
-                    description.Add(entity.nom, "");
+                foreach (DBentity entity in this.db.listEntities)
+                    if (this._criteria.ContainsKey(entity.id))
+                        description.Add(
+                            entity.nom,
+                            String.Join(" + ", this.criteria[entity.id].Select(ev => ev.label).ToList<String>())
+                        );
+                    else
+                        description.Add(entity.nom, "");
 
-            return description;
+                return description;
+            }
         }
 
         #region Implémentation de IEquatable http://msdn.microsoft.com/en-us/library/ms131190.aspx

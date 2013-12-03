@@ -71,20 +71,20 @@ namespace TaskLeader.DAL
                         SQLCmd.ExecuteNonQuery();
 
                         // On insère ensuite dans les tables annexes les données sélectionnées
-                        foreach (Criterium critere in filtre.criteria)
+                        foreach (var critere in filtre.criteria)
                         {
-                            if (critere.valuesSelected.Count > 0)
+                            if (critere.Value.Count > 0)
                             {
                                 // On crée la requête pour insertion des critères dans les tables annexes
                                 String requete = "INSERT INTO Filtres_cont VALUES "+
-                                    "((SELECT max(id) FROM Filtres)," + critere.entityID + ",@entityValueID);";
+                                    "((SELECT max(id) FROM Filtres)," + critere.Key + ",@entityValueID);";
                                 // On récupère le rowid du filtre frâichement créé
 
                                 SQLCmd.CommandText = requete;
                                 SQLiteParameter p_ValueID = new SQLiteParameter("@entityValueID");
                                 SQLCmd.Parameters.Add(p_ValueID);
 
-                                foreach (ListValue item in critere.valuesSelected)
+                                foreach (ListValue item in critere.Value)
                                 {
                                     p_ValueID.Value = item.id;
                                     SQLCmd.ExecuteNonQuery();
@@ -93,7 +93,7 @@ namespace TaskLeader.DAL
                             else
                             {
                                 SQLCmd.CommandText = "INSERT INTO Filtres_cont (filtreID,entityID) " +
-                                    "VALUES ((SELECT max(id) FROM Filtres)," + critere.entityID + ");";
+                                    "VALUES ((SELECT max(id) FROM Filtres)," + critere.Key + ");";
                                 SQLCmd.ExecuteNonQuery();
                             }
                         }
@@ -388,6 +388,8 @@ namespace TaskLeader.DAL
         // Mise à jour d'une action (flexible)
         public int updateAction(TLaction action)
         {
+            int result = 0;
+
             using (SQLiteConnection SQLC = new SQLiteConnection(this._connectionString))
             {
                 if (File.Exists(this.path))
@@ -399,7 +401,6 @@ namespace TaskLeader.DAL
                 {
                     using (SQLiteCommand SQLCmd = new SQLiteCommand(SQLC))
                     {
-                        //UPDATE Actions SET entityValue=XX WHERE id=N AND entityID=3
                         foreach (int entityID in this.entities.Keys)
                             if (action.hasChanged(entityID))
                             {
@@ -407,12 +408,12 @@ namespace TaskLeader.DAL
                                 if (value == "NULL") //Si valeur NULL, on supprime toutes les lignes
                                 {
                                     SQLCmd.CommandText = "DELETE FROM Actions WHERE id=" + action.ID + " AND entityID=" + entityID + ";";
-                                    SQLCmd.ExecuteNonQuery();
+                                    result += SQLCmd.ExecuteNonQuery();
                                 }
                                 else //Si valeur non nulle, INSERT OR UPDATE
                                 {
-                                    SQLCmd.CommandText = "INSERT OR REPLACE INTO Actions VALUES(" + action.ID + " AND entityID=" + entityID + ";";
-                                    SQLCmd.ExecuteNonQuery();
+                                    SQLCmd.CommandText = "INSERT OR REPLACE INTO Actions VALUES(" + action.ID + "," + entityID + "," + value + ");";
+                                    result += SQLCmd.ExecuteNonQuery();
                                 }
                             }
                     }
@@ -420,17 +421,9 @@ namespace TaskLeader.DAL
                 }
             }
 
-            String requete;
-            if (updatePart.Length > 0)
-            {
-                requete = "UPDATE Actions SET " + updatePart.Substring(0, updatePart.Length - 1) + " WHERE id='" + action.ID + "'";
-
-                int result = execSQL(requete);
-                this.OnActionEdited(action.ID);
-                return result;
-            }
-            else
-                return 0;
+            if (result > 0)
+                this.OnActionEdited(action.ID);           
+            return result;
         }
 
         #endregion

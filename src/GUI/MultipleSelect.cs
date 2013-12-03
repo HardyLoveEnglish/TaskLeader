@@ -101,6 +101,11 @@ namespace TaskLeader.GUI
         /// </summary>
 
         private DBentity type;
+        /// <summary>
+        /// ID de l'entité représentée par ce widget
+        /// </summary>
+        public int entityID { get { return type.id; } }
+
         private DB db;
 
         /// <summary>
@@ -208,16 +213,15 @@ namespace TaskLeader.GUI
         /// <summary>
         /// Renvoie le Criterium correspondant ou null
         /// </summary>
-        public Criterium getCriterium()
+        public List<ListValue> criterium
         {
-            if (!box.Checked)
-                return new Criterium()
-                {
-                    entityID = type.id,
-                    valuesSelected = liste.CheckedItems.Cast<ListValue>().ToList<ListValue>()
-                };
-            else
-                return null;
+            get
+            {
+                if (!box.Checked)
+                    return liste.CheckedItems.Cast<ListValue>().ToList<ListValue>();
+                else
+                    return null;
+            }
         }
 
         /// <summary>
