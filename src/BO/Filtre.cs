@@ -65,9 +65,17 @@ namespace TaskLeader.BO
             // Typage des colonnes pour éviter les problèmes de Merge
             DataTable data = dbData.Clone(); // Copie du schéma uniquement
             foreach (DataColumn column in data.Columns)
+            {
+                //Nom de la colonne = nom de l'entité pour faciliter le merge
+                column.ColumnName = this.db.entities[Int32.Parse(column.ColumnName)].nom;
                 column.DataType = typeof(String);
-            //TODO:typage des colonnes de type Date
-            data.Columns["Deadline"].DataType = typeof(DateTime);
+            }
+
+            //Typage des colonnes de type date
+            foreach (DBentity entity in this.db.entities.Values)
+                if (entity.type == "Date")
+                    data.Columns[entity.id.ToString()].DataType = typeof(DateTime);
+
             foreach (DataRow row in dbData.Rows)
                 data.ImportRow(row);
 

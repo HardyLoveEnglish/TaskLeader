@@ -66,6 +66,36 @@ namespace TaskLeader.BO
                     return null;
             }
         }
+
+        /// <summary>
+        /// Création de la DataGridViewColum correspondante
+        /// </summary>
+        public DataGridViewColumn getDGWcol()
+        {
+            DataGridViewColumn col;
+
+            switch (this.type)
+            {
+                case "List":
+                    col = new DataGridViewTextBoxColumn();
+                    break;
+                case "Text":
+                    col = new DataGridViewTextBoxColumn();
+                    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                    break;
+                case "Date":
+                    col = new DataGridViewDateColumn();
+                    break;
+                default:
+                    col = new DataGridViewColumn();
+                    break;
+            }
+
+            col.Name = this.id.ToString();
+            col.HeaderText = this.nom;
+            col.DataPropertyName = this.nom;
+            return col;
+        }
     }
 
     public abstract class EntityValue

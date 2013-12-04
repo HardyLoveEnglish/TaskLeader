@@ -12,6 +12,88 @@ using TaskLeader.BLL;
 
 namespace TaskLeader.GUI
 {
+    #region DataGridViewColumn de type date
+
+    public class DataGridViewDateCell : DataGridViewTextBoxCell
+    {
+        public DataGridViewDateCell()
+            :base()
+        {
+            this.ToolTipText = "Modifier la date";
+        }
+        
+        protected override object GetFormattedValue(
+            object value,
+            int rowIndex,
+            ref DataGridViewCellStyle cellStyle,
+            System.ComponentModel.TypeConverter valueTypeConverter,
+            System.ComponentModel.TypeConverter formattedValueTypeConverter, 
+            DataGridViewDataErrorContexts context)
+        {
+            DateTime date;
+
+            if (DateTime.TryParse(this.Value.ToString(), out date))
+            {
+                // Récupération du delta en jours
+                int diff = (date.Date - DateTime.Now.Date).Days;
+
+                // Modification de la mise en forme des cellules
+                if (diff < 0) // En retard
+                {
+                    cellStyle.ForeColor = Color.Red; // Affichage de la date en rouge
+                    cellStyle.Font = new Font(cellStyle.Font, FontStyle.Bold); // en gras
+                    cellStyle.SelectionForeColor = Color.DarkRed; // en darkRed sur séléction                    
+                }
+                else if (diff == 0) // Jour même
+                {
+                    cellStyle.ForeColor = Color.DarkOrange; // Affichage de la date en orange
+                    cellStyle.Font = new Font(cellStyle.Font, FontStyle.Bold);
+                    cellStyle.SelectionForeColor = Color.SaddleBrown; // en darkRed sur séléction 
+                }
+                else if (diff > 0 && diff <= Int32.Parse(ConfigurationManager.AppSettings["P1length"])) // Dans le futur "proche"
+                {
+                    cellStyle.ForeColor = Color.DarkGreen;
+                    cellStyle.Font = new Font(cellStyle.Font, FontStyle.Bold); // en gras
+                }
+
+                // Modification du contenu des cellules
+                if (diff == 0) // Aujourd'hui
+                    return date.ToShortDateString() + Environment.NewLine + "Today"; // Valeur modifiée      
+                else if (diff > 0)// Dans le futur
+                    return date.ToShortDateString() + Environment.NewLine + "+ " + diff.ToString() + " jours"; // Valeur modifiée
+                else
+                    return this.Value;
+            }
+            else
+                return this.Value;
+
+        }
+
+        protected override void OnClick(DataGridViewCellEventArgs e)
+        {
+            DataRowView row = this.OwningRow.DataBoundItem as DataRowView;
+
+            base.OnClick(e);
+            //grilleData.Cursor = Cursors.Default;
+            new ComplexTooltip(
+                new DatePickerPopup(
+                    new TLaction(row["id"].ToString(),row["DB"].ToString()),
+                    Int32.Parse(this.OwningColumn.Name)
+                )
+            ).Show();
+        }
+    }
+
+    public class DataGridViewDateColumn : DataGridViewTextBoxColumn
+    {
+        public DataGridViewDateColumn()
+        {
+            this.CellTemplate = new DataGridViewDateCell();
+        }
+    }
+
+    #endregion
+
     public partial class Grille : UserControl
     {
         /// <summary>
@@ -34,39 +116,22 @@ namespace TaskLeader.GUI
         // Récupération de la DataSource de grilleData
         private DataTable mergeTable { get { return this.grilleData.DataSource as DataTable; } }
 
-        /// <summary>
-        /// Retourne une DataGridViewTextBoxColumn à partir du nom de la colonne fournie
-        /// </summary>
-        private DataGridViewTextBoxColumn createSimpleColumn(String name, String property)
-        {
-            DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn();
-            col.Name = name;
-            col.DataPropertyName = property;
-
-            return col;
-        }
-
         public Grille()
         {
             InitializeComponent();
 
             this.grilleData.AutoGenerateColumns = false; //Les colonnes sont créées manuellement
-
-            grilleData.Columns.Insert(0, this.createSimpleColumn("Ref","Ref"));
+            
+            DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn();
+            col.Name = "Ref";
+            col.DataPropertyName = "Ref";
+            grilleData.Columns.Insert(0, col);
 
             // Création de la colonne des liens
             DataGridViewImageColumn linkCol = new DataGridViewImageColumn();
             linkCol.Name = "Liens";
             linkCol.DataPropertyName = "Liens";
             grilleData.Columns.Insert(1, linkCol);
-
-            grilleData.Columns.Insert(1, this.createSimpleColumn("Contexte"));
-            grilleData.Columns.Insert(2, this.createSimpleColumn("Sujet"));
-            grilleData.Columns.Insert(3, this.createSimpleColumn("Titre"));
-            grilleData.Columns["Titre"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            grilleData.Columns.Insert(5, this.createSimpleColumn("Deadline"));
-            grilleData.Columns.Insert(6, this.createSimpleColumn("Destinataire"));
-            grilleData.Columns.Insert(7, this.createSimpleColumn("Statut"));
 
             this.grilleData.DataSource = new DataTable();
 
@@ -83,9 +148,12 @@ namespace TaskLeader.GUI
             this.data.Add(filtre, filtre.getActions()); // Récupération des résultats du filtre et association au tableau
             TrayIcon.dbs[filtre.dbName].ActionEdited += new ActionEditedEventHandler(actionEdited); // Hook des éditions d'actions de la base correspondante
 
-            this.mergeTable.Merge(this.data[filtre]);
+            // Création des DataGridViewColumn manquantes
+            foreach (DBentity entity in TrayIcon.dbs[filtre.dbName].entities.Values)
+                if (!grilleData.Columns.Contains(entity.nom)) // Si nouvelle colonne, création d'une nouvelle DataGridViewColumn               
+                    grilleData.Columns.Insert(this.grilleData.Columns.Count, entity.getDGWcol());
 
-            this.mergeTable.DefaultView.Sort = "Deadline ASC"; // Tri sur les dates à chaque ajout (même si un autre filtre est en place)
+            this.mergeTable.Merge(this.data[filtre]);
             this.grilleData.Focus();
 
             return this.mergeTable.Rows.Count;
@@ -100,7 +168,16 @@ namespace TaskLeader.GUI
             this.data.Remove(filtre); // Suppression de la table du DataSet
             TrayIcon.dbs[filtre.dbName].ActionEdited -= new ActionEditedEventHandler(actionEdited);
 
-            this.mergeTable.Clear(); // Efface toutes les données de la table merge
+            this.mergeTable.Clear(); // Efface toutes les données de la table merge       
+            for (int i = 2; i < this.grilleData.Columns.Count; i++)
+                this.grilleData.Columns.RemoveAt(i); // Suppression de toutes les colonnes dont l'ID est > 2
+
+            // Création de toutes les DataGridViewColumn
+            foreach(Filtre filter in this.data.Keys)
+                foreach (DBentity entity in TrayIcon.dbs[filter.dbName].entities.Values)
+                    if (!grilleData.Columns.Contains(entity.nom)) // Si nouvelle colonne, création d'une nouvelle DataGridViewColumn
+                        grilleData.Columns.Insert(this.grilleData.Columns.Count, entity.getDGWcol());
+
             foreach (DataTable table in this.data.Values)
                 this.mergeTable.Merge(table); // Merge des tables restants dans le dataset
 
@@ -157,46 +234,8 @@ namespace TaskLeader.GUI
         // Mise en forme des cellules sous certaines conditions
         private void grilleData_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            DateTime date;
+            // Gestion de la colonne PJ: TODO: créer une classe dérivée
 
-            // Association du tooltip
-            if (grilleData.Columns[e.ColumnIndex].Name.Equals("Deadline"))
-                grilleData[e.ColumnIndex, e.RowIndex].ToolTipText = "Modifier la date";
-
-            #region Gestion de la colonne Deadline
-            if (grilleData.Columns[e.ColumnIndex].Name.Equals("Deadline") && DateTime.TryParse(e.Value.ToString(), out date))
-            {
-                // Récupération du delta en jours
-                int diff = (date.Date - DateTime.Now.Date).Days;
-
-                // Modification du contenu des cellules
-                if (diff == 0) // Aujourd'hui
-                    e.Value = date.ToShortDateString() + Environment.NewLine + "Today"; // Valeur modifiée      
-                else if (diff > 0)// Dans le futur
-                    e.Value = date.ToShortDateString() + Environment.NewLine + "+ " + diff.ToString() + " jours"; // Valeur modifiée
-
-                // Modification de la mise en forme des cellules
-                if (diff < 0) // En retard
-                {
-                    e.CellStyle.ForeColor = Color.Red; // Affichage de la date en rouge
-                    e.CellStyle.Font = new Font(e.CellStyle.Font, FontStyle.Bold); // en gras
-                    e.CellStyle.SelectionForeColor = Color.DarkRed; // en darkRed sur séléction                    
-                }
-                else if (diff == 0) // Jour même
-                {
-                    e.CellStyle.ForeColor = Color.DarkOrange; // Affichage de la date en orange
-                    e.CellStyle.Font = new Font(e.CellStyle.Font, FontStyle.Bold);
-                    e.CellStyle.SelectionForeColor = Color.SaddleBrown; // en darkRed sur séléction 
-                }
-                else if (diff > 0 && diff <= Int32.Parse(ConfigurationManager.AppSettings["P1length"])) // Dans le futur "proche"
-                {
-                    e.CellStyle.ForeColor = Color.DarkGreen;
-                    e.CellStyle.Font = new Font(e.CellStyle.Font, FontStyle.Bold); // en gras
-                }
-            }
-            #endregion
-
-            #region Gestion de la colonne PJ
             if (grilleData.Columns[e.ColumnIndex].Name.Equals("Liens"))
             {
                 switch (e.Value.ToString())
@@ -223,7 +262,6 @@ namespace TaskLeader.GUI
                         break;
                 }
             }
-            #endregion
         }
 
         // Gestion des clicks sur le tableau d'actions
@@ -258,18 +296,6 @@ namespace TaskLeader.GUI
 
                     linksContext.Show(Cursor.Position); // Affichage du menu contextuel de liste
                 }
-            }
-
-            if (e.Button == MouseButtons.Left && // Click gauche
-                grilleData.Columns[e.ColumnIndex].Name.Equals("Deadline") && // Colonne "Deadline"
-                e.RowIndex >= 0) // Ce n'est pas la ligne des headers // Cellule non vide
-            {
-                grilleData.Cursor = Cursors.Default;
-                new ComplexTooltip(
-                    new DatePickerPopup(
-                        new TLaction(this.getDataFromRow(e.RowIndex, "id"), this.getDataFromRow(e.RowIndex, "DB"))
-                    )
-                ).Show();
             }
         }
 

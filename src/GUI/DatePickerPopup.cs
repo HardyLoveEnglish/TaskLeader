@@ -44,7 +44,7 @@ namespace TaskLeader.GUI
             calendar.Visible = !noDueDate.Checked;
         }
 
-        // Sauvegarde de la nouvelle deadline
+        // Sauvegarde de la nouvelle date
         private void validBut_Click(object sender, System.EventArgs e)
         {
             // Update de la DueDate que si c'est nécessaire
