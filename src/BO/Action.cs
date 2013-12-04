@@ -66,7 +66,10 @@ namespace TaskLeader.BO
         /// </summary>
         public EntityValue getValue(int entityID)
         {
-            return values[entityID];
+            if (values.ContainsKey(entityID))
+                return values[entityID];
+            else
+                return this.db.entities[entityID].getEntityValue("");
         }
 
         /// <summary>

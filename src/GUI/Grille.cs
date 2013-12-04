@@ -32,7 +32,7 @@ namespace TaskLeader.GUI
         {
             DateTime date;
 
-            if (DateTime.TryParse(this.Value.ToString(), out date))
+            if (DateTime.TryParse(value.ToString(), out date))
             {
                 // Récupération du delta en jours
                 int diff = (date.Date - DateTime.Now.Date).Days;
@@ -62,18 +62,18 @@ namespace TaskLeader.GUI
                 else if (diff > 0)// Dans le futur
                     return date.ToShortDateString() + Environment.NewLine + "+ " + diff.ToString() + " jours"; // Valeur modifiée
                 else
-                    return this.Value;
+                    return date.ToShortDateString();
             }
             else
-                return this.Value;
+                return value.ToString();
 
         }
 
         protected override void OnClick(DataGridViewCellEventArgs e)
         {
-            DataRowView row = this.OwningRow.DataBoundItem as DataRowView;
-
             base.OnClick(e);
+
+            DataRowView row = this.OwningRow.DataBoundItem as DataRowView;
             //grilleData.Cursor = Cursors.Default;
             new ComplexTooltip(
                 new DatePickerPopup(
@@ -81,6 +81,18 @@ namespace TaskLeader.GUI
                     Int32.Parse(this.OwningColumn.Name)
                 )
             ).Show();
+        }
+
+        protected override void OnMouseEnter(int rowIndex)
+        {
+            base.OnMouseEnter(rowIndex);
+            this.OwningColumn.DataGridView.Cursor = Cursors.Hand;
+        }
+
+        protected override void OnMouseLeave(int rowIndex)
+        {
+            base.OnMouseLeave(rowIndex);
+            this.OwningColumn.DataGridView.Cursor = Cursors.Default;
         }
     }
 
@@ -150,7 +162,7 @@ namespace TaskLeader.GUI
 
             // Création des DataGridViewColumn manquantes
             foreach (DBentity entity in TrayIcon.dbs[filtre.dbName].entities.Values)
-                if (!grilleData.Columns.Contains(entity.nom)) // Si nouvelle colonne, création d'une nouvelle DataGridViewColumn               
+                if (!grilleData.Columns.Contains(entity.id.ToString())) // Si nouvelle colonne, création d'une nouvelle DataGridViewColumn               
                     grilleData.Columns.Insert(this.grilleData.Columns.Count, entity.getDGWcol());
 
             this.mergeTable.Merge(this.data[filtre]);
@@ -168,14 +180,14 @@ namespace TaskLeader.GUI
             this.data.Remove(filtre); // Suppression de la table du DataSet
             TrayIcon.dbs[filtre.dbName].ActionEdited -= new ActionEditedEventHandler(actionEdited);
 
-            this.mergeTable.Clear(); // Efface toutes les données de la table merge       
-            for (int i = 2; i < this.grilleData.Columns.Count; i++)
-                this.grilleData.Columns.RemoveAt(i); // Suppression de toutes les colonnes dont l'ID est > 2
+            this.grilleData.DataSource = new DataTable(); // Efface toutes les données de la table merge
+            while (this.grilleData.Columns.Count > 2)
+                this.grilleData.Columns.RemoveAt(2); // Suppression de toutes les colonnes dont l'ID est > 2
 
             // Création de toutes les DataGridViewColumn
             foreach(Filtre filter in this.data.Keys)
                 foreach (DBentity entity in TrayIcon.dbs[filter.dbName].entities.Values)
-                    if (!grilleData.Columns.Contains(entity.nom)) // Si nouvelle colonne, création d'une nouvelle DataGridViewColumn
+                    if (!grilleData.Columns.Contains(entity.id.ToString())) // Si nouvelle colonne, création d'une nouvelle DataGridViewColumn
                         grilleData.Columns.Insert(this.grilleData.Columns.Count, entity.getDGWcol());
 
             foreach (DataTable table in this.data.Values)
@@ -235,12 +247,11 @@ namespace TaskLeader.GUI
         private void grilleData_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             // Gestion de la colonne PJ: TODO: créer une classe dérivée
-
             if (grilleData.Columns[e.ColumnIndex].Name.Equals("Liens"))
             {
                 switch (e.Value.ToString())
                 {
-                    case ("0"):
+                    case (""):
                         e.Value = null; // Vidage la cellule
                         e.CellStyle.NullValue = null; // Aucun affichage si cellule vide
                         grilleData[e.ColumnIndex, e.RowIndex].ToolTipText = String.Empty;
@@ -305,13 +316,9 @@ namespace TaskLeader.GUI
             bool pjActivated =
                 grilleData.Columns[e.ColumnIndex].Name.Equals("Liens") &&
                 e.RowIndex >= 0 &&
-                grilleData[e.ColumnIndex, e.RowIndex].Value.ToString() != "0";
+                grilleData[e.ColumnIndex, e.RowIndex].Value.ToString() != "";
 
-            bool dateActivated =
-                grilleData.Columns[e.ColumnIndex].Name.Equals("Deadline") &&
-                e.RowIndex >= 0;
-
-            if (pjActivated || dateActivated)
+            if (pjActivated)
                 grilleData.Cursor = Cursors.Hand;
         }
 
@@ -320,13 +327,9 @@ namespace TaskLeader.GUI
             bool pjActivated =
                 grilleData.Columns[e.ColumnIndex].Name.Equals("Liens") &&
                 e.RowIndex >= 0 &&
-                grilleData[e.ColumnIndex, e.RowIndex].Value.ToString() != "0";
+                grilleData[e.ColumnIndex, e.RowIndex].Value.ToString() != "";
 
-            bool dateActivated =
-                grilleData.Columns[e.ColumnIndex].Name.Equals("Deadline") &&
-                e.RowIndex >= 0;
-
-            if (pjActivated || dateActivated)
+            if (pjActivated)
                 grilleData.Cursor = Cursors.Default;
         }
 

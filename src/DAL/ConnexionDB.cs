@@ -20,7 +20,7 @@ namespace TaskLeader.DAL
         /// <summary>
         /// Dictionnaire entityID => DBentity des entités de cette base
         /// </summary>
-        public Dictionary<int,DBentity> entities;
+        public Dictionary<int,DBentity> entities = new Dictionary<int,DBentity>();
         /// <summary>
         /// Liste des DBentity de type 'List'.
         /// /!\ L'index dans la liste n'est pas l'id de l'entité
@@ -37,15 +37,15 @@ namespace TaskLeader.DAL
             this.path = System.IO.Path.GetFullPath(chemin);
             this.name = nom;
 
-            this.getEntities();
-            this.listEntities = entities.Where(kvp => kvp.Value.type == "List")
-                    .ToDictionary(kvp => kvp.Key,kvp => kvp.Value).Values
-                    .ToList<DBentity>().ToArray();
-
             // ConnectionString definition
             _builder.DataSource = this.path;
             _builder.FailIfMissing = true;
             _builder.Pooling = true;
+
+            this.getEntities();
+            this.listEntities = entities.Where(kvp => kvp.Value.type == "List")
+                    .ToDictionary(kvp => kvp.Key,kvp => kvp.Value).Values
+                    .ToList<DBentity>().ToArray();
 
             // Création des piles correspondant aux entities List
             foreach (DBentity entity in this.listEntities)

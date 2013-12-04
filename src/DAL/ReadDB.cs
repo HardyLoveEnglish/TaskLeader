@@ -81,11 +81,8 @@ namespace TaskLeader.DAL
             }
             catch (Exception Ex)
             {
-                SQLiteException ex = Ex as SQLiteException;
-
                 // On affiche l'erreur.
                 String message = requete + Environment.NewLine +
-                    ex.ErrorCode.ToString() + Environment.NewLine +
                     Ex.Message + Environment.NewLine +
                     Ex.StackTrace;
 
@@ -250,13 +247,13 @@ namespace TaskLeader.DAL
 
             foreach (DataRow row in resultat.Rows)
             {
-                int entityID = (int)row["entityID"];
+                int entityID = Convert.ToInt32(row["entityID"]);
 
-                if (row["entityValue"] == null)
+                if (row.IsNull("entityValue"))
                     data[entityID] = null;
                 else
                 {
-                    ListValue value = new ListValue() { id = (int)row["entityValue"], label = row["label"] as String };
+                    ListValue value = new ListValue() { id = Convert.ToInt32(row["entityValue"]), label = row["label"] as String };
                     if (data.ContainsKey(entityID))
                         data[entityID].Add(value);
                     else
@@ -305,12 +302,12 @@ namespace TaskLeader.DAL
             DataTable results = getTable("SELECT id,label,contentType,parentID FROM Entities;");
             foreach (DataRow row in results.Rows)
             {
-                int id = (int)row["id"];
+                int id = Convert.ToInt32(row["id"]);
                 this.entities.Add(id,new DBentity {
                     id = id,
                     nom = row["label"] as String,
                     type = row["contentType"] as String,
-                    parentID = (int)row["parentID"]
+                    parentID = Convert.ToInt32(row["parentID"])
                 });
             }
         }
@@ -336,8 +333,8 @@ namespace TaskLeader.DAL
 
             foreach (DataRow row in resultats.Rows)
                 result.Add(new ListValue() {
-                    id = (int)row["id"],
-                    label = (String)row["label"]
+                    id = Convert.ToInt32(row["id"]),
+                    label = row["label"] as String
                 });
 
             return result;
@@ -358,7 +355,7 @@ namespace TaskLeader.DAL
 
             foreach (DataRow row in resultats.Rows)
             {
-                int id = (int)row["entityID"];
+                int id = Convert.ToInt32(row["entityID"]);
                 data.Add(
                     id,
                     this.entities[id].getEntityValue(
@@ -382,17 +379,21 @@ namespace TaskLeader.DAL
         private String getActionsRequest(String WHEREclause)
         {
             // Création de la requête de filtrage
-            String requete = "SELECT a.id,";
+            String requete = "SELECT a.id,Pj.num as 'Liens',";
 
             // Définition des colonnes suivantes
             foreach (int entityID in this.entities.Keys)
                 if (this.entities[entityID].type == "List")
                     requete += "MAX(CASE WHEN a.entityID = " + entityID + " THEN v.label ELSE NULL END) AS '" + entityID + "',";
+                else if (this.entities[entityID].type == "Date")
+                    requete += "MAX(CASE WHEN a.entityID = " + entityID + " THEN strftime(\"%d-%m-%Y\",a.entityValue) ELSE NULL END) AS '" + entityID + "',";
                 else
                     requete += "MAX(CASE WHEN a.entityID = " + entityID + " THEN a.entityValue ELSE NULL END) AS '" + entityID + "',";
             requete = requete.Substring(0, requete.Length - 1); //Suppression de la dernière virgule
 
-            requete += " FROM Actions a LEFT JOIN Entities_values v ON v.id = a.entityValue ";
+            requete += " FROM Actions a " +
+                "LEFT OUTER JOIN Entities_values v ON v.id = a.entityValue " +
+                "LEFT OUTER JOIN (SELECT ActionID,count(rowid) AS num FROM Enclosures GROUP BY ActionID) pj ON a.id=pj.ActionID  ";
             requete += WHEREclause;
             requete += " GROUP BY a.id;";
 
@@ -444,7 +445,8 @@ namespace TaskLeader.DAL
                     " WHERE " + String.Join(" AND ", whereList) + ")";
             }
 
-            return getTable(getActionsRequest(where));
+            String requete = getActionsRequest(where);
+            return getTable(requete);
         }
         
         /// <summary>
@@ -462,7 +464,7 @@ namespace TaskLeader.DAL
 
             foreach (DataRow row in result.Rows)
             {
-                int entityID = (int)row["entityID"];
+                int entityID = Convert.ToInt32(row["entityID"]);
                 if (this.entities[entityID].type == "List")
                     values.Add(
                         entityID,
