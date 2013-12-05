@@ -133,7 +133,7 @@ namespace TaskLeader.DAL
         #region Gestion de la compatibilité
 
         // Vérification si la table est bien compatible
-        public bool isVersionComp(String version)
+        private bool isVersionComp(String version)
         {
             try
             {
@@ -175,7 +175,7 @@ namespace TaskLeader.DAL
         }
 
         // On vérifie la version la plus haute compatible avec cette base
-        public String getLastVerComp()
+        private String getLastVerComp()
         {
             try
             {

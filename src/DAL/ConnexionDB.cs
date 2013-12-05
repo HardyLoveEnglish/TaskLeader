@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using TaskLeader.BO;
+using TaskLeader.GUI;
 
 namespace TaskLeader.DAL
 {
@@ -14,7 +16,7 @@ namespace TaskLeader.DAL
     public partial class DB
     {
         // Caractéristiques de la DB
-        public String path = "";
+        private String path = "";
         public String name = "";
 
         /// <summary>
@@ -32,6 +34,42 @@ namespace TaskLeader.DAL
         /// </summary>
         public override string ToString() { return this.name; }
 
+        private void checkCompatibility()
+        {
+            // On vérifie que la version de la GUI est bien dans la base
+            bool baseCompatible = this.isVersionComp(Application.ProductVersion.Substring(0, 3));
+
+            if (!baseCompatible)
+                if (this.getLastVerComp() != "0.7")
+                    throw new Exception(this.path + Environment.NewLine + "La base est trop ancienne pour une migration");
+                else
+                {
+                    // Copie de sauvegarde du fichier db avant toute manip
+                    String sourceFile = this.path;
+                    String backupFile = sourceFile.Substring(0, sourceFile.Length - 4) + DateTime.Now.ToString("_Back-ddMMyyyy") + ".db3";
+                    //TODO: P0 ne fonctionne qu'avec des extensions de 3 digits !
+                    System.IO.File.Copy(sourceFile, backupFile, true);
+
+                    // Récupération du script de migration
+                    try
+                    {
+                        String script = System.IO.File.ReadAllText(@"db/Migration/07-08.sql", System.Text.Encoding.UTF8);
+
+                        // Exécution du script
+                        TrayIcon.afficheMessage("Migration", "Exécution du script de migration");
+                        this.execSQL(script);
+
+                        // Nettoyage de la base
+                        this.execSQL("VACUUM;");
+                        TrayIcon.afficheMessage("Migration", "Migration de la base effectuée");
+                    }
+                    catch
+                    {
+                        throw new Exception("Erreur lors de la migration"); //TODO:affiner le pourquoi
+                    }
+                }
+        }
+
         public DB(String chemin, String nom)
         {
             this.path = System.IO.Path.GetFullPath(chemin);
@@ -41,6 +79,10 @@ namespace TaskLeader.DAL
             _builder.DataSource = this.path;
             _builder.FailIfMissing = true;
             _builder.Pooling = true;
+
+            // Vérification de la compatibilité de la base
+            try { this.checkCompatibility(); }
+            catch (Exception e) { throw e; }
 
             this.getEntities();
             this.listEntities = entities.Where(kvp => kvp.Value.type == "List")
