@@ -62,6 +62,11 @@ namespace TaskLeader.BO
         private Dictionary<int, EntityValue> values = new Dictionary<int, EntityValue>();
 
         /// <summary>
+        /// Liste des entityID non nuls de cette action
+        /// </summary>
+        public List<int> entitiesIDs { get { return values.Select(kvp => kvp.Key).ToList<int>(); } }
+
+        /// <summary>
         /// Récupération de la valeur de 'entity' pour cette action
         /// </summary>
         public EntityValue getValue(int entityID)
@@ -69,7 +74,7 @@ namespace TaskLeader.BO
             if (values.ContainsKey(entityID))
                 return values[entityID];
             else
-                return this.db.entities[entityID].getEntityValue("");
+                return this.db.entities[entityID].getEntityValue();
         }
 
         /// <summary>
@@ -89,11 +94,19 @@ namespace TaskLeader.BO
         /// Assignation de 'value' à l'entité 'entity' de cette action
         /// </summary>
         public void setValue(int entityID, EntityValue value){
-            if (value != values[entityID])
+            if (values.ContainsKey(entityID))
             {
-                entityHasChanged[entityID] = this.initialStateFrozen;
-                values[entityID] = value;
-            }            
+                if (value != values[entityID])
+                {
+                    entityHasChanged[entityID] = this.initialStateFrozen;
+                    values[entityID] = value;
+                }
+            }
+            else
+            {
+                values.Add(entityID, value);
+                entityHasChanged.Add(entityID, this.initialStateFrozen);
+            }
         }
 
         #endregion
@@ -144,7 +157,7 @@ namespace TaskLeader.BO
         private void initValues(Dictionary<int,EntityValue> _values)
         {
             this.values = _values;
-            foreach (int entityID in this.db.entities.Keys)
+            foreach (int entityID in this.values.Keys) // Insertion des entités présentes dans values uniquement
             {
                 this.entityHasChanged.Add(entityID, false);
             }
@@ -202,7 +215,7 @@ namespace TaskLeader.BO
             foreach (DBentity entity in this.db.listEntities)
             {
                 int entityID = entity.id;
-                if (this.entityHasChanged[entityID])
+                if (this.values.ContainsKey(entityID) && this.entityHasChanged[entityID])
                     if (((ListValue)this.values[entityID]).id < 0)
                     {
                         if (entity.parentID > 0)

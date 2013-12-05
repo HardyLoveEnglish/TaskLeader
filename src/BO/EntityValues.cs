@@ -52,12 +52,12 @@ namespace TaskLeader.BO
         /// </summary>
         /// <param name="value">Valeur de l'entité: Date, Texte ou ID</param>
         /// <param name="label">Dans le cas d'un type List, valeur du label</param>
-        public EntityValue getEntityValue(String value, String label = "")
+        public EntityValue getEntityValue(String value ="", String label = "")
         {
             switch (this.type)
             {
                 case "List":
-                    return new ListValue() { id = Int32.Parse(value), label = label };
+                    return new ListValue(value, label);
                 case "Text":
                     return new TextValue() { value = value };
                 case "Date":
@@ -146,15 +146,21 @@ namespace TaskLeader.BO
         /// <summary>
         /// Id de la valeur dans la  base
         /// </summary>
-        public int id { get; set; }
+        private int _id;
+        public int id { get { return _id; } set { this._id = value; } }
+
         /// <summary>
         /// Valeur SQL de l'entité= ID !
+        /// 
         /// </summary>
         public override String sqlValue {
             get {
-                if (this.id > 0)
+                if (this._id < 0)
+                    throw new System.UnauthorizedAccessException("L'ID n'est pas instancié");
+
+                if (this._id > 0)
                     return this.id.ToString();
-                else
+                else // id=0
                     return "NULL";
             }
         }
@@ -164,6 +170,18 @@ namespace TaskLeader.BO
         /// </summary>
         public String label { get; set; }
         public String sqlLabel { get { return this.sqlFactory(this.label); } }
+
+        #region Constructors
+
+        public ListValue() { }
+
+        public ListValue(String value, String label)
+        {
+            Int32.TryParse(value, out this._id); //Si échec du parse (valeur nulle par exemple), _id=0
+            this.label = label;
+        }
+
+        #endregion
 
         public override String ToString()
         {

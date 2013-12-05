@@ -184,7 +184,7 @@
 		FROM Temp_values
 		WHERE oldID = (SELECT id FROM Statuts WHERE Defaut=1) AND entityID = 6
 	)
-	WHERE label='Destinataire';
+	WHERE label='Statut';
 	
 	-- Migration des actions
 	INSERT INTO Actions (id,entityID,entityValue)

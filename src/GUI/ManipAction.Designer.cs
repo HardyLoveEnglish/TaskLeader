@@ -56,10 +56,10 @@
             // 
             // saveButton
             // 
-            this.saveButton.Location = new System.Drawing.Point(3, 236);
-            this.saveButton.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
+            this.saveButton.Location = new System.Drawing.Point(645, 4);
+            this.saveButton.Margin = new System.Windows.Forms.Padding(350, 4, 10, 3);
             this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(81, 23);
+            this.saveButton.Size = new System.Drawing.Size(81, 28);
             this.saveButton.TabIndex = 21;
             this.saveButton.Text = "Sauvegarder";
             this.saveButton.UseVisualStyleBackColor = true;
@@ -68,8 +68,8 @@
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 400F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 286F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 430F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 250F));
             this.tableLayoutPanel1.Controls.Add(this.entitiesPanel, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel5, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel3, 1, 1);
@@ -79,7 +79,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 42F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 300F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(713, 368);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(746, 397);
             this.tableLayoutPanel1.TabIndex = 27;
             // 
             // entitiesPanel
@@ -88,7 +88,7 @@
             this.entitiesPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.entitiesPanel.Location = new System.Drawing.Point(3, 45);
             this.entitiesPanel.Name = "entitiesPanel";
-            this.entitiesPanel.Size = new System.Drawing.Size(394, 320);
+            this.entitiesPanel.Size = new System.Drawing.Size(424, 349);
             this.entitiesPanel.TabIndex = 17;
             // 
             // flowLayoutPanel5
@@ -97,10 +97,11 @@
             this.flowLayoutPanel5.Controls.Add(this.pictureBox1);
             this.flowLayoutPanel5.Controls.Add(this.label7);
             this.flowLayoutPanel5.Controls.Add(this.dbsBox);
+            this.flowLayoutPanel5.Controls.Add(this.saveButton);
             this.flowLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel5.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel5.Name = "flowLayoutPanel5";
-            this.flowLayoutPanel5.Size = new System.Drawing.Size(707, 36);
+            this.flowLayoutPanel5.Size = new System.Drawing.Size(740, 36);
             this.flowLayoutPanel5.TabIndex = 21;
             // 
             // pictureBox1
@@ -142,17 +143,17 @@
             this.flowLayoutPanel3.Controls.Add(this.addLinkBut);
             this.flowLayoutPanel3.Controls.Add(this.AddMailLabel);
             this.flowLayoutPanel3.Controls.Add(this.linksView);
-            this.flowLayoutPanel3.Controls.Add(this.saveButton);
             this.flowLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(403, 45);
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(433, 45);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(307, 320);
+            this.flowLayoutPanel3.Padding = new System.Windows.Forms.Padding(0, 50, 0, 0);
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(310, 349);
             this.flowLayoutPanel3.TabIndex = 19;
             // 
             // linksLabel
             // 
             this.linksLabel.AutoSize = true;
-            this.linksLabel.Location = new System.Drawing.Point(20, 8);
+            this.linksLabel.Location = new System.Drawing.Point(20, 58);
             this.linksLabel.Margin = new System.Windows.Forms.Padding(20, 8, 3, 0);
             this.linksLabel.Name = "linksLabel";
             this.linksLabel.Size = new System.Drawing.Size(35, 13);
@@ -163,7 +164,7 @@
             // 
             this.addMailBut.Image = global::TaskLeader.Properties.Resources.email_add;
             this.addMailBut.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.addMailBut.Location = new System.Drawing.Point(61, 3);
+            this.addMailBut.Location = new System.Drawing.Point(61, 53);
             this.addMailBut.Name = "addMailBut";
             this.addMailBut.Size = new System.Drawing.Size(90, 25);
             this.addMailBut.TabIndex = 28;
@@ -176,7 +177,7 @@
             // 
             this.addLinkBut.Image = global::TaskLeader.Properties.Resources.link_add;
             this.addLinkBut.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.addLinkBut.Location = new System.Drawing.Point(157, 3);
+            this.addLinkBut.Location = new System.Drawing.Point(157, 53);
             this.addLinkBut.Name = "addLinkBut";
             this.addLinkBut.Size = new System.Drawing.Size(115, 25);
             this.addLinkBut.TabIndex = 30;
@@ -188,7 +189,7 @@
             // AddMailLabel
             // 
             this.AddMailLabel.AutoSize = true;
-            this.AddMailLabel.Location = new System.Drawing.Point(278, 8);
+            this.AddMailLabel.Location = new System.Drawing.Point(278, 58);
             this.AddMailLabel.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
             this.AddMailLabel.Name = "AddMailLabel";
             this.AddMailLabel.Size = new System.Drawing.Size(25, 13);
@@ -204,7 +205,7 @@
             this.linksView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
             this.linksView.HoverSelection = true;
             this.linksView.LabelEdit = true;
-            this.linksView.Location = new System.Drawing.Point(3, 34);
+            this.linksView.Location = new System.Drawing.Point(3, 84);
             this.linksView.MultiSelect = false;
             this.linksView.Name = "linksView";
             this.linksView.Size = new System.Drawing.Size(300, 196);
@@ -256,7 +257,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(713, 368);
+            this.ClientSize = new System.Drawing.Size(746, 397);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;

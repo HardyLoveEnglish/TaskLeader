@@ -348,21 +348,22 @@ namespace TaskLeader.DAL
         {
             Dictionary<int, EntityValue> data = new Dictionary<int, EntityValue>();
 
-            String request = "SELECT e.id AS entityID,e.defaultValue AS value,f.label AS label "+
-                "FROM Entities e LEFT JOIN Entities_values f "+
+            String request = "SELECT e.id,e.defaultValue,f.label "+
+                "FROM Entities e LEFT OUTER JOIN Entities_values f "+
                 "ON e.defaultValue = f.id;";
             DataTable resultats = getTable(request);
 
             foreach (DataRow row in resultats.Rows)
             {
-                int id = Convert.ToInt32(row["entityID"]);
-                data.Add(
-                    id,
-                    this.entities[id].getEntityValue(
-                        row["value"] as String,
-                        row["label"] as String
-                    )
-                );
+                int id = Convert.ToInt32(row["id"]);
+                if (!row.IsNull("defaultValue"))
+                    data.Add(
+                        id,
+                        this.entities[id].getEntityValue(
+                            row["defaultValue"] as String,
+                            row["label"] as String
+                        )
+                    );
             }
             return data;
         }

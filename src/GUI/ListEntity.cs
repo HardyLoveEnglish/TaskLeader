@@ -27,8 +27,10 @@ namespace TaskLeader.GUI
 			get {
                 if (this.valuesList.SelectedIndex >= 0)
                     return this.valuesList.SelectedItem as ListValue;
-                else
+                else if (!String.IsNullOrWhiteSpace(this.valuesList.Text))
                     return new ListValue() { id = -1, label = this.valuesList.Text };
+                else
+                    return new ListValue() { id = 0 };
 			}
 		}
 
@@ -90,12 +92,12 @@ namespace TaskLeader.GUI
 
         private void newParentValue(object sender, EventArgs e)
         {
-            ListValue parentValue = ((ListEntity)sender).value as ListValue;
+            this.valuesList.Items.Clear(); // Dans tous les cas on clear la liste
+
+            ListEntity parent = ((ComboBox)sender).Parent.Parent as ListEntity;
+            ListValue parentValue = parent.value as ListValue;
             if (parentValue.id > 0)
-            {
-                this.valuesList.Items.Clear();
                 this.valuesList.Items.AddRange(_db.getEntitiesValues(this.entityID, parentValue.id).ToArray());
-            }
         }
 
         // Clear de la liste si le texte de la ComboBox est manuel

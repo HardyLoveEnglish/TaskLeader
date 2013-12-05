@@ -351,8 +351,6 @@ namespace TaskLeader.DAL
         /// <returns>ID de l'action</returns>
         public String insertAction(TLaction action)
         {
-            String actionID;
-
             using (SQLiteConnection SQLC = new SQLiteConnection(this._connectionString))
             {
                 if (File.Exists(this.path))
@@ -364,16 +362,20 @@ namespace TaskLeader.DAL
                 {
                     using (SQLiteCommand SQLCmd = new SQLiteCommand(SQLC))
                     {
-                        SQLCmd.CommandText = "SELECT max(id)+1 FROM Actions;";
-                        actionID = SQLCmd.ExecuteScalar() as String;
-
-                        foreach (int entityID in this.entities.Keys)
+                        bool first = true;
+                        foreach (int entityID in action.entitiesIDs)
                         {
                             String value = action.getValue(entityID).sqlValue;
                             if (value != "NULL")
                             {
                                 SQLCmd.CommandText = "INSERT INTO Actions (id,entityID,entityValue) " +
-                                    "VALUES (" + actionID + "," + entityID + "," + value + ");";
+                                    "SELECT max(id)";
+                                if (first)
+                                {
+                                    SQLCmd.CommandText += "+1"; // La première valeur insérée incrémentera l'ID
+                                    first = false;
+                                }
+                                SQLCmd.CommandText += "," + entityID + "," + value + " FROM Actions;";
                                 SQLCmd.ExecuteNonQuery();
                             }
                         }
@@ -381,6 +383,8 @@ namespace TaskLeader.DAL
                     mytransaction.Commit();
                 }
             }
+
+            String actionID = this.getInteger("SELECT max(id) FROM Actions;").ToString();
             this.OnActionEdited(actionID);
             return actionID;
         }
@@ -401,7 +405,7 @@ namespace TaskLeader.DAL
                 {
                     using (SQLiteCommand SQLCmd = new SQLiteCommand(SQLC))
                     {
-                        foreach (int entityID in this.entities.Keys)
+                        foreach (int entityID in action.entitiesIDs)
                             if (action.hasChanged(entityID))
                             {
                                 String value = action.getValue(entityID).sqlValue;
