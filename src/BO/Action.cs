@@ -157,6 +157,7 @@ namespace TaskLeader.BO
         private void initValues(Dictionary<int,EntityValue> _values)
         {
             this.values = _values;
+            this.entityHasChanged.Clear();
             foreach (int entityID in this.values.Keys) // Insertion des entités présentes dans values uniquement
             {
                 this.entityHasChanged.Add(entityID, false);

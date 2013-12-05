@@ -28,8 +28,14 @@ namespace TaskLeader.GUI
             // Préparation des widgets
             this.entitiesPanel.SuspendLayout();
 
-            foreach (var kvp in this.db.getDefault())
-                this.entitiesPanel.Controls.Add(this.db.entities[kvp.Key].getWidget(this.dbName, kvp.Value, this.entitiesPanel));
+            Dictionary<int,EntityValue> defaultValues = this.db.getDefault();
+            foreach (var kvp in this.db.entities)
+            {
+                if (defaultValues.ContainsKey(kvp.Key))
+                    this.entitiesPanel.Controls.Add(kvp.Value.getWidget(this.dbName, defaultValues[kvp.Key], this.entitiesPanel));
+                else
+                    this.entitiesPanel.Controls.Add(kvp.Value.getWidget(this.dbName, kvp.Value.getEntityValue(), this.entitiesPanel));
+            }
 
             this.entitiesPanel.ResumeLayout();
 
