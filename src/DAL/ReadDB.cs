@@ -239,7 +239,7 @@ namespace TaskLeader.DAL
             String titre = "'" + name.Replace("'", "''") + "'";
 
             String requete =
-                "SELECT c.entityID,c.entityValue,ev.label " +
+                "SELECT ev.entityID,c.entityValue,ev.label " +
                 "FROM Filtres f, Filtres_cont c " +
                 "LEFT JOIN Entities_values ev ON c.entityValue=ev.id " +
                 "WHERE c.filtreID = f.id AND f.titre=" + titre + ";";
@@ -269,7 +269,7 @@ namespace TaskLeader.DAL
         /// </summary>
         public String getDefaultFilterName()
         {
-            object[] result = getList("SELECT titre FROM Filtres WHERE defaut=1");
+            object[] result = getList("SELECT titre FROM Filtres WHERE id=(SELECT Valeur FROM Properties WHERE Cle='FiltreDefaut');");
             if (result.Length > 0)
                 return result[0] as String;
             else

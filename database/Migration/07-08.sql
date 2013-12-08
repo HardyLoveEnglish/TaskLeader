@@ -20,10 +20,9 @@
 	-- Création d'une table temporaire pour le transfert des filtres
 	CREATE TABLE [FiltresTemp](
 		[id] INTEGER PRIMARY KEY,
-		[titre] VARCHAR(100),
-		[defaut] BOOLEAN
+		[titre] VARCHAR(100)
 	);
-	INSERT INTO FiltresTemp SELECT id,Titre,Defaut FROM Filtres;
+	INSERT INTO FiltresTemp SELECT id,Titre FROM Filtres;
 	
 /* Mises à jour de la structure des tables */
 
@@ -45,6 +44,8 @@
 	);
 
 	-- Table des filtres
+	INSERT INTO Properties (Cle) VALUES('FiltreDefaut');
+	UPDATE Properties SET Valeur=(SELECT id FROM Filtres WHERE Defaut=1) WHERE Cle='FiltreDefaut';
 	DROP TABLE Filtres;
 	ALTER TABLE FiltresTemp RENAME TO Filtres;
 	
@@ -203,7 +204,16 @@
 	INSERT INTO Entities_values
 		SELECT id,entityID,label,parentID
 		FROM Temp_values;
-	
+
+/* Nettoyage de certaines valeurs inutiles */
+
+	-- Actions dont la valeur de certaines entités sont vides
+	DELETE FROM Actions WHERE entityValue='';
+	-- Actions dont certaines valeurs correspondent à des entités vides
+	DELETE FROM Actions WHERE entityValue IN (SELECT id FROM Entities_values WHERE label='');
+	-- Valeurs d'entités vides
+	DELETE FROM Entities_values WHERE label='';
+		
 /* Suppression des tables */
 
 DROP TABLE Temp_values;

@@ -115,7 +115,7 @@ namespace TaskLeader.DAL
         {
             //TODO: serait plus propre par un ID
             String nomFiltre = "'" + name.Replace("'", "''") + "'";
-            execSQL("UPDATE Filtre SET defaut=1 WHERE titre=" + nomFiltre + ";");
+            execSQL("UPDATE Properties SET Valeur=(SELECT id FROM Filtres WHERE titre=" + nomFiltre + ") WHERE Cle='FiltreDefaut';");
         }
 
         #endregion
