@@ -332,7 +332,7 @@ namespace TaskLeader.GUI
             this.pictureBox1.Image = TaskLeader.Properties.Resources.database;
             this.pictureBox1.Visible = true;
 
-            this.liste.Items.AddRange(this.db.getFilters().ToArray());
+            this.liste.Items.AddRange(this.db.getFilters());
             this.db.subscribe_NewValue("Filtre", new EventHandler(maj));
         }
 
@@ -342,7 +342,7 @@ namespace TaskLeader.GUI
         private void maj(object sender,EventArgs args)
         {
             this.liste.Items.Clear();
-            this.liste.Items.AddRange(this.db.getFilters().ToArray());
+            this.liste.Items.AddRange(this.db.getFilters());
         }
 
         public List<Filtre> getSelected()

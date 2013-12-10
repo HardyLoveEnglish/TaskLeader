@@ -14,7 +14,7 @@
 	);
 
 	-- Création d'une table temporaire pour le transfert du contenu des filtres
-	CREATE TEMPORARY TABLE Filtres_contTemp(FiltreID, FiltreType,SelectedID);
+	CREATE TEMPORARY TABLE Filtres_contTemp(FiltreID,FiltreType,SelectedID);
 	INSERT INTO Filtres_contTemp SELECT * FROM Filtres_cont;
 	
 	-- Création d'une table temporaire pour le transfert des filtres
@@ -30,17 +30,20 @@
 	DROP TABLE Actions;
 	CREATE TABLE [Actions](
 		[id] INTEGER NOT NULL,
-		[entityID] REFERENCES [Entities]([id]),
-		[entityValue] VARCHAR(500),
-		PRIMARY KEY(id,entityID)
+		[entityID] INTEGER NOT NULL,
+		[entityValue] VARCHAR(500) NOT NULL,
+		PRIMARY KEY(id,entityID),
+		FOREIGN KEY(entityID) REFERENCES Entities(id)
 	);
 
 	-- Table du contenu des filtres
 	DROP TABLE Filtres_cont;
 	CREATE TABLE [Filtres_cont](
-		[filtreID] REFERENCES [Filtres]([id]),
-		[entityID] REFERENCES [Entities]([id]),
-		[entityValue] VARCHAR(500)
+		[filtreID] INTEGER NOT NULL,
+		[entityID] INTEGER NOT NULL,
+		[entityValue] VARCHAR(500),
+		FOREIGN KEY(filtreID) REFERENCES Filtres(id),
+		FOREIGN KEY(entityID) REFERENCES Entities(id)		
 	);
 
 	-- Table des filtres
@@ -70,9 +73,10 @@
 	-- Valeurs des entités
 	CREATE TABLE [Entities_values](
 		[id] INTEGER PRIMARY KEY,
-		[entityID] REFERENCES [Entities]([id]),
+		[entityID] INTEGER NOT NULL,
 		[label] VARCHAR(50) NOT NULL, /* Pas forcément UNIQUE (sujets identiques mais pour des contextes différents) */
-		[parentID] INTEGER DEFAULT 0
+		[parentID] INTEGER DEFAULT 0,
+		FOREIGN KEY(entityID) REFERENCES Entities(id)	
 	);
 	
 /* Migration des contextes */

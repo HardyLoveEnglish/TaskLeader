@@ -23,7 +23,8 @@ namespace TaskLeader.GUI
         private void AdminDefaut_Load(object sender, EventArgs e)
         {        
             //Remplissage de la combo des filtres
-            filterCombo.Items.AddRange(db.getFiltersLabels());
+            filterCombo.Items.AddRange(db.getFilters());
+            filterCombo.Text = db.getDefaultFilterName();
 
             // Préparation des widgets
             this.entitiesPanel.SuspendLayout();
@@ -38,8 +39,6 @@ namespace TaskLeader.GUI
             }
 
             this.entitiesPanel.ResumeLayout();
-
-            filterCombo.Text = db.getDefaultFilterName();
         }
 
         private void saveBut_Click(object sender, EventArgs e)
@@ -51,7 +50,7 @@ namespace TaskLeader.GUI
                 updatedValues.Add(control.entityID, control.value);
 
             if (filterCombo.SelectedIndex > 0)
-                db.insertDefaultFilter(filterCombo.Text);
+                db.insertDefaultFilter(((Filtre)filterCombo.SelectedItem).id);
 
             // Sauvegarde
             db.insertDefaut(updatedValues);

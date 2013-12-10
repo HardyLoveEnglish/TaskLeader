@@ -19,29 +19,21 @@ namespace TaskLeader.DAL
             if (System.Configuration.ConfigurationManager.AppSettings["debugMode"] == "true")
                 MessageBox.Show(requete, "Requête", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            try
+            // Le code ci-dessous peut lever des exceptions!
+            using (SQLiteConnection SQLC = new SQLiteConnection(this._connectionString))
             {
-                using (SQLiteConnection SQLC = new SQLiteConnection(this._connectionString))
-                {
-                    if (File.Exists(this.path))
-                        SQLC.Open();
-                    else
-                        throw new Exception("Base inaccessible");
+                if (File.Exists(this.path))
+                    SQLC.Open();
+                else
+                    throw new Exception("Base inaccessible");
 
-                    using (SQLiteCommand SQLCmd = new SQLiteCommand(SQLC))
-                    {
-                        // Création d'une nouvelle commande à partir de la connexion
-                        SQLCmd.CommandText = requete;
-                        //Exécution de la commande
-                        return SQLCmd.ExecuteNonQuery();
-                    }
+                using (SQLiteCommand SQLCmd = new SQLiteCommand(SQLC))
+                {
+                    // Création d'une nouvelle commande à partir de la connexion
+                    SQLCmd.CommandText = requete;
+                    //Exécution de la commande
+                    return SQLCmd.ExecuteNonQuery();
                 }
-            }
-            catch (Exception Ex)
-            {
-                // On affiche l'erreur.
-                MessageBox.Show(Ex.Message, "Exception sur execSQL", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return -1;
             }
         }
 
@@ -110,12 +102,10 @@ namespace TaskLeader.DAL
         /// <summary>
         /// Modifie le filtre par défaut
         /// </summary>
-        /// <param name="name">Nom du filtre</param>
-        public void insertDefaultFilter(String name)
+        /// <param name="name">ID du filtre en base</param>
+        public void insertDefaultFilter(int filtreID)
         {
-            //TODO: serait plus propre par un ID
-            String nomFiltre = "'" + name.Replace("'", "''") + "'";
-            execSQL("UPDATE Properties SET Valeur=(SELECT id FROM Filtres WHERE titre=" + nomFiltre + ") WHERE Cle='FiltreDefaut';");
+            execSQL("UPDATE Properties SET Valeur=" + filtreID + " WHERE Cle='FiltreDefaut';");
         }
 
         #endregion

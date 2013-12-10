@@ -221,28 +221,18 @@ namespace TaskLeader.DAL
         }
 
         /// <summary>
-        /// Récupération de la liste des titres de filtres
-        /// </summary>
-        public object[] getFiltersLabels()
-        {
-            string request = "SELECT titre FROM Filtres ORDER BY titre ASC;";
-            return getList(request);
-        }
-
-        /// <summary>
         /// Récupération d'un filtre en fonction de son titre
         /// </summary>
-        /// <param name="name">Nom du filtre</param>
-        public Dictionary<int,List<ListValue>> getFilterData(String name)
+        /// <param name="name">ID du filtre en base</param>
+        public Dictionary<int,List<ListValue>> getFilterData(int filtreID)
         {
             Dictionary<int, List<ListValue>> data = new Dictionary<int, List<ListValue>>();
-            String titre = "'" + name.Replace("'", "''") + "'";
 
             String requete =
                 "SELECT ev.entityID,c.entityValue,ev.label " +
-                "FROM Filtres f, Filtres_cont c " +
+                "FROM Filtres_cont c " +
                 "LEFT JOIN Entities_values ev ON c.entityValue=ev.id " +
-                "WHERE c.filtreID = f.id AND f.titre=" + titre + ";";
+                "WHERE c.filtreID=" + filtreID + ";";
             DataTable resultat = this.getTable(requete);
 
             foreach (DataRow row in resultat.Rows)
@@ -280,14 +270,20 @@ namespace TaskLeader.DAL
         /// Obtient un tableau de tous les filtres de la base
         /// </summary>
         /// <returns>Tableau de 'Filtre'</returns>
-        public List<Filtre> getFilters()
+        public Filtre[] getFilters()
         {
             List<Filtre> liste = new List<Filtre>();
 
-            foreach (String filtreName in this.getFiltersLabels())
-                liste.Add(new Filtre() { dbName = this.name, nom = filtreName });
+            DataTable results = getTable("SELECT id,titre FROM Filtres ORDER BY titre ASC;");
 
-            return liste;
+            foreach (DataRow row in results.Rows)
+                liste.Add(new Filtre() {
+                    dbName = this.name,
+                    nom = row["titre"] as String,
+                    id = Convert.ToInt32(row["id"])
+                });
+
+            return liste.ToArray();
         }
 
         #endregion

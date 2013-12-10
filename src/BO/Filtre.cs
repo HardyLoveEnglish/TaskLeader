@@ -27,7 +27,7 @@ namespace TaskLeader.BO
             get
             {
                 if (_criteria == null)
-                    _criteria = this.db.getFilterData(this.nom);
+                    _criteria = this.db.getFilterData(this.id);
                 return _criteria;
             }
             set
@@ -38,6 +38,11 @@ namespace TaskLeader.BO
 
         // Nom du filtre
         public String nom = "";
+
+        /// <summary>
+        /// ID du filtre en base
+        /// </summary>
+        public int id;
 
         // Contenu de la recherche
         public string recherche { set { this.nom = value; this._type = 2; } }
