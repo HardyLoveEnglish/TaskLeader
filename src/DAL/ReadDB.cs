@@ -492,7 +492,7 @@ namespace TaskLeader.DAL
                 requete += entityID + " LIKE '%" + words + "%' OR ";
 
             // Recherche dans les titres de mail
-            requete += "id IN(";
+            requete += "a.id IN(";
             requete += "   SELECT E.ActionID FROM Mails M, Enclosures E";
             requete += "      WHERE M.Titre LIKE '%" + words + "%'";
             requete += "      AND M.id=E.EncID";
@@ -500,7 +500,7 @@ namespace TaskLeader.DAL
             requete += ") OR ";
 
             // Recherche dans les titres ou chemins des liens
-            requete += "id IN(";
+            requete += "a.id IN(";
             requete += "   SELECT E.ActionID FROM Links L, Enclosures E";
             requete += "      WHERE L.Titre LIKE '%" + words + "%'";
             requete += "      AND L.id=E.EncID";

@@ -180,6 +180,7 @@ namespace TaskLeader.GUI
             // Création des CritereSelect
             CritereSelect widget;
             this.selectPanel.SuspendLayout();
+            this.selectPanel.Controls.Clear();
             foreach (DBentity entity in db.listEntities)
             {
                 widget = new CritereSelect(entity);

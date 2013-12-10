@@ -369,7 +369,7 @@ namespace TaskLeader.DAL
                             if (value != "NULL")
                             {
                                 SQLCmd.CommandText = "INSERT INTO Actions (id,entityID,entityValue) " +
-                                    "SELECT max(id)";
+                                    "SELECT COALESCE(max(id),0)"; // max(id)=NULL pour une table vide
                                 if (first)
                                 {
                                     SQLCmd.CommandText += "+1"; // La première valeur insérée incrémentera l'ID
