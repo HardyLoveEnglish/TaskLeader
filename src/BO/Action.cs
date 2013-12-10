@@ -217,9 +217,9 @@ namespace TaskLeader.BO
             {
                 int entityID = entity.id;
                 if (this.values.ContainsKey(entityID) && this.entityHasChanged[entityID])
-                    if (((ListValue)this.values[entityID]).id < 0)
+                    if (((ListValue)this.values[entityID]).isNew)
                     {
-                        if (entity.parentID > 0)
+                        if (entity.parentID > 0) //TODO: et si le parent n'est pas encore enregistré ?
                             resultat = db.insert(entity, (ListValue)this.values[entity.id],((ListValue)this.values[entity.parentID]).id);
                         else
                             resultat = db.insert(entity, this.values[entity.id] as ListValue);

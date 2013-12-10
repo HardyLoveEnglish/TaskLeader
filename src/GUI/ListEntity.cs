@@ -28,9 +28,9 @@ namespace TaskLeader.GUI
                 if (this.valuesList.SelectedIndex >= 0)
                     return this.valuesList.SelectedItem as ListValue;
                 else if (!String.IsNullOrWhiteSpace(this.valuesList.Text))
-                    return new ListValue() { id = -1, label = this.valuesList.Text };
+                    return new ListValue(this.valuesList.Text);
                 else
-                    return new ListValue() { id = 0 };
+                    return new ListValue();
 			}
 		}
 

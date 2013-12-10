@@ -146,17 +146,20 @@ namespace TaskLeader.BO
         /// <summary>
         /// Id de la valeur dans la  base
         /// </summary>
-        private int _id;
-        public int id { get { return _id; } set { this._id = value; } }
+        private int _id = 0;
+        public int id { get { return _id; } set {if (value > 0) this._id = value; else throw new Exception("id doit être positif"); } }
+        /// <summary>
+        /// Précise si la ListValue a déjà été stockée en base
+        /// </summary>
+        public bool isNew { get { return _id < 0; } }
 
         /// <summary>
         /// Valeur SQL de l'entité= ID !
-        /// 
         /// </summary>
         public override String sqlValue {
             get {
                 if (this._id < 0)
-                    throw new System.UnauthorizedAccessException("L'ID n'est pas instancié");
+                    throw new Exception("L'ID n'est pas instancié");
 
                 if (this._id > 0)
                     return this.id.ToString();
@@ -173,11 +176,28 @@ namespace TaskLeader.BO
 
         #region Constructors
 
+        /// <summary>
+        /// Constructeur permettant l'accès aux propriétés publiques
+        /// </summary>
         public ListValue() { }
-
-        public ListValue(String value, String label)
+        
+        /// <summary>
+        /// Constructeur vérifiant les entrées
+        /// </summary>
+        /// <param name="id">String représentant l'id</param>
+        /// <param name="label">Label correspondant</param>
+        public ListValue(String id, String label)
         {
-            Int32.TryParse(value, out this._id); //Si échec du parse (valeur nulle par exemple), _id=0
+            Int32.TryParse(id, out this._id); //Si échec du parse (valeur nulle par exemple), _id=0
+            this.label = label;
+        }
+
+        /// <summary>
+        /// Constructeur spécifiant uniquement le label
+        /// </summary>
+        public ListValue(String label)
+        {
+            this._id = -1;
             this.label = label;
         }
 
