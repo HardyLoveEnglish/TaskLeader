@@ -13,8 +13,17 @@ namespace TaskLeader.BO
         /// Type du filtre: 1=Critères, 2=Recherche
         /// Default value is 1
         /// </summary>
-        public int type { get { return _type; } }
-        private int _type = 1;
+        private int _type;
+        public int type
+        {
+            get
+            {
+                if (_type == 0)
+                    _type = 1;
+                return _type;
+            }
+        }
+
 
         // DB d'application de ce filtre
         public String dbName { get; set; }
@@ -150,11 +159,11 @@ namespace TaskLeader.BO
                 return false;
 
             // Les filtres ont des types différents
-            if (this._type != compFilter.type)
+            if (this.type != compFilter.type)
                 return false;
 
             // Les 2 filtres sont des recherches
-            if (this._type == 2)
+            if (this.type == 2)
                 return ((compFilter.nom == this.nom) && (compFilter.dbName == this.dbName));
 
             // Les 2 filtres sont des filtres enregistrés
