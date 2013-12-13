@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Configuration;
 using System.Windows.Forms;
 using System.Collections;
+using System.Collections.Generic;
 using TaskLeader.DAL;
+using TaskLeader.BO;
 
 namespace TaskLeader.GUI
 {
     public partial class AdminDefaut : Form
     {
-        String empty = "-- Aucun --";
-
         // Variables locales identifiant la base courante
         private String dbName;
         private DB db { get { return TrayIcon.dbs[dbName]; } }
@@ -23,80 +22,39 @@ namespace TaskLeader.GUI
 
         private void AdminDefaut_Load(object sender, EventArgs e)
         {        
-            //Remplissage des combos
-            ctxtListBox.Items.Add(empty);
-            ctxtListBox.Items.AddRange(db.getTitres(DB.contexte));
-            destListBox.Items.Add(empty);
-            destListBox.Items.AddRange(db.getTitres(DB.destinataire));
-            statutListBox.Items.Add(empty);
-            statutListBox.Items.AddRange(db.getTitres(DB.statut));
-            filterCombo.Items.Add(empty);
-            filterCombo.Items.AddRange(db.getTitres(DB.filtre));
+            //Remplissage de la combo des filtres
+            filterCombo.Items.AddRange(db.getFilters());
+            filterCombo.Text = db.getDefaultFilterName();
 
-            //Sélection des valeurs par défaut
+            // Préparation des widgets
+            this.entitiesPanel.SuspendLayout();
 
-            ctxtListBox.Text = db.getDefault(DB.contexte);
-            if (ctxtListBox.Text == "")
-                ctxtListBox.SelectedIndex = 0; // Sélection de la ligne "Aucun"
-
-            this.updateSujet(sender, e);
-
-            destListBox.Text = db.getDefault(DB.destinataire);
-            if (destListBox.Text == "")
-                destListBox.SelectedIndex = 0;
-
-            statutListBox.Text = db.getDefault(DB.statut);
-            if (statutListBox.Text == "")
-                statutListBox.SelectedIndex = 0;
-
-            filterCombo.Text = db.getDefault(DB.filtre);
-            if (filterCombo.Text == "")
-                filterCombo.SelectedIndex = 0;
-        }
-
-        private void updateSujet(object sender, EventArgs e)
-        {
-            // Remise à zéro de la liste
-            sujetListBox.Items.Clear();
-            sujetListBox.Items.Add(empty);
-            sujetListBox.Enabled = true;
-
-            if (ctxtListBox.SelectedIndex > 0) // Uniquement si contexte différent de "Aucun"
+            Dictionary<int,EntityValue> defaultValues = this.db.getDefault();
+            foreach (var kvp in this.db.entities)
             {
-                // Remplissage de la liste
-                sujetListBox.Items.AddRange(db.getTitres(DB.sujet,ctxtListBox.Text));
-
-                // Sélection du sujet par défaut
-                sujetListBox.Text = db.getDefault(DB.sujet);
-                if (sujetListBox.Text == "")
-                    sujetListBox.SelectedIndex = 0;
+                if (defaultValues.ContainsKey(kvp.Key))
+                    this.entitiesPanel.Controls.Add(kvp.Value.getWidget(this.dbName, defaultValues[kvp.Key], this.entitiesPanel));
+                else
+                    this.entitiesPanel.Controls.Add(kvp.Value.getWidget(this.dbName, kvp.Value.getEntityValue(), this.entitiesPanel));
             }
-            else
-                sujetListBox.Enabled = false;
+
+            this.entitiesPanel.ResumeLayout();
         }
 
         private void saveBut_Click(object sender, EventArgs e)
         {
             // Récupération de la liste des valeurs mise à jour
-            ArrayList updatedValues = new ArrayList();
+            Dictionary<int, EntityValue> updatedValues = new Dictionary<int, EntityValue>();
 
-            if (ctxtListBox.SelectedIndex > 0)
-                updatedValues.Add(new DBvalue(DB.contexte, ctxtListBox.Text));
-
-            if (sujetListBox.SelectedIndex > 0)
-                updatedValues.Add(new DBvalue(DB.sujet, sujetListBox.Text));
-
-            if (destListBox.SelectedIndex > 0)
-                updatedValues.Add(new DBvalue(DB.destinataire, destListBox.Text));
-
-            if (statutListBox.SelectedIndex > 0)
-                updatedValues.Add(new DBvalue(DB.statut, statutListBox.Text));
+            foreach (IValueRetrievable control in this.entitiesPanel.Controls)
+                updatedValues.Add(control.entityID, control.value);
 
             if (filterCombo.SelectedIndex > 0)
-                updatedValues.Add(new DBvalue(DB.filtre, filterCombo.Text));
+                db.insertDefaultFilter(((Filtre)filterCombo.SelectedItem).id);
 
             // Sauvegarde
-            db.insertDefaut(updatedValues.ToArray());
+            db.insertDefaut(updatedValues);
+
             // On affiche un message de statut sur la TrayIcon
             TrayIcon.afficheMessage("Bilan création/modification", "Valeurs par défaut mises à jour");
 

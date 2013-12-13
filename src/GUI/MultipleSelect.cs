@@ -8,6 +8,12 @@ using TaskLeader.DAL;
 
 namespace TaskLeader.GUI
 {
+    public class NewValueEventArgs : EventArgs
+    {
+        public int valueID { get; set; }
+    }
+    public delegate void NewValueEventHandler(object sender,NewValueEventArgs args);
+
     /// <summary>
     /// Classe générique pour communaliser l'IHM de tous les widgets MultipleSelect
     /// </summary>
@@ -95,6 +101,11 @@ namespace TaskLeader.GUI
         /// </summary>
 
         private DBentity type;
+        /// <summary>
+        /// ID de l'entité représentée par ce widget
+        /// </summary>
+        public int entityID { get { return type.id; } }
+
         private DB db;
 
         /// <summary>
@@ -130,10 +141,10 @@ namespace TaskLeader.GUI
                     this.liste.ItemCheck -= new ItemCheckEventHandler(this.liste_ItemCheck); // Désactivation de la surveillance
             }
         }
-        private void OnNewParentValue(String parentValue)
+        private void OnNewParentValue(int parentValueID)
         {
             if (this.v_NewParentValue != null)
-                this.v_NewParentValue(parentValue);
+                this.v_NewParentValue(this,new NewValueEventArgs(){valueID=parentValueID});
         }
 
         /// <summary>
@@ -141,29 +152,29 @@ namespace TaskLeader.GUI
         /// - la seule valeur qui était sélectionné ne l'est plus
         /// - la liste a été intégralement rafraîchie
         /// </summary>
-        public event NewValueEventHandler NoParentValue;
+        public event EventHandler NoParentValue;
         private void OnNoParentValue()
         {
             if (this.NoParentValue != null)
-                this.NoParentValue("");
+                this.NoParentValue(this,new EventArgs());
         }
 
         private void liste_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             if (!this.listeInProgress) // Si on n'est pas en train de toucher à la liste entière
             {
-                // On ne lève l'évènement que si un seul contexte est tické
+                // On ne lève l'évènement que si un seul item est tické
                 if ((this.liste.CheckedIndices.Count == 0) && (e.NewValue == CheckState.Checked))
-                    this.OnNewParentValue(this.liste.Items[e.Index].ToString());
+                    this.OnNewParentValue(((ListValue)this.liste.Items[e.Index]).id);
                 else if ((this.liste.CheckedIndices.Count == 2) && (e.NewValue == CheckState.Unchecked))
                 {
-                    String contexte;
+                    int index;
                     if (this.liste.CheckedIndices[0] == e.Index) // C'est l'autre qui va rester tické
-                        contexte = this.liste.Items[this.liste.CheckedIndices[1]].ToString();
+                        index = 1;
                     else
-                        contexte = this.liste.Items[this.liste.CheckedIndices[0]].ToString();
+                        index = 0;
 
-                    this.OnNewParentValue(contexte);
+                    this.OnNewParentValue(((ListValue)this.liste.Items[this.liste.CheckedIndices[index]]).id);
                 }
                 else if (this.liste.CheckedIndices.Count == 1)
                     this.OnNoParentValue();
@@ -185,16 +196,16 @@ namespace TaskLeader.GUI
 
         #region Membres 'enfant'
 
-        private bool hasParent { get { return (this.type.parent != -1); } }
+        private bool hasParent { get { return (this.type.parentID > 0); } }
 
-        /// <summary>
+        /// <summary>esrrsttt
         /// Rend dépendant ce widget d'un autre
         /// </summary>
         /// <param name="widget">CritereSelect parent</param>
         public void addParent(CritereSelect widget)
         {
-            widget.NewParentValue += (parentValue) => this.maj(parentValue);
-            widget.NoParentValue += (parentValue) => this.raz();
+            widget.NewParentValue += (object sender, NewValueEventArgs args) => this.maj(args.valueID);
+            widget.NoParentValue += (object sender,EventArgs args) => this.raz();
         }
 
         #endregion
@@ -202,12 +213,15 @@ namespace TaskLeader.GUI
         /// <summary>
         /// Renvoie le Criterium correspondant ou null
         /// </summary>
-        public Criterium getCriterium()
+        public List<ListValue> criterium
         {
-            if (!box.Checked)
-                return new Criterium(type, liste.CheckedItems.Cast<String>().ToList<String>());
-            else
-                return null;
+            get
+            {
+                if (!box.Checked)
+                    return liste.CheckedItems.Cast<ListValue>().ToList<ListValue>();
+                else
+                    return null;
+            }
         }
 
         /// <summary>
@@ -218,23 +232,23 @@ namespace TaskLeader.GUI
         {
             // Unregister de l'ancienne DB
             if (this.db != null)
-                this.db.unsubscribe_NewValue(this.type, new NewValueEventHandler(newValue));
+                this.db.unsubscribe_NewValue(this.type.nom, new EventHandler(newValue));
             // Mémorisation de la "nouvelle" DB
             this.db = database;
             // Register de la nouvelle DB
-            this.db.subscribe_NewValue(this.type, new NewValueEventHandler(newValue));
+            this.db.subscribe_NewValue(this.type.nom, new EventHandler(newValue));
 
             if (!this.hasParent) // Les contrôles enfants ne doivent pas être mis à jour directement
                 this.maj();
         }
 
-        private void maj(String key = null)
+        private void maj(int parentID = 0)
         {
             this.beginListUpdate();
 
             this.liste.Items.Clear(); // Vidage de la liste
 
-            foreach (object item in this.db.getTitres(this.type, key))
+            foreach (ListValue item in this.db.getEntitiesValues(this.type.id, parentID))
                 this.liste.Items.Add(item, true); // Sélection de toutes les valeurs
 
             this.box.Checked = true;
@@ -243,12 +257,13 @@ namespace TaskLeader.GUI
             this.endListUpdate();
         }
 
-        private void newValue(String parentValue)
+        /// <summary>
+        /// Méthode appelée lorsque une nouvelle valeur est créée en base pour l'entité
+        /// </summary>
+        private void newValue(object sender,EventArgs args)
         {
             if (!this.hasParent) // Ce widget n'a pas de parent
                 this.maj();
-            else if (this.liste.Items.Count > 0) // Ce widget a un parent et la liste n'est pas vide
-                this.maj(parentValue);
         }
     }
 
@@ -317,17 +332,17 @@ namespace TaskLeader.GUI
             this.pictureBox1.Image = TaskLeader.Properties.Resources.database;
             this.pictureBox1.Visible = true;
 
-            this.liste.Items.AddRange(this.db.getFilters().ToArray());
-            this.db.subscribe_NewValue(DB.filtre, new NewValueEventHandler(maj));
+            this.liste.Items.AddRange(this.db.getFilters());
+            this.db.subscribe_NewValue("Filtre", new EventHandler(maj));
         }
 
         /// <summary>
         /// Met à jour la liste des filtres de cette base
         /// </summary>
-        private void maj(String value)
+        private void maj(object sender,EventArgs args)
         {
             this.liste.Items.Clear();
-            this.liste.Items.AddRange(this.db.getFilters().ToArray());
+            this.liste.Items.AddRange(this.db.getFilters());
         }
 
         public List<Filtre> getSelected()

@@ -28,140 +28,42 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.ctxtListBox = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.sujetListBox = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.destListBox = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.statutListBox = new System.Windows.Forms.ComboBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.entitiesPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.filterCombo = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
             this.saveBut = new System.Windows.Forms.Button();
-            this.flowLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+            this.tableLayoutPanel1.SuspendLayout();
+            this.flowLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
-            // flowLayoutPanel1
+            // entitiesPanel
             // 
-            this.flowLayoutPanel1.Controls.Add(this.ctxtListBox);
-            this.flowLayoutPanel1.Controls.Add(this.label1);
-            this.flowLayoutPanel1.Controls.Add(this.sujetListBox);
-            this.flowLayoutPanel1.Controls.Add(this.label2);
-            this.flowLayoutPanel1.Controls.Add(this.destListBox);
-            this.flowLayoutPanel1.Controls.Add(this.label3);
-            this.flowLayoutPanel1.Controls.Add(this.statutListBox);
-            this.flowLayoutPanel1.Controls.Add(this.label4);
-            this.flowLayoutPanel1.Controls.Add(this.filterCombo);
-            this.flowLayoutPanel1.Controls.Add(this.label5);
-            this.flowLayoutPanel1.Controls.Add(this.saveBut);
-            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(270, 189);
-            this.flowLayoutPanel1.TabIndex = 0;
-            // 
-            // ctxtListBox
-            // 
-            this.ctxtListBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.ctxtListBox.FormattingEnabled = true;
-            this.ctxtListBox.Location = new System.Drawing.Point(80, 12);
-            this.ctxtListBox.Margin = new System.Windows.Forms.Padding(3, 12, 10, 3);
-            this.ctxtListBox.Name = "ctxtListBox";
-            this.ctxtListBox.Size = new System.Drawing.Size(180, 21);
-            this.ctxtListBox.TabIndex = 1;
-            this.ctxtListBox.SelectedIndexChanged += new System.EventHandler(this.updateSujet);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.flowLayoutPanel1.SetFlowBreak(this.label1, true);
-            this.label1.Location = new System.Drawing.Point(22, 15);
-            this.label1.Margin = new System.Windows.Forms.Padding(3, 15, 3, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(52, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Contexte:";
-            // 
-            // sujetListBox
-            // 
-            this.sujetListBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.sujetListBox.FormattingEnabled = true;
-            this.sujetListBox.Location = new System.Drawing.Point(80, 39);
-            this.sujetListBox.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
-            this.sujetListBox.Name = "sujetListBox";
-            this.sujetListBox.Size = new System.Drawing.Size(180, 21);
-            this.sujetListBox.TabIndex = 3;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.flowLayoutPanel1.SetFlowBreak(this.label2, true);
-            this.label2.Location = new System.Drawing.Point(40, 43);
-            this.label2.Margin = new System.Windows.Forms.Padding(3, 7, 3, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(34, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Sujet:";
-            // 
-            // destListBox
-            // 
-            this.destListBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.destListBox.FormattingEnabled = true;
-            this.destListBox.Location = new System.Drawing.Point(80, 66);
-            this.destListBox.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
-            this.destListBox.Name = "destListBox";
-            this.destListBox.Size = new System.Drawing.Size(180, 21);
-            this.destListBox.TabIndex = 3;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.flowLayoutPanel1.SetFlowBreak(this.label3, true);
-            this.label3.Location = new System.Drawing.Point(8, 70);
-            this.label3.Margin = new System.Windows.Forms.Padding(3, 7, 3, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(66, 13);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "Destinataire:";
-            // 
-            // statutListBox
-            // 
-            this.statutListBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.statutListBox.FormattingEnabled = true;
-            this.statutListBox.Location = new System.Drawing.Point(80, 93);
-            this.statutListBox.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
-            this.statutListBox.Name = "statutListBox";
-            this.statutListBox.Size = new System.Drawing.Size(180, 21);
-            this.statutListBox.TabIndex = 3;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(36, 97);
-            this.label4.Margin = new System.Windows.Forms.Padding(3, 7, 3, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(38, 13);
-            this.label4.TabIndex = 2;
-            this.label4.Text = "Statut:";
+            this.entitiesPanel.AutoScroll = true;
+            this.entitiesPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.entitiesPanel.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+            this.entitiesPanel.Location = new System.Drawing.Point(0, 50);
+            this.entitiesPanel.Margin = new System.Windows.Forms.Padding(0);
+            this.entitiesPanel.Name = "entitiesPanel";
+            this.entitiesPanel.Size = new System.Drawing.Size(424, 340);
+            this.entitiesPanel.TabIndex = 0;
             // 
             // filterCombo
             // 
             this.filterCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.filterCombo.FormattingEnabled = true;
-            this.filterCombo.Location = new System.Drawing.Point(80, 120);
-            this.filterCombo.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
+            this.filterCombo.Location = new System.Drawing.Point(174, 12);
+            this.filterCombo.Margin = new System.Windows.Forms.Padding(3, 12, 10, 3);
             this.filterCombo.Name = "filterCombo";
-            this.filterCombo.Size = new System.Drawing.Size(180, 21);
+            this.filterCombo.Size = new System.Drawing.Size(240, 21);
             this.filterCombo.TabIndex = 3;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(42, 124);
-            this.label5.Margin = new System.Windows.Forms.Padding(3, 7, 3, 0);
+            this.label5.Location = new System.Drawing.Point(136, 15);
+            this.label5.Margin = new System.Windows.Forms.Padding(3, 15, 3, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(32, 13);
             this.label5.TabIndex = 2;
@@ -169,8 +71,8 @@
             // 
             // saveBut
             // 
-            this.saveBut.Location = new System.Drawing.Point(95, 159);
-            this.saveBut.Margin = new System.Windows.Forms.Padding(3, 15, 95, 3);
+            this.saveBut.Location = new System.Drawing.Point(160, 410);
+            this.saveBut.Margin = new System.Windows.Forms.Padding(160, 20, 3, 3);
             this.saveBut.Name = "saveBut";
             this.saveBut.Size = new System.Drawing.Size(80, 23);
             this.saveBut.TabIndex = 4;
@@ -178,36 +80,61 @@
             this.saveBut.UseVisualStyleBackColor = true;
             this.saveBut.Click += new System.EventHandler(this.saveBut_Click);
             // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel2, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.entitiesPanel, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.saveBut, 0, 2);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 340F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(424, 446);
+            this.tableLayoutPanel1.TabIndex = 1;
+            // 
+            // flowLayoutPanel2
+            // 
+            this.flowLayoutPanel2.Controls.Add(this.filterCombo);
+            this.flowLayoutPanel2.Controls.Add(this.label5);
+            this.flowLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
+            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(424, 50);
+            this.flowLayoutPanel2.TabIndex = 0;
+            // 
             // AdminDefaut
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(270, 189);
-            this.Controls.Add(this.flowLayoutPanel1);
+            this.ClientSize = new System.Drawing.Size(424, 446);
+            this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "AdminDefaut";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Valeurs par défaut";
             this.Load += new System.EventHandler(this.AdminDefaut_Load);
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.flowLayoutPanel1.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel2.ResumeLayout(false);
+            this.flowLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ComboBox ctxtListBox;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ComboBox sujetListBox;
-        private System.Windows.Forms.ComboBox destListBox;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox statutListBox;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.FlowLayoutPanel entitiesPanel;
         private System.Windows.Forms.ComboBox filterCombo;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button saveBut;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
     }
 }

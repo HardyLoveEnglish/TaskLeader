@@ -26,25 +26,13 @@ namespace TaskLeader.GUI
         // Préparation des widgets
         private void loadWidgets()
         {
-            // Contextes
-            this.contexteBox.Items.Clear();
-            contexteBox.Items.AddRange(db.getTitres(DB.contexte));
-            contexteBox.Text = _action.Contexte;
+            this.entitiesPanel.SuspendLayout();
+            this.entitiesPanel.Controls.Clear();
 
-            // Sujets
-            if (contexteBox.Text != "")
-                updateSujet(); // Mise à jour de la liste des sujets
-            sujetBox.Text = _action.Sujet;
+            foreach (DBentity entity in this.db.entities.Values)
+                this.entitiesPanel.Controls.Add(entity.getWidget(_action.dbName, this._action.getValue(entity.id), this.entitiesPanel));
 
-            // Destinataires
-            this.destBox.Items.Clear();
-            destBox.Items.AddRange(db.getTitres(DB.destinataire));
-            destBox.Text = _action.Destinataire;
-
-            // Statuts
-            this.statutBox.Items.Clear();
-            statutBox.Items.AddRange(db.getTitres(DB.statut)); // On remplit la liste des statuts
-            statutBox.SelectedItem = _action.Statut;
+            this.entitiesPanel.ResumeLayout();
         }
 
         /// <summary>Constructeur de la fenêtre</summary>
@@ -67,13 +55,7 @@ namespace TaskLeader.GUI
             else
             {
                 this.Text += "Modifier une action - TaskLeader";
-
                 this.dbsBox.Enabled = false;
-
-                if (action.hasDueDate) // Attribut géré à part car pas de valeur par défaut
-                    actionDatePicker.Value = action.DueDate;
-                else
-                    noDueDate.Checked = true;
             }
 
             // Chargement des widgets
@@ -85,20 +67,6 @@ namespace TaskLeader.GUI
 
             this.linksView.Visible = (action.PJ.Count > 0);
 
-            // Affichage du descriptif de l'action
-            desField.Text = action.Texte;
-            desField.Select(desField.Text.Length, 0); // Curseur placé à la fin par défaut
-
-        }
-
-        // Mise à jour de la combobox présentant les sujets
-        private void updateSujet()
-        {
-            // On vide les sujets correspondants au contexte actuel
-            sujetBox.Items.Clear();
-
-            foreach (String item in db.getTitres(DB.sujet, contexteBox.Text))
-                sujetBox.Items.Add(item);
         }
 
         // Sauvegarde de l'action
@@ -106,39 +74,15 @@ namespace TaskLeader.GUI
         {
             //TODO: griser le bouton Sauvegarder si rien n'a été édité
 
-            // Erreur lorsque le champ descriptif est vide
-            if (String.IsNullOrWhiteSpace(this.desField.Text))
-            {
-                this.errorLabel.Visible = true;
-                return;
-            }
-
             // Update de l'action avec les nouveaux champs
-            _action.updateDefault(contexteBox.Text, sujetBox.Text, desField.Text, destBox.Text, statutBox.Text);
-
-            // Update de la DueDate que si c'est nécessaire
-            if (noDueDate.Checked)
-                _action.DueDate = DateTime.MinValue; // Remise à zéro de la dueDate
-            else
-                _action.DueDate = actionDatePicker.Value;
+            foreach (IValueRetrievable control in this.entitiesPanel.Controls)
+                _action.setValue(control.entityID, control.value);
 
             // On sauvegarde l'action
             _action.save();
 
             // Fermeture de la fenêtre
             this.Close();
-        }
-
-        // Demande de mise à jour des sujets quand le contexte sélectionné change
-        private void contexteBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            updateSujet();
-        }
-
-        // Mise à jour du widget date en fonction de la sélection de la checkbox
-        private void dateChosen_CheckedChanged(object sender, EventArgs e)
-        {
-            actionDatePicker.Enabled = !noDueDate.Checked;
         }
 
         /// <summary>
@@ -232,11 +176,6 @@ namespace TaskLeader.GUI
                 // Mise à jour des widgets
                 this.loadWidgets();
             }
-        }
-
-        private void desField_Enter(object sender, EventArgs e)
-        {
-            this.errorLabel.Visible = false;
         }
 
         #region Ajout de PJs

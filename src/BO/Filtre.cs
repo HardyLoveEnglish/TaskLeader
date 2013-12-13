@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
@@ -9,65 +8,23 @@ using System.Runtime.Serialization;
 
 namespace TaskLeader.BO
 {
-    public class Criterium : IEquatable<Criterium>
-    {
-        private DBentity _champ;
-        public int entityID { set { this._champ = DB.entities[value]; } }
-        public DBentity entity { get { return _champ; } }
-
-        public List<String> valuesSelected = new List<String>();
-
-        public Criterium(DBentity entity, IList criteres = null)
-        {
-            this._champ = entity;
-
-            if (criteres as IEnumerable<String> != null)
-                this.valuesSelected.AddRange(criteres as IEnumerable<String>);
-        }
-
-        public override String ToString()
-        {
-            return String.Join(" + ", this.valuesSelected);
-        }
-
-        #region Implémentation de IEquatable http://msdn.microsoft.com/en-us/library/ms131190.aspx
-
-        /// <summary>
-        /// Méthode permettant la comparaison de 2 Criterium
-        /// </summary>
-        /// <param name="compCriter">Filtre à comparer</param>
-        public bool Equals(Criterium compCriter)
-        {
-            if (compCriter == null)
-                return false;
-
-            return ((this._champ.nom == compCriter._champ.nom) && this.valuesSelected.SequenceEqual(compCriter.valuesSelected));
-        }
-
-        public override bool Equals(Object obj)
-        {
-            if (obj == null)
-                return false;
-
-            Criterium compCriter = obj as Criterium;
-            if (compCriter == null)
-                return false;
-            else
-                return Equals(compCriter);
-        }
-
-        #endregion
-    }
-    
     [DataContract]
     public class Filtre : IEquatable<Filtre>
     {
         /// <summary>
         /// Type du filtre: 1=Critères, 2=Recherche
-        /// Default value is 1.
+        /// Default value is 1
         /// </summary>
-        public int type { get { return _type; } }
-        private int _type = 1;
+        private int _type;
+        public int type
+        {
+            get
+            {
+                if (_type == 0)
+                    _type = 1;
+                return _type;
+            }
+        }
 
         // DB d'application de ce filtre
         [DataMember]
@@ -75,13 +32,13 @@ namespace TaskLeader.BO
         private DB db { get { return TrayIcon.dbs[this.dbName]; } }
 
         // Tableau qui donne la liste des critères sélectionnés autre que ALL
-        private List<Criterium> _criteria;
-        public List<Criterium> criteria
+        private Dictionary<int, List<ListValue>> _criteria;
+        public Dictionary<int, List<ListValue>> criteria
         {
             get
             {
                 if (_criteria == null)
-                    _criteria = this.db.getFilterData(this.nom);
+                    _criteria = this.db.getFilterData(this.id);
                 return _criteria;
             }
             set
@@ -93,6 +50,11 @@ namespace TaskLeader.BO
         // Nom du filtre
         [DataMember]
         public String nom = "";
+
+        /// <summary>
+        /// ID du filtre en base
+        /// </summary>
+        public int id;
 
         // Contenu de la recherche
         [DataMember]
@@ -123,9 +85,23 @@ namespace TaskLeader.BO
 
             // Typage des colonnes pour éviter les problèmes de Merge
             DataTable data = dbData.Clone(); // Copie du schéma uniquement
-            foreach (DataColumn column in data.Columns)
-                column.DataType = typeof(String);
-            data.Columns["Deadline"].DataType = typeof(DateTime);
+
+            data.Columns["Liens"].DataType = typeof(Int32); //Typage de la colonne Liens
+
+            for (int i = 2; i < data.Columns.Count; i++) // Les 2 premières colonnes sont "id" et "liens"
+            {
+                //Nom de la colonne = nom de l'entité pour faciliter le merge
+                String entityName = this.db.entities[Int32.Parse(data.Columns[i].ColumnName)].nom;
+                data.Columns[i].ColumnName = entityName;
+                dbData.Columns[i].ColumnName = entityName;
+                data.Columns[i].DataType = typeof(String);
+            }
+
+            //Typage des colonnes de type date
+            foreach (DBentity entity in this.db.entities.Values)
+                if (entity.type == "Date")
+                    data.Columns[entity.nom].DataType = typeof(DateTime);
+
             foreach (DataRow row in dbData.Rows)
                 data.ImportRow(row);
 
@@ -159,18 +135,23 @@ namespace TaskLeader.BO
         /// Retourne un Dictionnaire DBentity => Valeur décrivant le filtre.
         /// Valeur = "" si All sélectionné.
         /// </summary>
-        public Dictionary<String, String> getDescription()
+        public Dictionary<String, String> description
         {
-            Dictionary<String, String> description = new Dictionary<string, string>();
-            Dictionary<DBentity, Criterium> criteriaList = criteria.ToDictionary(c => c.entity, c => c);
+            get
+            {
+                Dictionary<String, String> description = new Dictionary<string, string>();
 
-            foreach (DBentity entity in DB.entities)
-                if (criteriaList.ContainsKey(entity))
-                    description.Add(entity.nom, criteriaList[entity].ToString());
-                else
-                    description.Add(entity.nom, "");
+                foreach (DBentity entity in this.db.listEntities)
+                    if (this._criteria.ContainsKey(entity.id))
+                        description.Add(
+                            entity.nom,
+                            String.Join(" + ", this.criteria[entity.id].Select(ev => ev.label).ToList<String>())
+                        );
+                    else
+                        description.Add(entity.nom, "");
 
-            return description;
+                return description;
+            }
         }
 
         #region Implémentation de IEquatable http://msdn.microsoft.com/en-us/library/ms131190.aspx
@@ -185,11 +166,11 @@ namespace TaskLeader.BO
                 return false;
 
             // Les filtres ont des types différents
-            if (this._type != compFilter.type)
+            if (this.type != compFilter.type)
                 return false;
 
             // Les 2 filtres sont des recherches
-            if (this._type == 2)
+            if (this.type == 2)
                 return ((compFilter.nom == this.nom) && (compFilter.dbName == this.dbName));
 
             // Les 2 filtres sont des filtres enregistrés

@@ -91,9 +91,9 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="BLL\Init.cs" />
     <Compile Include="BO\Action.cs" />
     <Compile Include="BO\Enclosure.cs" />
+    <Compile Include="BO\EntityValues.cs" />
     <Compile Include="BO\Filtre.cs" />
     <Compile Include="BO\Hotkey.cs" />
     <Compile Include="BO\Link.cs" />
@@ -109,6 +109,12 @@
     </Compile>
     <Compile Include="GUI\ComplexTooltip.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GUI\DateEntity.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\DateEntity.Designer.cs">
+      <DependentUpon>DateEntity.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI\DatePickerPopup.cs">
       <SubType>UserControl</SubType>
@@ -127,6 +133,12 @@
     </Compile>
     <Compile Include="GUI\Etiquette.Designer.cs">
       <DependentUpon>Etiquette.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\ListEntity.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\ListEntity.Designer.cs">
+      <DependentUpon>ListEntity.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI\MultipleSelect.cs">
       <SubType>UserControl</SubType>
@@ -152,6 +164,12 @@
     <Compile Include="GUI\SaveLink.Designer.cs">
       <DependentUpon>SaveLink.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\TextEntity.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\TextEntity.Designer.cs">
+      <DependentUpon>TextEntity.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\Toolbox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -174,6 +192,9 @@
     <EmbeddedResource Include="GUI\AdminDefaut.resx">
       <DependentUpon>AdminDefaut.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GUI\DateEntity.resx">
+      <DependentUpon>DateEntity.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI\DatePickerPopup.resx">
       <DependentUpon>DatePickerPopup.cs</DependentUpon>
     </EmbeddedResource>
@@ -182,6 +203,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Etiquette.resx">
       <DependentUpon>Etiquette.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\ListEntity.resx">
+      <DependentUpon>ListEntity.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\MultipleSelect.resx">
       <DependentUpon>MultipleSelect.cs</DependentUpon>
@@ -194,6 +218,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\SaveLink.resx">
       <DependentUpon>SaveLink.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\TextEntity.resx">
+      <DependentUpon>TextEntity.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Toolbox.resx">
       <DependentUpon>Toolbox.cs</DependentUpon>
@@ -214,6 +241,7 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data.SQLite, Version=1.0.80.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\references\Net40\System.Data.SQLite.dll</HintPath>
