@@ -75,9 +75,8 @@ namespace TaskLeader.Server
         [WebGet(UriTemplate = "client/{*filePath}")]
         public Stream GetFile(string filePath) {
 
-            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
-
             if (string.IsNullOrEmpty(filePath)){
+                WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
                 return File.OpenRead("client/index.html");
             }
 
@@ -92,6 +91,18 @@ namespace TaskLeader.Server
                 return stream;
 			}
 
+            switch (Path.GetExtension(filePath).ToLower())
+            {
+                case (".css"):
+                    WebOperationContext.Current.OutgoingResponse.ContentType = "text/css";
+                    break;
+                case (".js"):
+                    WebOperationContext.Current.OutgoingResponse.ContentType = "application/javascript";
+                    break;
+                default:
+                    WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
+                    break;
+            }
 
             return File.OpenRead("client/"+filePath);
         }
