@@ -33,6 +33,7 @@ namespace TaskLeader.BO
 
         // Tableau qui donne la liste des critères sélectionnés autre que ALL
         private Dictionary<int, List<ListValue>> _criteria;
+        [DataMember]
         public Dictionary<int, List<ListValue>> criteria
         {
             get
@@ -54,6 +55,7 @@ namespace TaskLeader.BO
         /// <summary>
         /// ID du filtre en base
         /// </summary>
+        [DataMember]
         public int id;
 
         // Contenu de la recherche

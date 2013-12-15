@@ -23,24 +23,41 @@ namespace TaskLeader.Server
         }
 
         [OperationContract]
-        [WebGet(UriTemplate = "getDBentities",
+        [WebGet(UriTemplate = "getDBentities?db={dbName}",
             ResponseFormat = WebMessageFormat.Json)]
-        public DBentity[] getDBentities() {
-            return DB.entities;
+        public DBentity[] getDBentities(String dbName)
+        {
+            return TrayIcon.dbs[dbName].entities.Values.ToArray();
+        }
+
+        [OperationContract]
+        [WebGet(UriTemplate = "getDBListentities?db={dbName}",
+            ResponseFormat = WebMessageFormat.Json)]
+        public DBentity[] getDBListentities(String dbName)
+        {
+            return TrayIcon.dbs[dbName].listEntities;
         }
 
         [OperationContract]
         [WebGet(UriTemplate = "getFilters?db={dbName}",
             ResponseFormat = WebMessageFormat.Json)]
-        public object[] getFilters(String dbName) {
-            return TrayIcon.dbs[dbName].getTitres(DB.filtre);
+        public Filtre[] getFilters(String dbName) {
+            if (!TrayIcon.dbs.ContainsKey(dbName))
+            {
+                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.BadRequest;
+                WebOperationContext.Current.OutgoingResponse.StatusDescription = "Nom de base inconnu";
+                return null;
+            }
+
+            return TrayIcon.dbs[dbName].getFilters();
         }
 
         [OperationContract]
-        [WebGet(UriTemplate = "getDBentityValues?db={dbName}&entityID={entityID}&parent={parentValue}",
+        [WebGet(UriTemplate = "getDBentityValues?db={dbName}&entityID={entityID}&parent={parentValueID}",
             ResponseFormat = WebMessageFormat.Json)]
-		public object[] getDBentityValues(String dbName, int entityID, String parentValue){
-            return TrayIcon.dbs[dbName].getTitres(DB.entities[entityID],parentValue);
+        public ListValue[] getDBentityValues(String dbName, int entityID, int parentValueID)
+        {
+            return TrayIcon.dbs[dbName].getEntitiesValues(entityID, parentValueID).ToArray();
 		}
 
         [OperationContract]
@@ -51,6 +68,7 @@ namespace TaskLeader.Server
         {
             if(!request.paramsAreValid()){
                 WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.BadRequest;
+                WebOperationContext.Current.OutgoingResponse.StatusDescription = "Les arguments DataTables sont incorrects";
                 return null;               
             }
 
@@ -93,15 +111,11 @@ namespace TaskLeader.Server
 
             switch (Path.GetExtension(filePath).ToLower())
             {
-                case (".css"):
-                    WebOperationContext.Current.OutgoingResponse.ContentType = "text/css";
-                    break;
-                case (".js"):
-                    WebOperationContext.Current.OutgoingResponse.ContentType = "application/javascript";
-                    break;
-                default:
-                    WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
-                    break;
+                case (".css"): WebOperationContext.Current.OutgoingResponse.ContentType = "text/css"; break;
+                case (".js"): WebOperationContext.Current.OutgoingResponse.ContentType = "application/javascript"; break;
+                case(".woff"): WebOperationContext.Current.OutgoingResponse.ContentType = "application/font-woff"; break;
+                case (".png"): WebOperationContext.Current.OutgoingResponse.ContentType = "image/png"; break;
+                default: WebOperationContext.Current.OutgoingResponse.ContentType = "text/html"; break;
             }
 
             return File.OpenRead("client/"+filePath);

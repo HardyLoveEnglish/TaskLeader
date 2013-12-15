@@ -8,10 +8,11 @@
 
     <title>Test</title>
 
-    <!-- Bootstrap core CSS -->
 	<link rel="stylesheet" href="css/bootstrap.min.css" >
 	<link rel="stylesheet" href="css/bootstrap-theme.min.css" >
 	<link rel="stylesheet" href="assets/dataTables.bootstrap.css">
+	<link rel="stylesheet" href="css/bootstrap-select.min.css">	
+	<link rel="stylesheet" href="assets/index.css">
 	
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -23,15 +24,50 @@
   <body>
 	
 	<div class="container">
-		<!-- Tableau des actions -->
-		<table id="tableau" class="table table-striped table-hover table-condensed"></table>
-	</div>
+		<div class="row"><!-- Onglets -->
+			
+			<!-- Titres -->
+			<ul class="nav nav-tabs">
+			  <li><a href="#manuel" data-toggle="tab">Filtre manuel</a></li>
+			  <li><a href="#search" data-toggle="tab">Recherche</a></li>
+			  <li><a href="#stored" data-toggle="tab">Filtres enregistrés</a></li>
+			</ul>
+
+			<!-- Contenu -->
+			<div class="tab-content">
+			  <div class="tab-pane active" id="manuel">
+			    <span class="glyphicon glyphicon-tasks" style="font-size:20px;"></span>
+				<div class="btn-group" id="manualDB" data-toggle="buttons"></div>
+				<button id="launch" type="button" class="btn btn-default pull-right">Filtre manuel</button>
+			  </div>
+			  <div class="tab-pane" id="search">
+				<button id="recherche" type="button" class="btn btn-default">Recherche "test" dans base "New"</button>
+			  </div>
+			  <div class="tab-pane" id="stored">
+				<button id="stored" type="button" class="btn btn-default">Affichage du filtre avec id=1 dans base "New"</button>
+			  </div>
+			</div>
+		</div>
 		
+		<div class="row"><!-- Filtres affichés -->
+			<div class="panel panel-default">
+				<div id="etiquettes"class="panel-body"></div>
+			</div>
+		</div>
+		
+		<div class="row">
+			<!-- Tableau des actions -->
+			<table id="tableau" class="table table-striped table-hover table-condensed"></table>
+		</div>
+	</div>
+	
     <!-- Placed at the end of the document so the pages load faster -->
 	<script src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/jquery.dataTables.min.js"></script>
 	<script src="assets/dataTables.bootstrap.js"></script>
+	<script src="js/bootstrap-select.min.js"></script>
+	<script src="assets/widgets.js"></script>
 	<script src="assets/index.js"></script>
 
   </body>

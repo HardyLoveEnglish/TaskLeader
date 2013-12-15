@@ -1,11 +1,20 @@
-$(document).ready(function() {
-
+function displayData(filtres){
+	$("#etiquettes")
+		.append(
+			'<span class="label label-primary">'+
+				'<span>Filtre: manuel</span>'+
+				'<a class="upload" href=""><span class="glyphicon glyphicon-info-sign"></span></a>'+
+				'<a class="upload" href=""><span class="glyphicon glyphicon-remove"></span></a>'+
+			'</span>'
+		);
+	
 	// Construction de la table
 	var oTable = $('#tableau').dataTable( {
 		"oLanguage": {"sUrl": "assets/datatables.french.lang"},
 		"iDisplayLength": 25,
 		"aoColumns": [
 			{ "sTitle": "id" },
+			{ "sTitle": "Liens" },
 			{ "sTitle": "Contexte" },
 			{ "sTitle": "Sujet" },
 			{ "sTitle": "Contenu", "sWidth": "20%",
@@ -13,7 +22,6 @@ $(document).ready(function() {
 				nTd.innerHTML = sData.replace(/\r\n|\r|\n/g, '<br />');
 			  }
 			},
-			{ "sTitle": "Liens" },
 			{ "sTitle": "Deadline" },
 			{ "sTitle": "Destinataire" },
 			{ "sTitle": "Statut" },
@@ -25,7 +33,6 @@ $(document).ready(function() {
 		"bServerSide": true,
 		"sAjaxSource": "../getActions",
 		"fnServerData": function ( sSource, aoData, fnCallback, oSettings ) {
-			var filtres = [{ recherche:"test", dbName:"Perso" }];
 			oSettings.jqXHR = $.ajax({
 				dataType: 'json',
 				type: "POST",
@@ -47,5 +54,47 @@ $(document).ready(function() {
 			$('div.dataTables_info').css('margin-bottom', '30px');
 		}
 	} );	
+}
+
+$(document).ready(function() {
 	
-} );;
+	//Ajout des bases actives
+	$.get('../getActiveDatabases', function(data) {
+		$(data).each(function(i,dbName){
+			$('<label class="btn btn-primary"></label>')
+				.append('<input type="radio" name="options">'+dbName)
+				.appendTo($('#manualDB'));
+		});
+	},"json");
+		
+	// Création des CritereSelect
+	$.get('../getDBListentities?db=New', function(data) {
+		$(data).each(function(i,entity){
+			if(entity.parentID==0) // Pas d'entité parente
+				$("div#manuel").addCritereSelect({
+					dbName: "New",
+					entityID: entity.id,
+					entityName: entity.nom
+				});
+		});
+	},"json");	
+
+	$("#recherche").click(function(){
+		displayData([{ recherche:"test", dbName:"New" }]);
+	});
+	
+	$("#stored").click(function(){
+		displayData([{ id:1, dbName:"New" }]);
+	});
+	
+	$("#launch").click(function(){
+		var criteria = new Array();
+		$($("div#manuel").data( "critereSelects" )).each(function(i,critereSelect){
+			var criterium = critereSelect.getListValue();
+			if(criterium)
+				criteria.push(criterium);
+		});
+		displayData([{ criteria:criteria, dbName:"New" }]);
+	});	
+	
+});

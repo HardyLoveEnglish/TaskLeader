@@ -1,20 +1,24 @@
 ﻿using System;
 using System.Windows.Forms;
 using TaskLeader.GUI;
+using System.Runtime.Serialization;
 
 namespace TaskLeader.BO
 {
     // Structure listant les différentes informations liées à une entité de la base
+	[DataContract]
     public class DBentity
     {
         /// <summary>
         /// ID de l'entité dans la base
         /// </summary>
+		[DataMember]
         public int id { get; set; }
 
         /// <summary>
         /// Nom de l'entité pour IHM
         /// </summary>
+		[DataMember]
         public String nom { get; set; }
 
         /// <summary>
@@ -25,6 +29,7 @@ namespace TaskLeader.BO
         /// <summary>
         /// ID de l'entité parente
         /// </summary>
+		[DataMember]
         public int parentID { get; set; }
 
         /// <summary>
@@ -98,6 +103,7 @@ namespace TaskLeader.BO
         }
     }
 
+    [DataContract]
     public abstract class EntityValue
     {
         // Méthode privée pour fabriquer des string compatible sql
@@ -141,12 +147,14 @@ namespace TaskLeader.BO
     /// <summary>
     /// Classe permettant de stocker des valeurs des entités de type List
     /// </summary>
+    [DataContract]
     public class ListValue : EntityValue
     {
         /// <summary>
         /// Id de la valeur dans la  base
         /// </summary>
         private int _id = 0;
+        [DataMember]
         public int id { get { return _id; } set {if (value > 0) this._id = value; else throw new Exception("id doit être positif"); } }
         /// <summary>
         /// Précise si la ListValue a déjà été stockée en base
@@ -171,6 +179,7 @@ namespace TaskLeader.BO
         /// <summary>
         /// String représentant la valeur
         /// </summary>
+        [DataMember]
         public String label { get; set; }
         public String sqlLabel { get { return this.sqlFactory(this.label); } }
 
