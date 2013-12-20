@@ -24,28 +24,26 @@
   <body>
 	
 	<div class="container">
-		<div class="row"><!-- Onglets -->
-			
+		<div class="row"><!-- Onglets -->		
 			<!-- Titres -->
-			<ul class="nav nav-tabs">
-			  <li><a href="#manuel" data-toggle="tab">Filtre manuel</a></li>
-			  <li><a href="#search" data-toggle="tab">Recherche</a></li>
-			  <li><a href="#stored" data-toggle="tab">Filtres enregistrés</a></li>
-			</ul>
-
+			<div class="col-md-2">
+				<ul class="nav nav-pills nav-stacked">
+				  <li class="active"><a href="#manuel" data-toggle="tab">Filtre manuel</a></li>
+				  <li><a href="#search" data-toggle="tab">Recherche</a></li>
+				  <li><a href="#stored" data-toggle="tab">Filtres enregistrés</a></li>
+				</ul>
+			</div>
 			<!-- Contenu -->
-			<div class="tab-content">
+			<div class="tab-content col-md-10">
 			  <div class="tab-pane active" id="manuel">
-			    <span class="glyphicon glyphicon-tasks" style="font-size:20px;"></span>
-				<div class="btn-group" id="manualDB" data-toggle="buttons"></div>
+				<div class="btn-group pull-left" id="manualDB" data-toggle="buttons"></div>
+				<div class="pull-left" id="selects"></div>
 				<button id="launch" type="button" class="btn btn-default pull-right">Filtre manuel</button>
 			  </div>
 			  <div class="tab-pane" id="search">
 				<button id="recherche" type="button" class="btn btn-default">Recherche "test" dans base "New"</button>
 			  </div>
-			  <div class="tab-pane" id="stored">
-				<button id="stored" type="button" class="btn btn-default">Affichage du filtre avec id=1 dans base "New"</button>
-			  </div>
+			  <div class="tab-pane" id="stored"></div>
 			</div>
 		</div>
 		

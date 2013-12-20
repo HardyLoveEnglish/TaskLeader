@@ -1,13 +1,8 @@
-// CritereSelect
 ;(function ( $, window, document, undefined ) {
 
-	// The actual plugin constructor
+	// CritereSelect
 	function CritereSelect ( element, options ) {
-		this.settings = $.extend({},{
-			dbName: "New",
-			entityID: 1,
-			entityName: "Contexte"
-		},options );
+		this.settings = options;
 		this.init(element);
 	}
 			
@@ -66,15 +61,19 @@
 			if(this.allBox[0].checked)
 				return;
 
-			var value = new Array();
-			$(this.wrapper.val()).each(function(i,id){
-				value.push({id:parseInt(id)});
+			var value = new Array(),
+				$wrap = this.wrapper;
+			$($wrap.val()).each(function(i,id){
+				value.push({
+					id:parseInt(id),
+					label: $wrap.find("option[value='"+id+"']").text()
+				});
 			});
 			return {
 				Key:this.settings.entityID,
 				Value: value
 			}
-	}
+		}
 	};
 
 	$.fn["addCritereSelect"] = function ( options ) {
@@ -87,64 +86,58 @@
 		});
 	};
 
-})( jQuery, window, document );
-
-// Etiquette
-;(function ( $, window, document, undefined ) {
-
-	// Create the defaults once
-	var pluginName = "etiquette";
-
-	// The actual plugin constructor
-	function Etiquette ( element, options ) {
-		this.element = element;
-		this.settings = $.extend({},{
-			filtre: "New",
-			type: 1
-		},options );
-		this._name = pluginName;
-		this.init();
-	}
-
-	Etiquette.prototype = {
-		init: function () {
-			var $wrapper = $('<select class="multiselect" multiple="multiple"></select>');
-			$.get('../getDBentityValues?db='+this.settings.dbName+'&entityID='+this.settings.entityID, function(data) {
-				$(data).each(function(i,listValue){
-					$wrapper.append('<option value='+listValue.id+'>'+listValue.label+'</option>');
-				});
-				$wrapper.multiselect({
-					includeSelectAllOption: true,
-					//selectAllText: "Tous",
-					//selectAllValue: "all",
-					buttonClass: 'btn btn-default'
-				});
-			},"json");
+	$.fn["addEtiquette"] = function ( options ) {
+		return this.each(function() {			
+			var filtre = options.filtre;
 			
-			$('<div class="input-group"></div>')
-				.append('<span class="input-group-addon">'+this.settings.entityName+'</span>')
-				.append('<span class="input-group-addon">Tous<input type="checkbox"></span>')
-				.append($wrapper)
-				.appendTo(this.element);
-			this.wrapper = $wrapper;
-		},
-		getListValue: function () {
-			var value = new Array();
-			$(this.wrapper.val()).each(function(i,id){
-				value.push({id:parseInt(id)});
+			// Bouton info
+			var descriptif = '<div><span class="glyphicon glyphicon-tasks"></span>'+filtre.dbName+'</div>';			
+			$(filtre.criteria).each(function(i,kvp){
+				descriptif += '<div>' + $('body').data("listEntitiesNames")[kvp.Key] + ': ' +
+					kvp.Value.map(function(lv){return lv.label;}).join(" + ") + '</div>';
 			});
-			return {
-				Key:this.settings.entityID,
-				Value: value
+			if(filtre.criteria.length==0)
+				descriptif += "<div>Toutes les valeurs</div>";
+			
+			var $info = $('<span class="glyphicon glyphicon-info-sign"></span>')
+				.attr('data-placement','auto top')
+				.attr('data-html',true)
+				.tooltip({ title: descriptif });
+			
+			// Définition du label
+			var label;
+			if(filtre.recherche){
+				label = "Recherche: '" + filtre.recherche + "' [" + filtre.dbName + "]";;
+				$info = $(); // Pas d'icône info pour les recherches
+			} else {
+				label = '<span class="glyphicon glyphicon-filter"></span>' + ((filtre.id) ? filtre.nom : "manuel");
 			}
-		}
-	};
-
-	$.fn[ pluginName ] = function ( options ) {
-		return this.each(function() {
-			if ( !$.data( this, "plugin_" + pluginName ) ) {
-				$.data( this, "plugin_" + pluginName, new CritereSelect( this, options ) );
-			}
+			
+			// Bouton d'ajout à la barre d'étiquette
+			var $add = $('<span class="glyphicon glyphicon-plus"></span>')
+				.click(function(){
+					var filtre = $(this).parent().data("filtre");
+					$('#etiquettes').addEtiquette({ filtre: filtre });
+					window.displayData();
+				});
+				
+			// Bouton de fermeture
+			var $remove = $('<span class="glyphicon glyphicon-remove"></span>')
+				.click(function(){
+					$(this).parent().remove();
+					window.displayData();
+				});
+			if(options.add) $remove.hide();
+			
+			// Création du widget
+			var $widget = $('<span class="label label-info etiquette"></span>')
+				.append('<span>'+label+'</span>')
+				.append($info);
+			if(options.add) $widget.append($add);
+			$widget
+				.append($remove)
+				.data("filtre",filtre)
+				.appendTo(this);
 		});
 	};
 

@@ -32,7 +32,7 @@ namespace TaskLeader.GUI
 
                     // Affichage de l'étiquette correspondant à la recherche
                     typeLabel.Text = "Recherche:";
-                    valeurLabel.Text = "'" + filtre.nom + "' [" + filtre.dbName + "]";
+                    valeurLabel.Text = "'" + filtre.ToString() + "'";
                     this.infoBox.Visible = false;
                     break;
 
@@ -41,11 +41,12 @@ namespace TaskLeader.GUI
                     // Affichage de l'étiquette correspondant au filtre
                     typeLabel.Text = "Filtre:";
                     if (filtre.nom != "")
-                        valeurLabel.Text = filtre.ToString() + " [" + filtre.dbName + "]";
+                        valeurLabel.Text = filtre.ToString();
                     else
-                        valeurLabel.Text = "manuel [" + filtre.dbName + "]";
+                        valeurLabel.Text = "manuel";
                     break;
             }
+            valeurLabel.Text += " [" + filtre.dbName + "]";
         }
 
         /// <summary>

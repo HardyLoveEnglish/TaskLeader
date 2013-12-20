@@ -72,6 +72,13 @@ namespace TaskLeader.Server
                 return null;               
             }
 
+            if (request.filtres.Length == 0)
+            {
+                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.BadRequest;
+                WebOperationContext.Current.OutgoingResponse.StatusDescription = "Aucun filtre spécifié";
+                return null;  
+            }
+
             return request.getData();
         }
 

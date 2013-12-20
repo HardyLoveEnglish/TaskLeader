@@ -59,10 +59,11 @@ namespace TaskLeader.BO
         public int id;
 
         // Contenu de la recherche
-        [DataMember]
+        [DataMember(EmitDefaultValue = false)]
+        private string _recherche;
         public string recherche {
-            set { this.nom = value; this._type = 2; }
-            get { return this.nom;}
+            set { this._recherche = value; this._type = 2; }
+            get { return this._recherche;}
         }
 
         /// <summary>
@@ -78,7 +79,7 @@ namespace TaskLeader.BO
                     dbData = db.getActions(this.criteria);
                     break;
                 case (2):
-                    dbData = db.searchActions(this.nom);
+                    dbData = db.searchActions(this.recherche);
                     break;
                 default:
                     dbData = new DataTable();
@@ -130,7 +131,10 @@ namespace TaskLeader.BO
         /// <returns>Nom du filtre</returns>
         public override String ToString()
         {
-            return this.nom; //Donc rien pour les filtres manuels.
+            if (this.type == 1)
+                return this.nom; //Donc rien pour les filtres manuels.
+            else
+                return this.recherche;
         }
 
         /// <summary>
@@ -144,7 +148,7 @@ namespace TaskLeader.BO
                 Dictionary<String, String> description = new Dictionary<string, string>();
 
                 foreach (DBentity entity in this.db.listEntities)
-                    if (this._criteria.ContainsKey(entity.id))
+                    if (this.criteria.ContainsKey(entity.id))
                         description.Add(
                             entity.nom,
                             String.Join(" + ", this.criteria[entity.id].Select(ev => ev.label).ToList<String>())
@@ -173,7 +177,7 @@ namespace TaskLeader.BO
 
             // Les 2 filtres sont des recherches
             if (this.type == 2)
-                return ((compFilter.nom == this.nom) && (compFilter.dbName == this.dbName));
+                return ((compFilter.recherche == this.recherche) && (compFilter.dbName == this.dbName));
 
             // Les 2 filtres sont des filtres enregistrés
             if (!String.IsNullOrEmpty(this.nom) && !String.IsNullOrEmpty(compFilter.nom))
