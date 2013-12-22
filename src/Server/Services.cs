@@ -14,6 +14,7 @@ namespace TaskLeader.Server
     [ServiceBehavior(IncludeExceptionDetailInFaults = true), ServiceContract]
     public partial class GuiService
     {
+        #region DBs
 
         [OperationContract]
         [WebGet(UriTemplate = "getActiveDatabases",
@@ -21,6 +22,18 @@ namespace TaskLeader.Server
         public List<String> getActiveDatabases() {
             return TrayIcon.activeDBs.ToList<String>();
         }
+
+        [OperationContract]
+        [WebGet(UriTemplate = "getDefaultDB",
+            ResponseFormat = WebMessageFormat.Json)]
+        public String getDefaultDB()
+        {
+            return TrayIcon.defaultDB.name;
+        }
+
+        #endregion
+
+        #region Entities
 
         [OperationContract]
         [WebGet(UriTemplate = "getDBentities?db={dbName}",
@@ -39,6 +52,18 @@ namespace TaskLeader.Server
         }
 
         [OperationContract]
+        [WebGet(UriTemplate = "getDBentityValues?db={dbName}&entityID={entityID}&parent={parentValueID}",
+            ResponseFormat = WebMessageFormat.Json)]
+        public ListValue[] getDBentityValues(String dbName, int entityID, int parentValueID)
+        {
+            return TrayIcon.dbs[dbName].getEntitiesValues(entityID, parentValueID).ToArray();
+        }
+
+        #endregion
+
+        #region Filtres
+
+        [OperationContract]
         [WebGet(UriTemplate = "getFilters?db={dbName}",
             ResponseFormat = WebMessageFormat.Json)]
         public Filtre[] getFilters(String dbName) {
@@ -52,13 +77,9 @@ namespace TaskLeader.Server
             return TrayIcon.dbs[dbName].getFilters();
         }
 
-        [OperationContract]
-        [WebGet(UriTemplate = "getDBentityValues?db={dbName}&entityID={entityID}&parent={parentValueID}",
-            ResponseFormat = WebMessageFormat.Json)]
-        public ListValue[] getDBentityValues(String dbName, int entityID, int parentValueID)
-        {
-            return TrayIcon.dbs[dbName].getEntitiesValues(entityID, parentValueID).ToArray();
-		}
+        #endregion
+
+        #region Actions
 
         [OperationContract]
         [WebInvoke(Method = "POST", UriTemplate = "getActions",
@@ -81,6 +102,10 @@ namespace TaskLeader.Server
 
             return request.getData();
         }
+
+        #endregion
+
+        #region Fichiers
 
         [OperationContract]
         [WebGet(UriTemplate = "aide")]
@@ -127,7 +152,8 @@ namespace TaskLeader.Server
 
             return File.OpenRead("client/"+filePath);
         }
-        
+
+        #endregion
     }
 
 }

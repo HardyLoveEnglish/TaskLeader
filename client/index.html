@@ -24,26 +24,37 @@
   <body>
 	
 	<div class="container">
-		<div class="row"><!-- Onglets -->		
-			<!-- Titres -->
-			<div class="col-md-2">
-				<ul class="nav nav-pills nav-stacked">
-				  <li class="active"><a href="#manuel" data-toggle="tab">Filtre manuel</a></li>
-				  <li><a href="#search" data-toggle="tab">Recherche</a></li>
-				  <li><a href="#stored" data-toggle="tab">Filtres enregistrés</a></li>
-				</ul>
+		<div class="row">		
+			<div class="col-md-9">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<span>Base:</span><div id="radioDB" class="btn-group"></div>
+						<div id="filterType" class="btn-group pull-right">
+							<button data-type="manuel" type="button" class="btn btn-info">
+								<span class="glyphicon glyphicon-hand-up"></span>Manuel
+							</button>
+							<button data-type="stored" type="button" class="btn btn-info active">
+								<span class="glyphicon glyphicon-floppy-disk"></span>Saved
+							</button>
+						</div>						
+					</div>
+					<div class="panel-body" id="filtreContent"></div>
+				</div>
 			</div>
-			<!-- Contenu -->
-			<div class="tab-content col-md-10">
-			  <div class="tab-pane active" id="manuel">
-				<div class="btn-group pull-left" id="manualDB" data-toggle="buttons"></div>
-				<div class="pull-left" id="selects"></div>
-				<button id="launch" type="button" class="btn btn-default pull-right">Filtre manuel</button>
-			  </div>
-			  <div class="tab-pane" id="search">
-				<button id="recherche" type="button" class="btn btn-default">Recherche "test" dans base "New"</button>
-			  </div>
-			  <div class="tab-pane" id="stored"></div>
+			<div class="col-md-3">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<span>Base:</span><div id="checkDB" class="btn-group" data-toggle="buttons"></div>
+					</div>
+					<div class="panel-body">
+						<div class="input-group">
+							<input type="text" class="form-control" placeholder="Recherche"/>
+							<div class="input-group-btn">
+								<button id="recherche" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 		

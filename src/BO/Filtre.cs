@@ -59,8 +59,8 @@ namespace TaskLeader.BO
         public int id;
 
         // Contenu de la recherche
-        [DataMember(EmitDefaultValue = false)]
         private string _recherche;
+        [DataMember(EmitDefaultValue = false)]
         public string recherche {
             set { this._recherche = value; this._type = 2; }
             get { return this._recherche;}

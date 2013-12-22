@@ -28,7 +28,8 @@
 				});
 				$wrapper.selectpicker({
 					noneSelectedText : 'Aucun choix',
-					countSelectedText: '{0} sélectionné sur {1}'
+					countSelectedText: '{0} sélectionné sur {1}',
+					style: "btn-info"
 				});
 			},"json");
 			
@@ -40,7 +41,7 @@
 				});		
 				
 			// Création du bouton descriptif
-			var $button = $('<button type="button" class="btn btn-info"></button>')
+			var $button = $('<button type="button" class="btn btn-default"></button>')
 				.append(this.settings.entityName+':')
 				.append($allBox).append('Tous')
 				.click(function(){
@@ -89,28 +90,28 @@
 	$.fn["addEtiquette"] = function ( options ) {
 		return this.each(function() {			
 			var filtre = options.filtre;
-			
-			// Bouton info
-			var descriptif = '<div><span class="glyphicon glyphicon-tasks"></span>'+filtre.dbName+'</div>';			
-			$(filtre.criteria).each(function(i,kvp){
-				descriptif += '<div>' + $('body').data("listEntitiesNames")[kvp.Key] + ': ' +
-					kvp.Value.map(function(lv){return lv.label;}).join(" + ") + '</div>';
-			});
-			if(filtre.criteria.length==0)
-				descriptif += "<div>Toutes les valeurs</div>";
-			
-			var $info = $('<span class="glyphicon glyphicon-info-sign"></span>')
-				.attr('data-placement','auto top')
-				.attr('data-html',true)
-				.tooltip({ title: descriptif });
-			
-			// Définition du label
+				
+			// Définition du label et du bouton info
 			var label;
 			if(filtre.recherche){
 				label = "Recherche: '" + filtre.recherche + "' [" + filtre.dbName + "]";;
 				$info = $(); // Pas d'icône info pour les recherches
 			} else {
 				label = '<span class="glyphicon glyphicon-filter"></span>' + ((filtre.id) ? filtre.nom : "manuel");
+				
+				// Bouton info
+				var descriptif = '<div><span class="glyphicon glyphicon-tasks"></span>'+filtre.dbName+'</div>';			
+				$(filtre.criteria).each(function(i,kvp){
+					descriptif += '<div>' + $('body').data("listEntitiesNames")[filtre.dbName][kvp.Key] + ': ' +
+						kvp.Value.map(function(lv){return lv.label;}).join(" + ") + '</div>';
+				});
+				if(filtre.criteria.length==0)
+					descriptif += "<div>Toutes les valeurs</div>";
+				
+				var $info = $('<span class="glyphicon glyphicon-info-sign"></span>')
+					.attr('data-placement','auto top')
+					.attr('data-html',true)
+					.tooltip({ title: descriptif });
 			}
 			
 			// Bouton d'ajout à la barre d'étiquette
@@ -130,7 +131,8 @@
 			if(options.add) $remove.hide();
 			
 			// Création du widget
-			var $widget = $('<span class="label label-info etiquette"></span>')
+			var labeltype = ((options.add) ? 'info' : 'primary');
+			var $widget = $('<span class="label label-'+labeltype+' etiquette pull-left"></span>')
 				.append('<span>'+label+'</span>')
 				.append($info);
 			if(options.add) $widget.append($add);
