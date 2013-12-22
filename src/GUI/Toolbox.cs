@@ -26,17 +26,6 @@ namespace TaskLeader.GUI
             {
                 if (TrayIcon.activeDBs.Contains(db.name)) // Si la base est active
                     this.addDB(db);
-
-                // Menu admin
-                ToolStripMenuItem activeItem = new ToolStripMenuItem("Active");
-                activeItem.Checked = TrayIcon.activeDBs.Contains(db.name);
-                activeItem.CheckOnClick = true;
-                activeItem.CheckedChanged += new EventHandler(this.changeActiveDBs);
-
-                this.adminItem.DropDownItems.Add(new ToolStripMenuItem(db.name, TaskLeader.Properties.Resources.database, new ToolStripMenuItem[]{
-                    activeItem,
-                    new ToolStripMenuItem("Valeurs par défaut",TaskLeader.Properties.Resources.bullets,this.defaultValuesToolStripMenuItem_Click),
-                }));
             }
 
             this.manuelDBcombo.Text = TrayIcon.defaultDB.name; // ATTENTION: déclenche la mise à jour de toutes les CritereSelect!!
@@ -102,26 +91,7 @@ namespace TaskLeader.GUI
 
         #endregion
 
-        #region Menu admin
-
-        /// <summary>
-        /// Modifie la liste des bases actives
-        /// </summary>
-        private void changeActiveDBs(object sender, EventArgs e)
-        {
-            ToolStripDropDownMenu menu = ((ToolStripMenuItem)sender).GetCurrentParent() as ToolStripDropDownMenu;
-
-            if (((ToolStripMenuItem)sender).Checked) // La base vient d'être activée
-                TrayIcon.activeDBs.Add(menu.OwnerItem.Text); // Ajout à la liste globale des bases actives
-            else // La base vient d'être désactivée
-                TrayIcon.activeDBs.Remove(menu.OwnerItem.Text); // Suppression de la liste globale des bases actives
-        }
-
-        private void defaultValuesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ToolStripDropDownMenu menu = ((ToolStripMenuItem)sender).GetCurrentParent() as ToolStripDropDownMenu;
-            new AdminDefaut(menu.OwnerItem.Text).Show();
-        }
+        #region Menu
 
         // Ouverture de la gui création d'action
         private void ajoutAction(object sender, EventArgs e)

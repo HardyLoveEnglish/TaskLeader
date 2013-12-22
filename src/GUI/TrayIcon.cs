@@ -20,6 +20,7 @@ namespace TaskLeader.GUI
         private ToolStripMenuItem outlookItem = new ToolStripMenuItem();
         private ToolStripMenuItem closeItem = new ToolStripMenuItem();
         private ToolStripMenuItem maximItem = new ToolStripMenuItem();
+        private ToolStripMenuItem adminItem = new ToolStripMenuItem();
 
         // Déclaration des composants métiers
         static Control invokeControl = new Control();
@@ -35,7 +36,7 @@ namespace TaskLeader.GUI
             trayIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(displayToolbox);
 
             // Menu contextuel de la trayIcon
-            this.trayContext.Items.AddRange(new ToolStripItem[] { this.newActionItem, this.maximItem, this.outlookItem, this.closeItem });
+            this.trayContext.Items.AddRange(new ToolStripItem[] { this.newActionItem, this.maximItem, this.outlookItem, this.adminItem, this.closeItem });
             this.trayContext.Name = "trayContext";
             this.trayContext.Opened += new EventHandler(trayContext_Opened);
 
@@ -57,6 +58,23 @@ namespace TaskLeader.GUI
             this.outlookItem.Text = "Connecter à Outlook";
             this.outlookItem.Click += new System.EventHandler(this.connectOutlook);
 
+            // Item "Administration" du menu contextuel
+            this.adminItem.Image = TaskLeader.Properties.Resources.database_gear;
+            this.adminItem.Name = "adminItem";
+            this.adminItem.Size = new System.Drawing.Size(89, 23);
+            this.adminItem.Text = "Admin DB";
+            foreach (DB db in dbs.Values) // Ajout des entrées dans le menu
+            {
+                ToolStripMenuItem activeItem = new ToolStripMenuItem("Active");
+                activeItem.Checked = activeDBs.Contains(db.name);
+                activeItem.CheckOnClick = true;
+                activeItem.CheckedChanged += new EventHandler(this.changeActiveDBs);
+
+                this.adminItem.DropDownItems.Add(new ToolStripMenuItem(db.name, TaskLeader.Properties.Resources.database, new ToolStripMenuItem[]{
+                    activeItem,
+                    new ToolStripMenuItem("Valeurs par défaut",TaskLeader.Properties.Resources.bullets,this.defaultValuesToolStripMenuItem_Click),
+                }));
+            }
             // Item "fermer" du menu contextuel
             this.closeItem.Image = TaskLeader.Properties.Resources.door_out;
             this.closeItem.Text = "Fermer";
@@ -162,9 +180,6 @@ namespace TaskLeader.GUI
         // Constructeur de la NotifyIcon
         public TrayIcon()
         {
-            // On charge tous les composants
-            this.loadComponents();
-
             // Vérification de démarrage
             if (this.canLaunch())
             {
@@ -178,6 +193,9 @@ namespace TaskLeader.GUI
                 trayIcon.Visible = false;
                 Environment.Exit(0);
             }
+
+            // On charge tous les composants
+            this.loadComponents();
 
             // Gestion de l'évènement "Nouveau mail"
             OutlookIF.Instance.NewMail += new NewMailEventHandler(newActionOutlook);
@@ -224,11 +242,30 @@ namespace TaskLeader.GUI
                 new ManipAction(action).Show();
             }
         }
-
-        // Activation si nécessaire de l'item outlook
+  
         private void trayContext_Opened(object sender, EventArgs e)
         {
+            // Activation si nécessaire de l'item outlook
             this.outlookItem.Visible = OutlookIF.Instance.connectionNeeded;
+        }
+
+        /// <summary>
+        /// Modifie la liste des bases actives
+        /// </summary>
+        private void changeActiveDBs(object sender, EventArgs e)
+        {
+            ToolStripDropDownMenu menu = ((ToolStripMenuItem)sender).GetCurrentParent() as ToolStripDropDownMenu;
+
+            if (((ToolStripMenuItem)sender).Checked) // La base vient d'être activée
+                activeDBs.Add(menu.OwnerItem.Text); // Ajout à la liste globale des bases actives
+            else // La base vient d'être désactivée
+                activeDBs.Remove(menu.OwnerItem.Text); // Suppression de la liste globale des bases actives
+        }
+
+        private void defaultValuesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripDropDownMenu menu = ((ToolStripMenuItem)sender).GetCurrentParent() as ToolStripDropDownMenu;
+            new AdminDefaut(menu.OwnerItem.Text).Show();
         }
 
         // Tentative de connexion à Outlook

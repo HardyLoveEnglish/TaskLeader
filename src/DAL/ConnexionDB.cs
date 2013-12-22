@@ -78,7 +78,6 @@ namespace TaskLeader.DAL
             // ConnectionString definition
             _builder.DataSource = this.path;
             _builder.FailIfMissing = true;
-            _builder.Pooling = true;
 
             // Vérification de la compatibilité de la base
             try { this.checkCompatibility(); }
