@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using TaskLeader.BLL;
 using TaskLeader.BO;
 using TaskLeader.DAL;
+using System.IO;
 
 namespace TaskLeader.GUI
 {
@@ -19,30 +20,10 @@ namespace TaskLeader.GUI
         private ToolStripMenuItem outlookItem = new ToolStripMenuItem();
         private ToolStripMenuItem closeItem = new ToolStripMenuItem();
         private ToolStripMenuItem maximItem = new ToolStripMenuItem();
+        private ToolStripMenuItem adminItem = new ToolStripMenuItem();
 
         // Déclaration des composants métiers
         static Control invokeControl = new Control();
-
-        // Gestion des DBs
-        /// <summary>
-        /// Nom de la DB => Objet DB
-        /// </summary>
-        public static Dictionary<string, DB> dbs = new Dictionary<string, DB>();
-        public static ObservableCollection<string> activeDBs = new ObservableCollection<string>();
-        /// <summary>
-        /// Liste des filtres affichés dans la Toolbox
-        /// </summary>
-        public static ObservableCollection<Filtre> displayedFilters = new ObservableCollection<Filtre>();
-        public static DB defaultDB
-        {
-            get
-            {
-                if(activeDBs.Contains(ConfigurationManager.AppSettings["defaultDB"])) // La DB par défaut n'est pas forcément active
-                    return dbs[ConfigurationManager.AppSettings["defaultDB"]]; // Si c'est le cas, elle est la DB par défaut
-                else
-                    return dbs[activeDBs[0].ToString()]; // Sinon, on prend la première de la liste
-            }
-        }
 
         // Déclaration de tous les composants
         private void loadComponents()
@@ -55,7 +36,7 @@ namespace TaskLeader.GUI
             trayIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(displayToolbox);
 
             // Menu contextuel de la trayIcon
-            this.trayContext.Items.AddRange(new ToolStripItem[] { this.newActionItem, this.maximItem, this.outlookItem, this.closeItem });
+            this.trayContext.Items.AddRange(new ToolStripItem[] { this.newActionItem, this.maximItem, this.outlookItem, this.adminItem, this.closeItem });
             this.trayContext.Name = "trayContext";
             this.trayContext.Opened += new EventHandler(trayContext_Opened);
 
@@ -77,11 +58,55 @@ namespace TaskLeader.GUI
             this.outlookItem.Text = "Connecter à Outlook";
             this.outlookItem.Click += new System.EventHandler(this.connectOutlook);
 
+            // Item "Administration" du menu contextuel
+            this.adminItem.Image = TaskLeader.Properties.Resources.database_gear;
+            this.adminItem.Name = "adminItem";
+            this.adminItem.Size = new System.Drawing.Size(89, 23);
+            this.adminItem.Text = "Admin DB";
+            foreach (DB db in dbs.Values) // Ajout des entrées dans le menu
+            {
+                ToolStripMenuItem activeItem = new ToolStripMenuItem("Active");
+                activeItem.Checked = activeDBs.Contains(db.name);
+                activeItem.CheckOnClick = true;
+                activeItem.CheckedChanged += new EventHandler(this.changeActiveDBs);
+
+                this.adminItem.DropDownItems.Add(new ToolStripMenuItem(db.name, TaskLeader.Properties.Resources.database, new ToolStripMenuItem[]{
+                    activeItem,
+                    new ToolStripMenuItem("Valeurs par défaut",TaskLeader.Properties.Resources.bullets,this.defaultValuesToolStripMenuItem_Click),
+                }));
+            }
             // Item "fermer" du menu contextuel
             this.closeItem.Image = TaskLeader.Properties.Resources.door_out;
             this.closeItem.Text = "Fermer";
             this.closeItem.Click += new System.EventHandler(this.closeItem_Click);
         }
+
+        #region Gestion des DBs
+
+        /// <summary>
+        /// Nom de la DB => Objet DB
+        /// </summary>
+        public static Dictionary<string, DB> dbs = new Dictionary<string, DB>();
+        public static ObservableCollection<string> activeDBs = new ObservableCollection<string>();
+
+        /// <summary>
+        /// Liste des filtres affichés dans la Toolbox
+        /// </summary>
+        public static ObservableCollection<Filtre> displayedFilters = new ObservableCollection<Filtre>();
+        public static DB defaultDB
+        {
+            get
+            {
+                if(activeDBs.Contains(ConfigurationManager.AppSettings["defaultDB"])) // La DB par défaut n'est pas forcément active
+                    return dbs[ConfigurationManager.AppSettings["defaultDB"]]; // Si c'est le cas, elle est la DB par défaut
+                else
+                    return dbs[activeDBs[0].ToString()]; // Sinon, on prend la première de la liste
+            }
+        }
+
+        #endregion
+        
+        #region Gestion des raccourcis claviers
 
         // Déclaration des hotkeys
         Hotkey hkNewAction = new Hotkey();
@@ -120,18 +145,47 @@ namespace TaskLeader.GUI
             }
         }
 
+        #endregion
+
+        #region Init et constructeur
+
+        private bool canLaunch()
+        {
+            //TODO: il faudrait vérifier s'il n'y a pas de doublons dans la liste des DBs
+
+            // Récupération de la liste des databases
+            NameValueCollection dbData = (NameValueCollection)ConfigurationManager.GetSection("Databases");
+            String defaultDBname = ConfigurationManager.AppSettings["defaultDB"];
+
+            foreach (String dbName in dbData)
+            {
+                if (!File.Exists(dbData[dbName]))
+                    MessageBox.Show("Base " + dbName + " introuvable\nVérifier fichier de conf", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                else
+                {
+                    try
+                    {
+                        dbs.Add(dbName, new DB(dbData[dbName], dbName));
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message, "Erreur",MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
+                }
+            }
+
+            return (dbs.Count > 0); // Lancement si au moins 1 DB est ok
+        }
+
         // Constructeur de la NotifyIcon
         public TrayIcon()
         {
-            // On charge tous les composants
-            this.loadComponents();
-
             // Vérification de démarrage
-            if (Init.Instance.canLaunch())
+            if (this.canLaunch())
             {
                 foreach (String dbName in dbs.Keys)
                     activeDBs.Add(dbName); // Au lancement toutes les DBs sont actives
-                this.displayToolbox(new Object(), new EventArgs()); // Affichage de la Toolbox
+                //this.displayToolbox(new Object(), new EventArgs()); // Affichage de la Toolbox
                 invokeControl.CreateControl();
             }
             else
@@ -139,6 +193,9 @@ namespace TaskLeader.GUI
                 trayIcon.Visible = false;
                 Environment.Exit(0);
             }
+
+            // On charge tous les composants
+            this.loadComponents();
 
             // Gestion de l'évènement "Nouveau mail"
             OutlookIF.Instance.NewMail += new NewMailEventHandler(newActionOutlook);
@@ -148,6 +205,8 @@ namespace TaskLeader.GUI
             registerHotkey(section["NewAction"], ref hkNewAction, new HotkeyMethodDelegate(ajoutAction));
             registerHotkey(section["ListeActions"], ref hkListe, new HotkeyMethodDelegate(displayToolbox));
         }
+
+        #endregion
 
         private static Toolbox v_toolbox = null;
 
@@ -179,16 +238,34 @@ namespace TaskLeader.GUI
             else // Demande d'ajout de mail à une action
             {
                 TLaction action = new TLaction();
-                action.Texte = e.Mail.Titre;
                 action.addPJ(e.Mail);
                 new ManipAction(action).Show();
             }
         }
-
-        // Activation si nécessaire de l'item outlook
+  
         private void trayContext_Opened(object sender, EventArgs e)
         {
+            // Activation si nécessaire de l'item outlook
             this.outlookItem.Visible = OutlookIF.Instance.connectionNeeded;
+        }
+
+        /// <summary>
+        /// Modifie la liste des bases actives
+        /// </summary>
+        private void changeActiveDBs(object sender, EventArgs e)
+        {
+            ToolStripDropDownMenu menu = ((ToolStripMenuItem)sender).GetCurrentParent() as ToolStripDropDownMenu;
+
+            if (((ToolStripMenuItem)sender).Checked) // La base vient d'être activée
+                activeDBs.Add(menu.OwnerItem.Text); // Ajout à la liste globale des bases actives
+            else // La base vient d'être désactivée
+                activeDBs.Remove(menu.OwnerItem.Text); // Suppression de la liste globale des bases actives
+        }
+
+        private void defaultValuesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripDropDownMenu menu = ((ToolStripMenuItem)sender).GetCurrentParent() as ToolStripDropDownMenu;
+            new AdminDefaut(menu.OwnerItem.Text).Show();
         }
 
         // Tentative de connexion à Outlook

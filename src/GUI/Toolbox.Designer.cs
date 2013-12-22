@@ -36,7 +36,6 @@
             this.ajouterItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nouvelleActionToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.actionsEvernoteToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.adminItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reduceButton = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -95,7 +94,7 @@
             this.mainTableLayout.ColumnCount = 3;
             this.mainTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.mainTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.mainTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 181F));
+            this.mainTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 94F));
             this.mainTableLayout.Controls.Add(this.resultLabel, 0, 1);
             this.mainTableLayout.Controls.Add(this.tagsPanel, 1, 1);
             this.mainTableLayout.Controls.Add(this.topMenu, 2, 1);
@@ -108,7 +107,7 @@
             this.mainTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 155F));
             this.mainTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.mainTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.mainTableLayout.Size = new System.Drawing.Size(721, 750);
+            this.mainTableLayout.Size = new System.Drawing.Size(721, 742);
             this.mainTableLayout.TabIndex = 7;
             // 
             // resultLabel
@@ -128,7 +127,7 @@
             this.tagsPanel.Location = new System.Drawing.Point(57, 155);
             this.tagsPanel.Margin = new System.Windows.Forms.Padding(0);
             this.tagsPanel.Name = "tagsPanel";
-            this.tagsPanel.Size = new System.Drawing.Size(483, 30);
+            this.tagsPanel.Size = new System.Drawing.Size(570, 30);
             this.tagsPanel.TabIndex = 5;
             this.tagsPanel.ControlAdded += new System.Windows.Forms.ControlEventHandler(this.tagsPanel_ControlAdded);
             this.tagsPanel.ControlRemoved += new System.Windows.Forms.ControlEventHandler(this.tagsPanel_ControlRemoved);
@@ -139,12 +138,11 @@
             this.topMenu.Dock = System.Windows.Forms.DockStyle.Fill;
             this.topMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ajouterItem,
-            this.adminItem,
             this.reduceButton});
-            this.topMenu.Location = new System.Drawing.Point(540, 158);
+            this.topMenu.Location = new System.Drawing.Point(627, 158);
             this.topMenu.Margin = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.topMenu.Name = "topMenu";
-            this.topMenu.Size = new System.Drawing.Size(181, 27);
+            this.topMenu.Size = new System.Drawing.Size(94, 27);
             this.topMenu.TabIndex = 6;
             this.topMenu.Text = "menuStrip1";
             // 
@@ -175,13 +173,6 @@
             this.actionsEvernoteToolStripMenuItem2.ShowShortcutKeys = false;
             this.actionsEvernoteToolStripMenuItem2.Size = new System.Drawing.Size(156, 22);
             this.actionsEvernoteToolStripMenuItem2.Text = "Actions Evernote";
-            // 
-            // adminItem
-            // 
-            this.adminItem.Image = global::TaskLeader.Properties.Resources.database_gear;
-            this.adminItem.Name = "adminItem";
-            this.adminItem.Size = new System.Drawing.Size(89, 23);
-            this.adminItem.Text = "Admin DB";
             // 
             // reduceButton
             // 
@@ -598,7 +589,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(721, 750);
+            this.ClientSize = new System.Drawing.Size(721, 742);
             this.Controls.Add(this.mainTableLayout);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Location = new System.Drawing.Point(435, 10);
@@ -657,7 +648,6 @@
         private System.Windows.Forms.ToolStripMenuItem ajouterItem;
         private System.Windows.Forms.ToolStripMenuItem nouvelleActionToolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem actionsEvernoteToolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem adminItem;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
