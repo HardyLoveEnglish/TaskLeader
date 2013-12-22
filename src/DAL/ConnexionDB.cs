@@ -56,7 +56,6 @@ namespace TaskLeader.DAL
             // ConnectionString definition
             _builder.DataSource = this.path;
             _builder.FailIfMissing = true;
-            _builder.Pooling = true;
 
             //TODO: ne pas harcoder les différents types
             this.NewValue.Add(contexte.nom, null);
